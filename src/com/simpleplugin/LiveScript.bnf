@@ -20,7 +20,7 @@
     BOOL="regexp:true|false"
 
     FUNC_ARROW="regexp:!?[-~]>"
-    OPERATOR="regexp:[<>!]=|==|[=+*/><]"
+    OPERATOR="regexp:[<>!]=|==|[-=+*/><]"
     BANG="regexp:!"
     PAREN_L="regexp:\("
     PAREN_R="regexp:\)"
