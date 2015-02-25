@@ -13,8 +13,8 @@
   tokenTypeClass="com.simpleplugin.psi.SimpleTokenType"
 }
 
-simpleFile ::= item_*
+file ::= element*
 
-private item_ ::= (property|COMMENT|CRLF)
+element ::= statement|COMMENT
 
-property ::= (KEY? SEPARATOR VALUE?) | KEY
+statement ::= ("x = 2"|"y = 3"|"if x + 2 == 4"|"  "|"do-something()")NEWLINE

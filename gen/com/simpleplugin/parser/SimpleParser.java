@@ -22,8 +22,11 @@ public class SimpleParser implements PsiParser {
     boolean r;
     b = adapt_builder_(t, b, this, null);
     Marker m = enter_section_(b, 0, _COLLAPSE_, null);
-    if (t == PROPERTY) {
-      r = property(b, 0);
+    if (t == ELEMENT) {
+      r = element(b, 0);
+    }
+    else if (t == STATEMENT) {
+      r = statement(b, 0);
     }
     else {
       r = parse_root_(t, b, 0);
@@ -32,72 +35,58 @@ public class SimpleParser implements PsiParser {
   }
 
   protected boolean parse_root_(IElementType t, PsiBuilder b, int l) {
-    return simpleFile(b, l + 1);
+    return file(b, l + 1);
   }
 
   /* ********************************************************** */
-  // property|COMMENT|CRLF
-  static boolean item_(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "item_")) return false;
+  // statement|COMMENT
+  public static boolean element(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "element")) return false;
     boolean r;
-    Marker m = enter_section_(b);
-    r = property(b, l + 1);
+    Marker m = enter_section_(b, l, _NONE_, "<element>");
+    r = statement(b, l + 1);
     if (!r) r = consumeToken(b, COMMENT);
-    if (!r) r = consumeToken(b, CRLF);
-    exit_section_(b, m, null, r);
+    exit_section_(b, l, m, ELEMENT, r, false, null);
     return r;
   }
 
   /* ********************************************************** */
-  // (KEY? SEPARATOR VALUE?) | KEY
-  public static boolean property(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "property")) return false;
-    if (!nextTokenIs(b, "<property>", KEY, SEPARATOR)) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, "<property>");
-    r = property_0(b, l + 1);
-    if (!r) r = consumeToken(b, KEY);
-    exit_section_(b, l, m, PROPERTY, r, false, null);
-    return r;
-  }
-
-  // KEY? SEPARATOR VALUE?
-  private static boolean property_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "property_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = property_0_0(b, l + 1);
-    r = r && consumeToken(b, SEPARATOR);
-    r = r && property_0_2(b, l + 1);
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  // KEY?
-  private static boolean property_0_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "property_0_0")) return false;
-    consumeToken(b, KEY);
-    return true;
-  }
-
-  // VALUE?
-  private static boolean property_0_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "property_0_2")) return false;
-    consumeToken(b, VALUE);
-    return true;
-  }
-
-  /* ********************************************************** */
-  // item_*
-  static boolean simpleFile(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "simpleFile")) return false;
+  // element*
+  static boolean file(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "file")) return false;
     int c = current_position_(b);
     while (true) {
-      if (!item_(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "simpleFile", c)) break;
+      if (!element(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "file", c)) break;
       c = current_position_(b);
     }
     return true;
+  }
+
+  /* ********************************************************** */
+  // ("x = 2"|"y = 3"|"if x + 2 == 4"|"  "|"do-something()")NEWLINE
+  public static boolean statement(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "statement")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, "<statement>");
+    r = statement_0(b, l + 1);
+    r = r && consumeToken(b, NEWLINE);
+    exit_section_(b, l, m, STATEMENT, r, false, null);
+    return r;
+  }
+
+  // "x = 2"|"y = 3"|"if x + 2 == 4"|"  "|"do-something()"
+  private static boolean statement_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "statement_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, "x = 2");
+    if (!r) r = consumeToken(b, "y = 3");
+    if (!r) r = consumeToken(b, "if x + 2 == 4");
+    if (!r) r = consumeToken(b, "  ");
+    if (!r) r = consumeToken(b, "do-something()");
+    exit_section_(b, m, null, r);
+    return r;
   }
 
 }

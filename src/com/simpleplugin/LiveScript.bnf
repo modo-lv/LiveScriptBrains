@@ -1,5 +1,5 @@
 {
-  parserClass="com.simpleplugin.parser.SimpleParser"
+  /*parserClass="com.simpleplugin.parser.SimpleParser"
 
   extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
 
@@ -10,11 +10,53 @@
 
   elementTypeHolderClass="com.simpleplugin.psi.SimpleTypes"
   elementTypeClass="com.simpleplugin.psi.SimpleElementType"
-  tokenTypeClass="com.simpleplugin.psi.SimpleTokenType"
+  tokenTypeClass="com.simpleplugin.psi.SimpleTokenType"*/
+
+  tokens = [
+    NEWLINE="regexp:\r\n|\r|\n"
+
+    IF="regexp:if|unless"
+    THEN="regexp:then"
+    BOOL="regexp:true|false"
+
+    FUNC_ARROW="regexp:!?[-~]>"
+    OPERATOR="regexp:[<>!]=|==|[=+*/><]"
+    BANG="regexp:!"
+    PAREN_L="regexp:\("
+    PAREN_R="regexp:\)"
+    NUMBER="regexp:[0-9]+"
+    IDENTIFIER="regexp:[$_a-zA-Z][-$_a-zA-Z0-9]*[$_a-zA-Z0-9]?"
+
+    WHITE_SPACE="regexp:[ \t]+"
+
+    SEPARATOR="regexp:[ \t,]"
+  ]
+
+  extends(".*_exp")=exp
 }
 
-simpleFile ::= item_*
+file ::= (statement | NEWLINE)*
 
-private item_ ::= (property|COMMENT|CRLF)
+exp ::= paren_exp | operation_exp | call_paren_exp | call_exp | run_exp | func_def_exp | value_exp
 
-property ::= (KEY? SEPARATOR VALUE?) | KEY
+statement ::= if_statement | exp
+
+operation_exp ::= exp (OPERATOR exp)+
+
+value_exp ::= IDENTIFIER|NUMBER
+
+paren_exp ::= PAREN_L exp PAREN_R
+
+if_statement ::= (IF) exp (THEN exp)?
+
+arg_list ::= exp (SEPARATOR exp)*
+
+arg_list_paren ::= PAREN_L arg_list PAREN_R
+
+call_exp ::= IDENTIFIER arg_list
+
+call_paren_exp ::= IDENTIFIER arg_list_paren
+
+run_exp ::= IDENTIFIER (BANG | PAREN_L PAREN_R)
+
+func_def_exp ::= arg_list_paren FUNC_ARROW

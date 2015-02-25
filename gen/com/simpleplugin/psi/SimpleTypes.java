@@ -8,19 +8,20 @@ import com.simpleplugin.psi.impl.*;
 
 public interface SimpleTypes {
 
-  IElementType PROPERTY = new SimpleElementType("PROPERTY");
+  IElementType ELEMENT = new SimpleElementType("ELEMENT");
+  IElementType STATEMENT = new SimpleElementType("STATEMENT");
 
   IElementType COMMENT = new SimpleTokenType("COMMENT");
-  IElementType CRLF = new SimpleTokenType("CRLF");
-  IElementType KEY = new SimpleTokenType("KEY");
-  IElementType SEPARATOR = new SimpleTokenType("SEPARATOR");
-  IElementType VALUE = new SimpleTokenType("VALUE");
+  IElementType NEWLINE = new SimpleTokenType("NEWLINE");
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {
       IElementType type = node.getElementType();
-       if (type == PROPERTY) {
-        return new SimplePropertyImpl(node);
+       if (type == ELEMENT) {
+        return new SimpleElementImpl(node);
+      }
+      else if (type == STATEMENT) {
+        return new SimpleStatementImpl(node);
       }
       throw new AssertionError("Unknown element type: " + type);
     }
