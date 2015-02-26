@@ -1,6 +1,6 @@
 <idea-plugin version="2">
     <id>com.yourcompany.unique.plugin.id</id>
-    <name>Plugin display name here</name>
+    <name>LiveScriptBrains</name>
     <version>1.0</version>
     <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
 
@@ -26,8 +26,8 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
-        <fileTypeFactory implementation="com.simpleplugin.SimpleFileTypeFactory"/>
-        <lang.parserDefinition language="Simple" implementationClass="com.simpleplugin.SimpleParserDefinition"/>
+        <fileTypeFactory implementation="com.simpleplugin.LiveScriptFileTypeFactory"/>
+        <lang.parserDefinition language="LiveScript" implementationClass="com.simpleplugin.LiveScriptParserDefinition"/>
     </extensions>
 
     <application-components>

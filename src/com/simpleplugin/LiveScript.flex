@@ -2,12 +2,12 @@ package com.simpleplugin;
 
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
-import com.simpleplugin.psi.SimpleTypes;
+import com.simpleplugin.psi.LiveScriptTypes;
 import com.intellij.psi.TokenType;
 
 %%
 
-%class SimpleLexer
+%class LiveScriptLexer
 %implements FlexLexer
 %unicode
 %function advance
@@ -15,8 +15,16 @@ import com.intellij.psi.TokenType;
 %eof{  return;
 %eof}
 
-NEWLINE = \r\n|\r|\n
-WHITE_SPACE = [\ \t]+
+
+NUMBER = (([1-9]|[1-2]\d?|3[0-2])~[a-zA-Z\d]+|\d[_\d]*\.?[_\d]+[a-zA-Z]*)
+IDENTIFIER = [$_a-zA-Z][-$_a-zA-Z0-9]*
+
+EQ = "="
+GLOBAL_EQ = ":="
+
+NEWLINE = \r\n|[\r\n]
+WHITE_SPACE = [\t\ ]+
+
 /*
 FIRST_VALUE_CHARACTER=[^ \n\r\f\\] | "\\"{CRLF} | "\\".
 VALUE_CHARACTER=[^\n\r\f\\] | "\\"{CRLF} | "\\".
@@ -29,24 +37,17 @@ KEY_CHARACTER=[^:=\ \n\r\t\f\\] | "\\"{CRLF} | "\\".
 
 %%
 
-/*
-<YYINITIAL> {END_OF_LINE_COMMENT}                           { yybegin(YYINITIAL); return SimpleTypes.COMMENT; }
 
-<YYINITIAL> {KEY_CHARACTER}+                                { yybegin(YYINITIAL); return SimpleTypes.KEY; }
+{IDENTIFIER}                                                { return LiveScriptTypes.IDENTIFIER; }
 
-<YYINITIAL> {SEPARATOR}                                     { yybegin(WAITING_VALUE); return SimpleTypes.SEPARATOR; }
+{NUMBER}                                                    { return LiveScriptTypes.NUMBER; }
 
-<WAITING_VALUE> {CRLF}                                     { yybegin(YYINITIAL); return SimpleTypes.CRLF; }
+{EQ}                                                        { return LiveScriptTypes.EQ; }
 
-<WAITING_VALUE> {WHITE_SPACE}+                              { yybegin(WAITING_VALUE); return TokenType.WHITE_SPACE; }
+{GLOBAL_EQ}                                                 { return LiveScriptTypes.GLOBAL_EQ; }
 
-<WAITING_VALUE> {FIRST_VALUE_CHARACTER}{VALUE_CHARACTER}*   { yybegin(YYINITIAL); return SimpleTypes.VALUE; }
+{WHITE_SPACE}                                               { return TokenType.WHITE_SPACE; }
 
-*/
-
-{WHITE_SPACE}                                               { yybegin(YYINITIAL); return TokenType.WHITE_SPACE; }
-
-{NEWLINE}                                                   { return SimpleTypes.NEWLINE; }
-
+{NEWLINE}                                                   { return LiveScriptTypes.NEWLINE; }
 
 .                                                           { return TokenType.BAD_CHARACTER; }

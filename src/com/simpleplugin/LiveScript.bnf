@@ -1,55 +1,153 @@
 {
-  /*parserClass="com.simpleplugin.parser.SimpleParser"
+  parserClass="com.simpleplugin.parser.LiveScriptParser"
 
   extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
 
-  psiClassPrefix="Simple"
+  psiClassPrefix="LiveScript"
   psiImplClassSuffix="Impl"
   psiPackage="com.simpleplugin.psi"
   psiImplPackage="com.simpleplugin.psi.impl"
 
-  elementTypeHolderClass="com.simpleplugin.psi.SimpleTypes"
-  elementTypeClass="com.simpleplugin.psi.SimpleElementType"
-  tokenTypeClass="com.simpleplugin.psi.SimpleTokenType"*/
+  elementTypeHolderClass="com.simpleplugin.psi.LiveScriptTypes"
+  elementTypeClass="com.simpleplugin.psi.LiveScriptElementType"
+  tokenTypeClass="com.simpleplugin.psi.LiveScriptTokenType"
 
+/*
   tokens = [
-    NEWLINE="regexp:\r\n|\r|\n"
+    NUMBER = "regexp:(([1-9]|[1-2]\d?|3[0-2])~[a-zA-Z\d]+|\d[_\d]*\.?[_\d]+[a-zA-Z]*)"
+    IDENTIFIER = "regexp:[$_a-zA-Z][-$_a-zA-Z0-9]*"
 
-    IF="regexp:if|unless"
-    THEN="regexp:then"
-    BOOL="regexp:true|false"
+    EQ = "="
+    GLOBAL_EQ = ":="
 
-    FUNC_ARROW="regexp:!?[-~]>"
-    OPERATOR="regexp:[<>!]=|==|[-=+*/><]"
-    BANG="regexp:!"
-    PAREN_L="regexp:\("
-    PAREN_R="regexp:\)"
-    NUMBER="regexp:[0-9]+"
-    IDENTIFIER="regexp:[$_a-zA-Z][-$_a-zA-Z0-9]*[$_a-zA-Z0-9]?"
-
-    WHITE_SPACE="regexp:[ \t]+"
-
-    SEPARATOR="regexp:[ \t,]"
+    WHITE_SPACE = "regexp:[\ \t]+"
+    NEWLINE = "regexp:\r\n|[\r\n]"
   ]
+//*/
 
-  extends(".*_exp")=exp
+  extends(".*Expression$")=Expression
 }
 
-file ::= (statement | NEWLINE)*
+file ::= (Statement | NEWLINE)*
 
-exp ::= paren_exp | operation_exp | call_paren_exp | call_exp | run_exp | func_def_exp | value_exp
+Statement ::= Expression
 
-statement ::= if_statement | exp
+/** EXPRESSIONS **/
 
-operation_exp ::= exp (OPERATOR exp)+
+Expression ::= AssignmentExpression
+    | ReferenceExpression
+    | LiteralExpression
 
-value_exp ::= IDENTIFIER|NUMBER
+
+AssignmentExpression ::= ReferenceExpression (GLOBAL_EQ | EQ) + Expression
+
+ReferenceExpression ::= IDENTIFIER
+
+// Anything that is a pure value - strings, numbers, booleans, Nulls ...
+LiteralExpression ::= NUMBER
+
+c ::= COMMENT
+
+
+/*
+file ::= (Statement | COMMENT | NEWLINE)*
+
+Expression ::= FuncDefExpression
+    | FuncCallExpression
+    | AssignmentExpression
+    | BinaryExpression
+    | ReferenceExpression
+    | LiteralExpression
+
+Statement ::= IfStatement
+    | Expression
+    | IDENTIFIER
+
+*/
+/** STATEMENTS **//*
+
+IfStatement ::= IF Expression
+
+
+*/
+/** EXPRESSIONS **//*
+
+
+FuncDefExpression ::= (funcDefArgList|) FUNC_ARROW Statement
+
+FuncCallExpression ::= ReferenceExpression + ArgumentsExpression
+
+ArgumentsExpression ::= ((BANG | PAREN_L + PAREN_R) | argumentList)
+
+AssignmentExpression ::= ReferenceExpression EQ Expression
+
+BinaryExpression ::= Expression OPERATOR Expression
+
+ReferenceExpression ::= IDENTIFIER
+
+LiteralExpression ::= NUMBER | STRING
+
+
+*/
+/** PIECES **//*
+
+private argumentList ::= Expression (COMMA? Expression)*
+private funcDefArgList ::= '(' IDENTIFIER (COMMA IDENTIFIER)* ')'
+*/
+
+
+/*
+file ::= (Statement | COMMENT | NEWLINE)*
+
+exp ::= const_exp
+    | var_exp
+    | if_exp
+    | then_else_exp
+    | paren_exp
+    | obj_def_curl_exp
+    | obj_def_exp
+    | prop_def_exp
+    | value_exp
+    | operation_exp
+    | property_exp
+    | string_exp
+    | call_paren_exp
+    | call_exp
+    | run_exp
+    | func_def_exp
+
+Statement ::= (if_exp | exp) terminator
+
+// x = 12, a = b * c, x / 2, etc.
+operation_exp ::= exp operator (exp (operator exp)*)?
+
+operator ::= OPERATOR|OP_ASSIGN
+
+terminator ::= NEWLINE | SEMICOLON
+
+value_exp ::= BOOL|VALUE|string_exp|BACKSTRING|IDENTIFIER|number|array
+
+property_exp ::= (IDENTIFIER|array|string_exp|number) DOT (IDENTIFIER|number|string_exp)
+
+prop_def_exp ::= (string_exp|value_exp) COLON exp
+
+obj_def_exp::= prop_def_exp ((COMMA|NEWLINE) prop_def_exp)*
+
+obj_def_curl_exp ::= CURL_L (prop_def_exp | value_exp) ((COMMA|NEWLINE) (prop_def_exp | value_exp))* CURL_R
+
+array ::= BRACK_L arg_list BRACK_R
+
+number ::= NUMBER|BASED_NUMBER
+
+string_exp ::= HEREDOC|INTER_STRING|SIMPLE_STRING|STRING
 
 paren_exp ::= PAREN_L exp PAREN_R
 
-if_statement ::= (IF) exp (THEN exp)?
+if_exp ::= IF exp
 
-arg_list ::= exp (SEPARATOR exp)*
+then_else_exp ::= THEN exp | (ELSE IF?) exp
+
+arg_list ::= exp (inline_sep exp)*
 
 arg_list_paren ::= PAREN_L arg_list PAREN_R
 
@@ -60,3 +158,11 @@ call_paren_exp ::= IDENTIFIER arg_list_paren
 run_exp ::= IDENTIFIER (BANG | PAREN_L PAREN_R)
 
 func_def_exp ::= arg_list_paren FUNC_ARROW
+
+var_exp ::= VAR IDENTIFIER
+
+const_exp ::= CONST IDENTIFIER OP_ASSIGN exp
+
+inline_sep ::= COMMA | INLINE_SEP
+
+block_sep ::= COMMA | BLOCK_SEP*/
