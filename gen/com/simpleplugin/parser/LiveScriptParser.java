@@ -180,22 +180,33 @@ public class LiveScriptParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // STRING_START STRING? STRING_END
+  // STRING_START STRING? STRING_END | BACKSTRING
   public static boolean StringExpression(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "StringExpression")) return false;
-    if (!nextTokenIs(b, STRING_START)) return false;
+    if (!nextTokenIs(b, "<string expression>", BACKSTRING, STRING_START)) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, "<string expression>");
+    r = StringExpression_0(b, l + 1);
+    if (!r) r = consumeToken(b, BACKSTRING);
+    exit_section_(b, l, m, STRING_EXPRESSION, r, false, null);
+    return r;
+  }
+
+  // STRING_START STRING? STRING_END
+  private static boolean StringExpression_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "StringExpression_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, STRING_START);
-    r = r && StringExpression_1(b, l + 1);
+    r = r && StringExpression_0_1(b, l + 1);
     r = r && consumeToken(b, STRING_END);
-    exit_section_(b, m, STRING_EXPRESSION, r);
+    exit_section_(b, m, null, r);
     return r;
   }
 
   // STRING?
-  private static boolean StringExpression_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "StringExpression_1")) return false;
+  private static boolean StringExpression_0_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "StringExpression_0_1")) return false;
     consumeToken(b, STRING);
     return true;
   }

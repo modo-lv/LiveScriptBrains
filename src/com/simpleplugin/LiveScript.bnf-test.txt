@@ -24,3 +24,10 @@ void
 # Strings
 'a string'
 "a string"
+
+# Backstrings
+\word
+func \word, \word;
+(func \word)
+[\word]
+{prop:\word}

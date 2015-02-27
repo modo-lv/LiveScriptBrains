@@ -18,6 +18,7 @@ public interface LiveScriptTypes {
   IElementType STATEMENT = new LiveScriptElementType("STATEMENT");
   IElementType STRING_EXPRESSION = new LiveScriptElementType("STRING_EXPRESSION");
 
+  IElementType BACKSTRING = new LiveScriptTokenType("BACKSTRING");
   IElementType BOOLEAN = new LiveScriptTokenType("BOOLEAN");
   IElementType COMMENT = new LiveScriptTokenType("COMMENT");
   IElementType EQ = new LiveScriptTokenType("EQ");

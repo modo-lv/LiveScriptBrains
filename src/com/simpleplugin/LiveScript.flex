@@ -114,6 +114,7 @@ BOOLEAN = true|false|on|off|yes|no
 BASED_NUMBER = ([0-9]|[1-2][0-9]|3[0-2])\~[0-9a-zA-Z]+
 NUMBER = [0-9][0-9_]*\.?[0-9_]*[a-zA-Z]*
 IDENTIFIER = [$_a-zA-Z][-$_a-zA-Z0-9]*
+BACKSTRING = \\[^,;\]\)\} \t\r\n]+
 
 EQ = "="
 GLOBAL_EQ = ":="
@@ -138,7 +139,7 @@ SEPARATOR=[:=]
 KEY_CHARACTER=[^:=\ \n\r\t\f\\] | "\\"{CRLF} | "\\".
 */
 
-%state SIMPLE_STRING_STARTED, FULL_STRING_STARTED, STRING_SUSPENDED
+%state SIMPLE_STRING_STARTED, FULL_STRING_STARTED, STRING_SUSPENDED, BACK_STRING_STARTED
 
 %%
 
@@ -166,8 +167,9 @@ KEY_CHARACTER=[^:=\ \n\r\t\f\\] | "\\"{CRLF} | "\\".
     \'          { enterState(SIMPLE_STRING_STARTED); return LiveScriptTypes.STRING_START; }
 
     \"          { enterState(FULL_STRING_STARTED); return LiveScriptTypes.STRING_START; }
-}
 
+    {BACKSTRING}        { return LiveScriptTypes.BACKSTRING; }
+}
 
 <SIMPLE_STRING_STARTED> {
     (\\\'|[^\'])+       { return LiveScriptTypes.STRING; }
