@@ -38,13 +38,15 @@ import com.intellij.util.containers.Stack;
    * Pop the last state from the stack and change to it.
    * If the stack is empty, go to YYINITIAL
    */
-  private void leaveState() {
-    if (!stack.empty()) {
-      yybegin(stack.pop());
-    } else {
-      yybegin(YYINITIAL);
+    private boolean leaveState() {
+        if (!stack.empty()) {
+            yybegin(stack.pop());
+            return true;
+        } else {
+            yybegin(YYINITIAL);
+            return false;
+        }
     }
-  }
 
 
   /**
@@ -175,7 +177,7 @@ KEY_CHARACTER=[^:=\ \n\r\t\f\\] | "\\"{CRLF} | "\\".
 
 <FULL_STRING_STARTED> {
 
-    (\\\"|[^\"#]|\\#)*  { return LiveScriptTypes.STRING; }
+    (\\\"|[^\"#]|\\#)+  { return LiveScriptTypes.STRING; }
 
     "\""                { leaveState(); return LiveScriptTypes.STRING_END; }
 
@@ -196,7 +198,10 @@ KEY_CHARACTER=[^:=\ \n\r\t\f\\] | "\\"{CRLF} | "\\".
 
 //{CURL_L}            { return LiveScriptTypes.CURL_L; }
 
-"}"                 { rewindBy(1); leaveState(); }
+// Only rewind if we're actually moving up the state stack,
+// if we rewind with the stack empty we'll just get stuck
+// in an infinite loop.
+"}"                 { if (leaveState()) rewindBy(1); }
 
 {NEWLINE}           { return LiveScriptTypes.NEWLINE; }
 

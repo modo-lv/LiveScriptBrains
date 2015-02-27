@@ -16,6 +16,7 @@ public interface LiveScriptTypes {
   IElementType PAREN_EXPRESSION = new LiveScriptElementType("PAREN_EXPRESSION");
   IElementType REFERENCE_EXPRESSION = new LiveScriptElementType("REFERENCE_EXPRESSION");
   IElementType STATEMENT = new LiveScriptElementType("STATEMENT");
+  IElementType STRING_EXPRESSION = new LiveScriptElementType("STRING_EXPRESSION");
 
   IElementType BOOLEAN = new LiveScriptTokenType("BOOLEAN");
   IElementType COMMENT = new LiveScriptTokenType("COMMENT");
@@ -59,6 +60,9 @@ public interface LiveScriptTypes {
       }
       else if (type == STATEMENT) {
         return new LiveScriptStatementImpl(node);
+      }
+      else if (type == STRING_EXPRESSION) {
+        return new LiveScriptStringExpressionImpl(node);
       }
       throw new AssertionError("Unknown element type: " + type);
     }

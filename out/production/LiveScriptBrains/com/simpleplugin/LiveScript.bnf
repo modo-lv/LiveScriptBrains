@@ -61,7 +61,9 @@ AssignmentExpression ::= ReferenceExpression (GLOBAL_EQ | EQ) Expression
 ReferenceExpression ::= IDENTIFIER
 
 // Anything that is a pure value - strings, numbers, booleans, Nulls ...
-LiteralExpression ::= NULL | BOOLEAN | NUMBER | STRING_START STRING STRING_END
+LiteralExpression ::= NULL | BOOLEAN | NUMBER | StringExpression
+
+StringExpression ::= STRING_START STRING? STRING_END
 
 
 c ::= COMMENT

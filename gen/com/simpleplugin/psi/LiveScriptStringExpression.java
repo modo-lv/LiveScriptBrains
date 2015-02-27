@@ -7,7 +7,4 @@ import com.intellij.psi.PsiElement;
 
 public interface LiveScriptStringExpression extends LiveScriptExpression {
 
-  @NotNull
-  List<LiveScriptExpression> getExpressionList();
-
 }
