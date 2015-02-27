@@ -21,10 +21,4 @@ public class LiveScriptReferenceExpressionImpl extends LiveScriptExpressionImpl 
     else super.accept(visitor);
   }
 
-  @Override
-  @NotNull
-  public PsiElement getIdentifier() {
-    return findNotNullChildByType(IDENTIFIER);
-  }
-
 }

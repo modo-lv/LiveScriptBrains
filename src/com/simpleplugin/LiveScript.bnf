@@ -12,46 +12,57 @@
   elementTypeClass="com.simpleplugin.psi.LiveScriptElementType"
   tokenTypeClass="com.simpleplugin.psi.LiveScriptTokenType"
 
-//*
+/*
   tokens = [
-    NUMBER = "regexp:(([0-9]|[1-2][0-9]|3[0-2])\~[0-9a-zA-Z]+|[0-9][0-9_]*\.?[0-9_]*[a-zA-Z]*)"
-    IDENTIFIER = "regexp:[$_a-zA-Z][-$_a-zA-Z0-9]*"
-    SIMPLE_STRING = "regexp:\'(\\\'|[^\'])*'";
+//* Full string tokens
+        WHITE_SPACE = "regexp:[ \t]+"
 
-    PAREN_L = '('
-    PAREN_R = ')'
-
-    EQ = "="
-    GLOBAL_EQ = ":="
-
-    WHITE_SPACE = "regexp:[\ \t]+"
-    NEWLINE = "regexp:\r\n|[\r\n]"
-  ]
+        FULL_STRING_START = "regexp:<"
+        FULL_STRING_END = "regexp:>";
+        //FULL_STRING_IDENTIFIER = "regexp:#[a-x][a-z]*"
+        FULL_STRING_INTER_START = "regexp:#\{?"
+        CURL_L = "regexp:\{"
+        FULL_STRING_INTER_END = "regexp:\}"
+        STRING = "regexp:[z]*"
+//*//*
+        NEWLINE = "regexp:\r\n|[\r\n]"
+        IDENTIFIER = "regexp:[a-x][a-z]*"
+        EQ = "regexp:="
+        NUMBER = "regexp:[0-9]+"
+    ]
 //*/
+
 
   extends(".*Expression$")=Expression
 }
 
 file ::= (Statement | NEWLINE)*
+
+Statement ::= Expression+ {recoverWhile="recover_statement"}
+
+// On any errors, ignore everything until the next line.
 private recover_statement ::= !NEWLINE
 
-Statement ::= Expression {recoverWhile="recover_statement"}
 
 /** EXPRESSIONS **/
 
-Expression ::= ParenExpression
+Expression ::= InterExpression
+    | ParenExpression
     | AssignmentExpression
-    | ReferenceExpression
     | LiteralExpression
+    | ReferenceExpression
+
+InterExpression ::= INTER_START Statement INTER_END
 
 ParenExpression ::= PAREN_L Expression PAREN_R
 
-AssignmentExpression ::= ReferenceExpression (GLOBAL_EQ | EQ) + Expression
+AssignmentExpression ::= ReferenceExpression (GLOBAL_EQ | EQ) Expression
 
 ReferenceExpression ::= IDENTIFIER
 
 // Anything that is a pure value - strings, numbers, booleans, Nulls ...
-LiteralExpression ::= NUMBER|SIMPLE_STRING
+LiteralExpression ::= NULL | BOOLEAN | NUMBER | STRING_START STRING STRING_END
+
 
 c ::= COMMENT
 

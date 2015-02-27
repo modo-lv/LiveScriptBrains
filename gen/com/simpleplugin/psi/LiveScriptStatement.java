@@ -8,6 +8,6 @@ import com.intellij.psi.PsiElement;
 public interface LiveScriptStatement extends PsiElement {
 
   @NotNull
-  LiveScriptExpression getExpression();
+  List<LiveScriptExpression> getExpressionList();
 
 }

@@ -11,20 +11,27 @@ public interface LiveScriptTypes {
   IElementType ASSIGNMENT_EXPRESSION = new LiveScriptElementType("ASSIGNMENT_EXPRESSION");
   IElementType C = new LiveScriptElementType("C");
   IElementType EXPRESSION = new LiveScriptElementType("EXPRESSION");
+  IElementType INTER_EXPRESSION = new LiveScriptElementType("INTER_EXPRESSION");
   IElementType LITERAL_EXPRESSION = new LiveScriptElementType("LITERAL_EXPRESSION");
   IElementType PAREN_EXPRESSION = new LiveScriptElementType("PAREN_EXPRESSION");
   IElementType REFERENCE_EXPRESSION = new LiveScriptElementType("REFERENCE_EXPRESSION");
   IElementType STATEMENT = new LiveScriptElementType("STATEMENT");
 
+  IElementType BOOLEAN = new LiveScriptTokenType("BOOLEAN");
   IElementType COMMENT = new LiveScriptTokenType("COMMENT");
-  IElementType EQ = new LiveScriptTokenType("=");
-  IElementType GLOBAL_EQ = new LiveScriptTokenType(":=");
+  IElementType EQ = new LiveScriptTokenType("EQ");
+  IElementType GLOBAL_EQ = new LiveScriptTokenType("GLOBAL_EQ");
   IElementType IDENTIFIER = new LiveScriptTokenType("IDENTIFIER");
+  IElementType INTER_END = new LiveScriptTokenType("INTER_END");
+  IElementType INTER_START = new LiveScriptTokenType("INTER_START");
   IElementType NEWLINE = new LiveScriptTokenType("NEWLINE");
+  IElementType NULL = new LiveScriptTokenType("NULL");
   IElementType NUMBER = new LiveScriptTokenType("NUMBER");
-  IElementType PAREN_L = new LiveScriptTokenType("(");
-  IElementType PAREN_R = new LiveScriptTokenType(")");
-  IElementType SIMPLE_STRING = new LiveScriptTokenType("SIMPLE_STRING");
+  IElementType PAREN_L = new LiveScriptTokenType("PAREN_L");
+  IElementType PAREN_R = new LiveScriptTokenType("PAREN_R");
+  IElementType STRING = new LiveScriptTokenType("STRING");
+  IElementType STRING_END = new LiveScriptTokenType("STRING_END");
+  IElementType STRING_START = new LiveScriptTokenType("STRING_START");
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {
@@ -37,6 +44,9 @@ public interface LiveScriptTypes {
       }
       else if (type == EXPRESSION) {
         return new LiveScriptExpressionImpl(node);
+      }
+      else if (type == INTER_EXPRESSION) {
+        return new LiveScriptInterExpressionImpl(node);
       }
       else if (type == LITERAL_EXPRESSION) {
         return new LiveScriptLiteralExpressionImpl(node);

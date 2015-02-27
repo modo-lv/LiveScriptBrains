@@ -4,6 +4,7 @@ import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
 import com.simpleplugin.psi.LiveScriptTypes;
 import com.intellij.psi.TokenType;
+import com.intellij.util.containers.Stack;
 
 %%
 
@@ -11,24 +12,120 @@ import com.intellij.psi.TokenType;
 %implements FlexLexer
 %unicode
 %function advance
+
+%{
+  private final Stack<Integer> stack = new Stack<Integer>();
+
+  /**
+   * Push the actual state on top of the stack
+   */
+  private void pushState() {
+    stack.push(yystate());
+  }
+
+  /**
+   * Push the actual state on top of the stack
+   * and change into another state
+   *
+   * @param state The new state
+   */
+  private void enterState(int state) {
+    stack.push(yystate());
+    yybegin(state);
+  }
+
+  /**
+   * Pop the last state from the stack and change to it.
+   * If the stack is empty, go to YYINITIAL
+   */
+  private void leaveState() {
+    if (!stack.empty()) {
+      yybegin(stack.pop());
+    } else {
+      yybegin(YYINITIAL);
+    }
+  }
+
+
+  /**
+   * Push the stream back to the position before the text match
+   *
+   * @param text The text to match
+   * @return true when matched
+   */
+  private boolean rewindTo(String text) {
+    final int position = yytext().toString().indexOf(text);
+
+    if (position != -1) {
+      yypushback(yylength() - position - 1);
+      return true;
+    }
+
+    return false;
+  }
+
+
+  private void rewindBy(int count) {
+    yypushback(count);
+  }
+
+
+    /**
+     * Rewind the input stream back to the position before
+     * the text match and leave current state.
+     */
+    private boolean rewindAndLeaveState(String text) {
+        final boolean success = rewindTo(text);
+        if (success) {
+            leaveState();
+        }
+        return true;
+    }
+
+  /**
+   * Push the stream back to the position before the text match
+   * and change into the given state
+   *
+   * @param text The text to match
+   * @param state The new state
+   * @return true when matched
+   */
+  private boolean pushBackAndState(String text, int state) {
+    final boolean success = rewindTo(text);
+
+    if (success) {
+      enterState(state);
+    }
+
+    return success;
+  }
+%}
+
 %type IElementType
 %eof{  return;
 %eof}
 
+NEWLINE = \r\n|[\r\n]
 
+NULL=null|void
+BOOLEAN = true|false|on|off|yes|no
 BASED_NUMBER = ([0-9]|[1-2][0-9]|3[0-2])\~[0-9a-zA-Z]+
 NUMBER = [0-9][0-9_]*\.?[0-9_]*[a-zA-Z]*
 IDENTIFIER = [$_a-zA-Z][-$_a-zA-Z0-9]*
 
-SIMPLE_STRING = '(\\'|[^'])*'
+EQ = "="
+GLOBAL_EQ = ":="
+
+SIMPLE_STRING_START = "'"
+FULL_STRING_START = "\""
 
 PAREN_L = "("
 PAREN_R = ")"
 
-EQ = "="
-GLOBAL_EQ = ":="
+CURL_L = "{"
+CURL_R = "}"
 
-NEWLINE = \r\n|[\r\n]
+
 WHITE_SPACE = [\t\ ]+
 
 /*
@@ -39,28 +136,68 @@ SEPARATOR=[:=]
 KEY_CHARACTER=[^:=\ \n\r\t\f\\] | "\\"{CRLF} | "\\".
 */
 
-//%state WAITING_VALUE
+%state SIMPLE_STRING_STARTED, FULL_STRING_STARTED, STRING_SUSPENDED
 
 %%
 
-{SIMPLE_STRING}                                             { return LiveScriptTypes.SIMPLE_STRING; }
+<YYINITIAL> {
+    {NULL}                                                      { return LiveScriptTypes.NULL; }
 
-{IDENTIFIER}                                                { return LiveScriptTypes.IDENTIFIER; }
+    {BOOLEAN}                                                   { return LiveScriptTypes.BOOLEAN; }
 
-{BASED_NUMBER}                                              { return LiveScriptTypes.NUMBER; }
+    {BASED_NUMBER}                                              { return LiveScriptTypes.NUMBER; }
 
-{NUMBER}                                                    { return LiveScriptTypes.NUMBER; }
+    {NUMBER}                                                    { return LiveScriptTypes.NUMBER; }
 
-{PAREN_L}                                                    { return LiveScriptTypes.PAREN_L; }
+    {PAREN_L}                                                   { return LiveScriptTypes.PAREN_L; }
 
-{PAREN_R}                                                    { return LiveScriptTypes.PAREN_R; }
+    {PAREN_R}                                                   { return LiveScriptTypes.PAREN_R; }
 
-{EQ}                                                        { return LiveScriptTypes.EQ; }
+    {IDENTIFIER}                                                { return LiveScriptTypes.IDENTIFIER; }
 
-{GLOBAL_EQ}                                                 { return LiveScriptTypes.GLOBAL_EQ; }
+    {EQ}                                                        { return LiveScriptTypes.EQ; }
 
-{WHITE_SPACE}                                               { return TokenType.WHITE_SPACE; }
+    {GLOBAL_EQ}                                                 { return LiveScriptTypes.GLOBAL_EQ; }
 
-{NEWLINE}                                                   { return LiveScriptTypes.NEWLINE; }
+    {WHITE_SPACE}                                               { return TokenType.WHITE_SPACE; }
 
-.                                                           { return TokenType.BAD_CHARACTER; }
+    \'          { enterState(SIMPLE_STRING_STARTED); return LiveScriptTypes.STRING_START; }
+
+    \"          { enterState(FULL_STRING_STARTED); return LiveScriptTypes.STRING_START; }
+}
+
+
+<SIMPLE_STRING_STARTED> {
+    (\\\'|[^\'])+       { return LiveScriptTypes.STRING; }
+
+    "'"                 { leaveState(); }
+}
+
+<FULL_STRING_STARTED> {
+
+    (\\\"|[^\"#]|\\#)*  { return LiveScriptTypes.STRING; }
+
+    "\""                { leaveState(); return LiveScriptTypes.STRING_END; }
+
+    "#{"                { enterState(STRING_SUSPENDED); return LiveScriptTypes.STRING_END; }
+}
+
+// Intermediary state between FULL_STRING_STARTED and YYINITIAL, to properly handle entry/exit
+<STRING_SUSPENDED> {
+
+    // Once the interpolation is closed, leave the "Suspended" state and resume normal string.
+    "}"     { leaveState(); return LiveScriptTypes.STRING_START; }
+
+    // This state can only be reached by opening or closing a string interpolation,
+    // so if it's not closing (handled above), it must be opening.
+    .       { rewindBy(1); enterState(YYINITIAL); }
+}
+
+
+//{CURL_L}            { return LiveScriptTypes.CURL_L; }
+
+"}"                 { rewindBy(1); leaveState(); }
+
+{NEWLINE}           { return LiveScriptTypes.NEWLINE; }
+
+.                   { return TokenType.BAD_CHARACTER; }

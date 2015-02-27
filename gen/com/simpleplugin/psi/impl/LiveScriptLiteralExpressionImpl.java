@@ -21,16 +21,4 @@ public class LiveScriptLiteralExpressionImpl extends LiveScriptExpressionImpl im
     else super.accept(visitor);
   }
 
-  @Override
-  @Nullable
-  public PsiElement getNumber() {
-    return findChildByType(NUMBER);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getSimpleString() {
-    return findChildByType(SIMPLE_STRING);
-  }
-
 }
