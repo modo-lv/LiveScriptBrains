@@ -147,7 +147,7 @@ SEPARATOR=[:=]
 KEY_CHARACTER=[^:=\ \n\r\t\f\\] | "\\"{CRLF} | "\\".
 */
 
-%state SIMPLE_STRING_STARTED, FULL_STRING_STARTED, STRING_SUSPENDED, BACK_STRING_STARTED
+%state SIMPLE_STRING_STARTED, FULL_STRING_STARTED, STRING_SUSPENDED, BACK_STRING_STARTED, STRING_VARIABLE
 
 %%
 
@@ -174,7 +174,7 @@ KEY_CHARACTER=[^:=\ \n\r\t\f\\] | "\\"{CRLF} | "\\".
 
     \'          { enterState(SIMPLE_STRING_STARTED); return LiveScriptTypes.STRING_START; }
 
-    \"          { enterState(FULL_STRING_STARTED); return LiveScriptTypes.STRING_START; }
+    \"|%\"              { enterState(FULL_STRING_STARTED); return LiveScriptTypes.STRING_START; }
 
     {BACKSTRING}        { return LiveScriptTypes.BACKSTRING; }
 }
@@ -192,16 +192,18 @@ KEY_CHARACTER=[^:=\ \n\r\t\f\\] | "\\"{CRLF} | "\\".
 
     "#{"                { enterState(STRING_SUSPENDED); return LiveScriptTypes.STRING_END; }
 
-    "#"{IDENTIFIER}     { rewindTo("#"); advanceBy(1); enterState(STRING_SUSPENDED); return LiveScriptTypes.STRING; }
+    "#"{IDENTIFIER}     { rewindTo("#"); advanceBy(1); enterState(STRING_VARIABLE); return LiveScriptTypes.STRING; }
 
     "#"                 { return LiveScriptTypes.STRING; }
 }
 
-// Intermediary state between FULL_STRING_STARTED and YYINITIAL, to properly handle entry/exit
-<STRING_SUSPENDED> {
+<STRING_VARIABLE> {
     // Return simple variables.
     {IDENTIFIER}    { leaveState(); return LiveScriptTypes.IDENTIFIER; }
+}
 
+// Intermediary state between FULL_STRING_STARTED and YYINITIAL, to properly handle entry/exit
+<STRING_SUSPENDED> {
     // Once the interpolation is closed, leave the "Suspended" state and resume normal string.
     "}"             { leaveState(); return LiveScriptTypes.STRING_START; }
 
