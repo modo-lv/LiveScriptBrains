@@ -124,8 +124,11 @@ NUMBER = [0-9][0-9_]*\.?[0-9_]*[a-zA-Z]*
 IDENTIFIER = [$_a-zA-Z][-$_a-zA-Z0-9]*
 BACKSTRING = \\[^,;\]\)\} \t\r\n]+
 
+BINARY_OP = [-+*/]
+
 EQ = "="
 GLOBAL_EQ = ":="
+HEREDOC = \'\'\'(.|[\r\n])*\'\'\'
 
 SIMPLE_STRING_START = "'"
 FULL_STRING_START = "\""
@@ -148,6 +151,7 @@ KEY_CHARACTER=[^:=\ \n\r\t\f\\] | "\\"{CRLF} | "\\".
 */
 
 %state SIMPLE_STRING_STARTED, FULL_STRING_STARTED, STRING_SUSPENDED, BACK_STRING_STARTED, STRING_VARIABLE
+%state HEREDOC_STARTED
 
 %%
 
@@ -172,14 +176,17 @@ KEY_CHARACTER=[^:=\ \n\r\t\f\\] | "\\"{CRLF} | "\\".
 
     {WHITE_SPACE}                                               { return TokenType.WHITE_SPACE; }
 
-    \'          { enterState(SIMPLE_STRING_STARTED); return LiveScriptTypes.STRING_START; }
+    {HEREDOC}       { return LiveScriptTypes.HEREDOC; }
 
-    \"|%\"              { enterState(FULL_STRING_STARTED); return LiveScriptTypes.STRING_START; }
+    \'              { enterState(SIMPLE_STRING_STARTED); return LiveScriptTypes.STRING_START; }
 
-    {BACKSTRING}        { return LiveScriptTypes.BACKSTRING; }
+    \"|%\"          { enterState(FULL_STRING_STARTED); return LiveScriptTypes.STRING_START; }
+
+    {BACKSTRING}    { return LiveScriptTypes.BACKSTRING; }
 }
 
 <SIMPLE_STRING_STARTED> {
+
     (\\\'|[^\'])+       { return LiveScriptTypes.STRING; }
 
     \'                  { leaveState(); return LiveScriptTypes.STRING_END; }

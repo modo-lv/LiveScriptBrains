@@ -39,3 +39,16 @@ func \word, \word;
 variable = "world"
 "Hello #variable"
 "Not an interpolated # string at all."
+
+# Multiline & heredoc
+multiline = 'string can be multiline
+            and go on and on
+            beginning whitespace is
+            ignored'
+heredoc = '''
+            string can be multiline
+            with newlines
+            and go on and on
+            beginning whitespace is
+            ignored
+'''

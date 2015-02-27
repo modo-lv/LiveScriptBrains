@@ -23,6 +23,7 @@ public interface LiveScriptTypes {
   IElementType COMMENT = new LiveScriptTokenType("COMMENT");
   IElementType EQ = new LiveScriptTokenType("EQ");
   IElementType GLOBAL_EQ = new LiveScriptTokenType("GLOBAL_EQ");
+  IElementType HEREDOC = new LiveScriptTokenType("HEREDOC");
   IElementType IDENTIFIER = new LiveScriptTokenType("IDENTIFIER");
   IElementType INTER_END = new LiveScriptTokenType("INTER_END");
   IElementType INTER_START = new LiveScriptTokenType("INTER_START");

@@ -63,7 +63,7 @@ ReferenceExpression ::= IDENTIFIER
 // Anything that is a pure value - strings, numbers, booleans, Nulls ...
 LiteralExpression ::= NULL | BOOLEAN | NUMBER | StringExpression
 
-StringExpression ::= STRING_START STRING* (IDENTIFIER | STRING)* STRING_END | BACKSTRING
+StringExpression ::= STRING_START STRING* (IDENTIFIER | STRING)* STRING_END | BACKSTRING | HEREDOC
 
 
 c ::= COMMENT

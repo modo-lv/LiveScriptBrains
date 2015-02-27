@@ -180,14 +180,14 @@ public class LiveScriptParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // STRING_START STRING* (IDENTIFIER | STRING)* STRING_END | BACKSTRING
+  // STRING_START STRING* (IDENTIFIER | STRING)* STRING_END | BACKSTRING | HEREDOC
   public static boolean StringExpression(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "StringExpression")) return false;
-    if (!nextTokenIs(b, "<string expression>", BACKSTRING, STRING_START)) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, "<string expression>");
     r = StringExpression_0(b, l + 1);
     if (!r) r = consumeToken(b, BACKSTRING);
+    if (!r) r = consumeToken(b, HEREDOC);
     exit_section_(b, l, m, STRING_EXPRESSION, r, false, null);
     return r;
   }
