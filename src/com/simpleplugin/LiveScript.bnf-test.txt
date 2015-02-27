@@ -52,3 +52,11 @@ heredoc = '''
             beginning whitespace is
             ignored
 '''
+
+
+/* multiline comments
+   use this format and are preserved
+   in the output unlike single line ones
+*/
+
+

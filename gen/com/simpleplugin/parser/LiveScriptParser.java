@@ -46,9 +46,6 @@ public class LiveScriptParser implements PsiParser {
     else if (t == STRING_EXPRESSION) {
       r = StringExpression(b, 0);
     }
-    else if (t == C) {
-      r = c(b, 0);
-    }
     else {
       r = parse_root_(t, b, 0);
     }
@@ -163,19 +160,30 @@ public class LiveScriptParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // Expression+
+  // COMMENT | Expression+
   public static boolean Statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Statement")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, "<statement>");
+    r = consumeToken(b, COMMENT);
+    if (!r) r = Statement_1(b, l + 1);
+    exit_section_(b, l, m, STATEMENT, r, false, recover_statement_parser_);
+    return r;
+  }
+
+  // Expression+
+  private static boolean Statement_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "Statement_1")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
     r = Expression(b, l + 1);
     int c = current_position_(b);
     while (r) {
       if (!Expression(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "Statement", c)) break;
+      if (!empty_element_parsed_guard_(b, "Statement_1", c)) break;
       c = current_position_(b);
     }
-    exit_section_(b, l, m, STATEMENT, r, false, recover_statement_parser_);
+    exit_section_(b, m, null, r);
     return r;
   }
 
@@ -237,18 +245,6 @@ public class LiveScriptParser implements PsiParser {
     r = consumeToken(b, IDENTIFIER);
     if (!r) r = consumeToken(b, STRING);
     exit_section_(b, m, null, r);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // COMMENT
-  public static boolean c(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "c")) return false;
-    if (!nextTokenIs(b, COMMENT)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, COMMENT);
-    exit_section_(b, m, C, r);
     return r;
   }
 

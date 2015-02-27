@@ -12,33 +12,12 @@
   elementTypeClass="com.simpleplugin.psi.LiveScriptElementType"
   tokenTypeClass="com.simpleplugin.psi.LiveScriptTokenType"
 
-/*
-  tokens = [
-//* Full string tokens
-        WHITE_SPACE = "regexp:[ \t]+"
-
-        FULL_STRING_START = "regexp:<"
-        FULL_STRING_END = "regexp:>";
-        //FULL_STRING_IDENTIFIER = "regexp:#[a-x][a-z]*"
-        FULL_STRING_INTER_START = "regexp:#\{?"
-        CURL_L = "regexp:\{"
-        FULL_STRING_INTER_END = "regexp:\}"
-        STRING = "regexp:[z]*"
-//*//*
-        NEWLINE = "regexp:\r\n|[\r\n]"
-        IDENTIFIER = "regexp:[a-x][a-z]*"
-        EQ = "regexp:="
-        NUMBER = "regexp:[0-9]+"
-    ]
-//*/
-
-
   extends(".*Expression$")=Expression
 }
 
 file ::= (Statement | NEWLINE)*
 
-Statement ::= Expression+ {recoverWhile="recover_statement"}
+Statement ::= COMMENT | Expression+ {recoverWhile="recover_statement"}
 
 // On any errors, ignore everything until the next line.
 private recover_statement ::= !NEWLINE
@@ -64,9 +43,6 @@ ReferenceExpression ::= IDENTIFIER
 LiteralExpression ::= NULL | BOOLEAN | NUMBER | StringExpression
 
 StringExpression ::= STRING_START STRING* (IDENTIFIER | STRING)* STRING_END | BACKSTRING | HEREDOC
-
-
-c ::= COMMENT
 
 
 /*

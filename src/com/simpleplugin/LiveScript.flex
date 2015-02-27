@@ -119,8 +119,12 @@ NEWLINE = \r\n|[\r\n]
 
 NULL=null|void
 BOOLEAN = true|false|on|off|yes|no
+LINE_COMMENT = #.+
+BLOCK_COMMENT = \/\*(.|[\r\n])*\*\/
+
 BASED_NUMBER = ([0-9]|[1-2][0-9]|3[0-2])\~[0-9a-zA-Z]+
 NUMBER = [0-9][0-9_]*\.?[0-9_]*[a-zA-Z]*
+
 IDENTIFIER = [$_a-zA-Z][-$_a-zA-Z0-9]*
 BACKSTRING = \\[^,;\]\)\} \t\r\n]+
 
@@ -130,14 +134,8 @@ EQ = "="
 GLOBAL_EQ = ":="
 HEREDOC = \'\'\'(.|[\r\n])*\'\'\'
 
-SIMPLE_STRING_START = "'"
-FULL_STRING_START = "\""
-
 PAREN_L = "("
 PAREN_R = ")"
-
-CURL_L = "{"
-CURL_R = "}"
 
 
 WHITE_SPACE = [\t\ ]+
@@ -151,7 +149,6 @@ KEY_CHARACTER=[^:=\ \n\r\t\f\\] | "\\"{CRLF} | "\\".
 */
 
 %state SIMPLE_STRING_STARTED, FULL_STRING_STARTED, STRING_SUSPENDED, BACK_STRING_STARTED, STRING_VARIABLE
-%state HEREDOC_STARTED
 
 %%
 
@@ -183,6 +180,10 @@ KEY_CHARACTER=[^:=\ \n\r\t\f\\] | "\\"{CRLF} | "\\".
     \"|%\"          { enterState(FULL_STRING_STARTED); return LiveScriptTypes.STRING_START; }
 
     {BACKSTRING}    { return LiveScriptTypes.BACKSTRING; }
+
+    {LINE_COMMENT}  { return LiveScriptTypes.COMMENT; }
+
+    {BLOCK_COMMENT} { return LiveScriptTypes.COMMENT; }
 }
 
 <SIMPLE_STRING_STARTED> {

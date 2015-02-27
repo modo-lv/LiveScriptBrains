@@ -9,7 +9,6 @@ import com.simpleplugin.psi.impl.*;
 public interface LiveScriptTypes {
 
   IElementType ASSIGNMENT_EXPRESSION = new LiveScriptElementType("ASSIGNMENT_EXPRESSION");
-  IElementType C = new LiveScriptElementType("C");
   IElementType EXPRESSION = new LiveScriptElementType("EXPRESSION");
   IElementType INTER_EXPRESSION = new LiveScriptElementType("INTER_EXPRESSION");
   IElementType LITERAL_EXPRESSION = new LiveScriptElementType("LITERAL_EXPRESSION");
@@ -41,9 +40,6 @@ public interface LiveScriptTypes {
       IElementType type = node.getElementType();
        if (type == ASSIGNMENT_EXPRESSION) {
         return new LiveScriptAssignmentExpressionImpl(node);
-      }
-      else if (type == C) {
-        return new LiveScriptCImpl(node);
       }
       else if (type == EXPRESSION) {
         return new LiveScriptExpressionImpl(node);
