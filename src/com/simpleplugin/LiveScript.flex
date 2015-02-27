@@ -59,7 +59,7 @@ import com.intellij.util.containers.Stack;
     final int position = yytext().toString().indexOf(text);
 
     if (position != -1) {
-      yypushback(yylength() - position - 1);
+      yypushback(yylength() - position);
       return true;
     }
 
@@ -67,9 +67,17 @@ import com.intellij.util.containers.Stack;
   }
 
 
-  private void rewindBy(int count) {
-    yypushback(count);
-  }
+    // Move the input stream read position back.
+    private LiveScriptLexer rewindBy(int count) {
+        yypushback(count);
+        return this;
+    }
+
+    // Advance the read position in the stream by the given number.
+    private LiveScriptLexer advanceBy(int count) {
+        yypushback(-count);
+        return this;
+    }
 
 
     /**
@@ -178,23 +186,28 @@ KEY_CHARACTER=[^:=\ \n\r\t\f\\] | "\\"{CRLF} | "\\".
 }
 
 <FULL_STRING_STARTED> {
-
     (\\\"|[^\"#]|\\#)+  { return LiveScriptTypes.STRING; }
 
     "\""                { leaveState(); return LiveScriptTypes.STRING_END; }
 
     "#{"                { enterState(STRING_SUSPENDED); return LiveScriptTypes.STRING_END; }
+
+    "#"{IDENTIFIER}     { rewindTo("#"); advanceBy(1); enterState(STRING_SUSPENDED); return LiveScriptTypes.STRING; }
+
+    "#"                 { return LiveScriptTypes.STRING; }
 }
 
 // Intermediary state between FULL_STRING_STARTED and YYINITIAL, to properly handle entry/exit
 <STRING_SUSPENDED> {
+    // Return simple variables.
+    {IDENTIFIER}    { leaveState(); return LiveScriptTypes.IDENTIFIER; }
 
     // Once the interpolation is closed, leave the "Suspended" state and resume normal string.
-    "}"     { leaveState(); return LiveScriptTypes.STRING_START; }
+    "}"             { leaveState(); return LiveScriptTypes.STRING_START; }
 
     // This state can only be reached by opening or closing a string interpolation,
     // so if it's not closing (handled above), it must be opening.
-    .       { rewindBy(1); enterState(YYINITIAL); }
+    .               { rewindBy(1); enterState(YYINITIAL); }
 }
 
 

@@ -38,3 +38,4 @@ func \word, \word;
 
 variable = "world"
 "Hello #variable"
+"Not an interpolated # string at all."
