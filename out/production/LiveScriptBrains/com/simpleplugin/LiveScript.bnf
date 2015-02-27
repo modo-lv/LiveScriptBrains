@@ -16,6 +16,7 @@
   tokens = [
     NUMBER = "regexp:(([1-9]|[1-2]\d?|3[0-2])~[a-zA-Z\d]+|\d[_\d]*\.?[_\d]+[a-zA-Z]*)"
     IDENTIFIER = "regexp:[$_a-zA-Z][-$_a-zA-Z0-9]*"
+    SIMPLE_STRING = "regexp:\'(\\\'|[^\'])*'";
 
     EQ = "="
     GLOBAL_EQ = ":="
@@ -44,7 +45,7 @@ AssignmentExpression ::= ReferenceExpression (GLOBAL_EQ | EQ) + Expression
 ReferenceExpression ::= IDENTIFIER
 
 // Anything that is a pure value - strings, numbers, booleans, Nulls ...
-LiteralExpression ::= NUMBER
+LiteralExpression ::= NUMBER|SIMPLE_STRING
 
 c ::= COMMENT
 

@@ -101,7 +101,6 @@ public class LiveScriptParser implements PsiParser {
   //     | LiteralExpression
   public static boolean Expression(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Expression")) return false;
-    if (!nextTokenIs(b, "<expression>", IDENTIFIER, NUMBER)) return false;
     boolean r;
     Marker m = enter_section_(b, l, _COLLAPSE_, "<expression>");
     r = AssignmentExpression(b, l + 1);
@@ -112,14 +111,15 @@ public class LiveScriptParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // NUMBER
+  // NUMBER|SIMPLE_STRING
   public static boolean LiteralExpression(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "LiteralExpression")) return false;
-    if (!nextTokenIs(b, NUMBER)) return false;
+    if (!nextTokenIs(b, "<literal expression>", NUMBER, SIMPLE_STRING)) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, "<literal expression>");
     r = consumeToken(b, NUMBER);
-    exit_section_(b, m, LITERAL_EXPRESSION, r);
+    if (!r) r = consumeToken(b, SIMPLE_STRING);
+    exit_section_(b, l, m, LITERAL_EXPRESSION, r, false, null);
     return r;
   }
 
@@ -139,7 +139,6 @@ public class LiveScriptParser implements PsiParser {
   // Expression
   public static boolean Statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Statement")) return false;
-    if (!nextTokenIs(b, "<statement>", IDENTIFIER, NUMBER)) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, "<statement>");
     r = Expression(b, l + 1);

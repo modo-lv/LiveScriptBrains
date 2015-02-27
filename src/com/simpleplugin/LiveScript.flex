@@ -16,8 +16,11 @@ import com.intellij.psi.TokenType;
 %eof}
 
 
-NUMBER = (([1-9]|[1-2]\d?|3[0-2])~[a-zA-Z\d]+|\d[_\d]*\.?[_\d]+[a-zA-Z]*)
+BASED_NUMBER = ([1-2][0-9]|3[0-2])\~[0-9a-zA-Z]+
+NUMBER = [0-9][0-9_]*\.?[0-9_]*[a-zA-Z]*
 IDENTIFIER = [$_a-zA-Z][-$_a-zA-Z0-9]*
+
+SIMPLE_STRING = '(\\'|[^'])*'
 
 EQ = "="
 GLOBAL_EQ = ":="
@@ -37,8 +40,11 @@ KEY_CHARACTER=[^:=\ \n\r\t\f\\] | "\\"{CRLF} | "\\".
 
 %%
 
+{SIMPLE_STRING}                                             { return LiveScriptTypes.SIMPLE_STRING; }
 
 {IDENTIFIER}                                                { return LiveScriptTypes.IDENTIFIER; }
+
+{BASED_NUMBER}                                              { return LiveScriptTypes.NUMBER; }
 
 {NUMBER}                                                    { return LiveScriptTypes.NUMBER; }
 

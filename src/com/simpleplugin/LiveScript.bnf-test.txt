@@ -1,3 +1,23 @@
+multiline = 'string can be multiline
+            and go on and on
+            beginning whitespace is
+            ignored'
+heredoc = '''
+            string can be multiline
+            with newlines
+            and go on and on
+            beginning whitespace is
+            ignored
+'''
+
+%"#x #y"
+
+"The answer is #{2 + 2}"
+'As #{is}'
+
+variable = "world"
+"Hello #variable"
+
 \word
 func \word, \word;
 (func \word)
