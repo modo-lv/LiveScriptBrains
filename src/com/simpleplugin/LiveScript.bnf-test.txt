@@ -31,3 +31,10 @@ func \word, \word;
 (func \word)
 [\word]
 {prop:\word}
+
+# Interpolation
+"The answer is #{2 + 2}"
+'As #{is}'
+
+variable = "world"
+"Hello #variable"

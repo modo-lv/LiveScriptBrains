@@ -174,7 +174,7 @@ KEY_CHARACTER=[^:=\ \n\r\t\f\\] | "\\"{CRLF} | "\\".
 <SIMPLE_STRING_STARTED> {
     (\\\'|[^\'])+       { return LiveScriptTypes.STRING; }
 
-    "'"                 { leaveState(); }
+    \'                  { leaveState(); return LiveScriptTypes.STRING_END; }
 }
 
 <FULL_STRING_STARTED> {
