@@ -7,4 +7,10 @@ import com.intellij.psi.PsiElement;
 
 public interface LiveScriptLiteralExpression extends LiveScriptExpression {
 
+  @Nullable
+  PsiElement getNumber();
+
+  @Nullable
+  PsiElement getSimpleString();
+
 }

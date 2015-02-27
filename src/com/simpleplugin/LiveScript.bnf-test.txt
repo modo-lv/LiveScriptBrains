@@ -1,68 +1,8 @@
-multiline = 'string can be multiline
-            and go on and on
-            beginning whitespace is
-            ignored'
-heredoc = '''
-            string can be multiline
-            with newlines
-            and go on and on
-            beginning whitespace is
-            ignored
-'''
-
-%"#x #y"
-
-"The answer is #{2 + 2}"
-'As #{is}'
-
-variable = "world"
-"Hello #variable"
-
-\word
-func \word, \word;
-(func \word)
-[\word]
-{prop:\word}
-
-
-'a string'
-"a string"
-
-void
-x = void
-null
-
-true
-false
-on
-off
-yes
-no
-
-6~12
-2~1000
-16~ff
-
-64_000km
-
 42
 17.34
 0.4
-
-
-times = (x, y) ->
-  x * y
-
-(x, y) -> x + y
-
-add 2, 3
-
-if 2 + 2 == 4
-  do-something()
-  
-if x < (a + b) then y = 3
-if x > 2
-
-x = (x + y) - 3
-x = y = 3
-x = 2
+.4
+64_000km
+6~12
+2~1000
+16~ff

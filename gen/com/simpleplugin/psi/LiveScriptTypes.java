@@ -12,15 +12,18 @@ public interface LiveScriptTypes {
   IElementType C = new LiveScriptElementType("C");
   IElementType EXPRESSION = new LiveScriptElementType("EXPRESSION");
   IElementType LITERAL_EXPRESSION = new LiveScriptElementType("LITERAL_EXPRESSION");
+  IElementType PAREN_EXPRESSION = new LiveScriptElementType("PAREN_EXPRESSION");
   IElementType REFERENCE_EXPRESSION = new LiveScriptElementType("REFERENCE_EXPRESSION");
   IElementType STATEMENT = new LiveScriptElementType("STATEMENT");
 
   IElementType COMMENT = new LiveScriptTokenType("COMMENT");
-  IElementType EQ = new LiveScriptTokenType("EQ");
-  IElementType GLOBAL_EQ = new LiveScriptTokenType("GLOBAL_EQ");
+  IElementType EQ = new LiveScriptTokenType("=");
+  IElementType GLOBAL_EQ = new LiveScriptTokenType(":=");
   IElementType IDENTIFIER = new LiveScriptTokenType("IDENTIFIER");
   IElementType NEWLINE = new LiveScriptTokenType("NEWLINE");
   IElementType NUMBER = new LiveScriptTokenType("NUMBER");
+  IElementType PAREN_L = new LiveScriptTokenType("(");
+  IElementType PAREN_R = new LiveScriptTokenType(")");
   IElementType SIMPLE_STRING = new LiveScriptTokenType("SIMPLE_STRING");
 
   class Factory {
@@ -37,6 +40,9 @@ public interface LiveScriptTypes {
       }
       else if (type == LITERAL_EXPRESSION) {
         return new LiveScriptLiteralExpressionImpl(node);
+      }
+      else if (type == PAREN_EXPRESSION) {
+        return new LiveScriptParenExpressionImpl(node);
       }
       else if (type == REFERENCE_EXPRESSION) {
         return new LiveScriptReferenceExpressionImpl(node);

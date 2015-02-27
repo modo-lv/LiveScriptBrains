@@ -12,11 +12,14 @@
   elementTypeClass="com.simpleplugin.psi.LiveScriptElementType"
   tokenTypeClass="com.simpleplugin.psi.LiveScriptTokenType"
 
-/*
+//*
   tokens = [
-    NUMBER = "regexp:(([1-9]|[1-2]\d?|3[0-2])~[a-zA-Z\d]+|\d[_\d]*\.?[_\d]+[a-zA-Z]*)"
+    NUMBER = "regexp:(([0-9]|[1-2][0-9]|3[0-2])\~[0-9a-zA-Z]+|[0-9][0-9_]*\.?[0-9_]*[a-zA-Z]*)"
     IDENTIFIER = "regexp:[$_a-zA-Z][-$_a-zA-Z0-9]*"
     SIMPLE_STRING = "regexp:\'(\\\'|[^\'])*'";
+
+    PAREN_L = '('
+    PAREN_R = ')'
 
     EQ = "="
     GLOBAL_EQ = ":="
@@ -30,15 +33,18 @@
 }
 
 file ::= (Statement | NEWLINE)*
+private recover_statement ::= !NEWLINE
 
-Statement ::= Expression
+Statement ::= Expression {recoverWhile="recover_statement"}
 
 /** EXPRESSIONS **/
 
-Expression ::= AssignmentExpression
+Expression ::= ParenExpression
+    | AssignmentExpression
     | ReferenceExpression
     | LiteralExpression
 
+ParenExpression ::= PAREN_L Expression PAREN_R
 
 AssignmentExpression ::= ReferenceExpression (GLOBAL_EQ | EQ) + Expression
 

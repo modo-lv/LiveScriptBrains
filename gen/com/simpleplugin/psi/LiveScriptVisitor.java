@@ -19,6 +19,10 @@ public class LiveScriptVisitor extends PsiElementVisitor {
     visitExpression(o);
   }
 
+  public void visitParenExpression(@NotNull LiveScriptParenExpression o) {
+    visitExpression(o);
+  }
+
   public void visitReferenceExpression(@NotNull LiveScriptReferenceExpression o) {
     visitExpression(o);
   }

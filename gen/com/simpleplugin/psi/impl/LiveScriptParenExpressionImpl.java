@@ -10,21 +10,21 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static com.simpleplugin.psi.LiveScriptTypes.*;
 import com.simpleplugin.psi.*;
 
-public class LiveScriptReferenceExpressionImpl extends LiveScriptExpressionImpl implements LiveScriptReferenceExpression {
+public class LiveScriptParenExpressionImpl extends LiveScriptExpressionImpl implements LiveScriptParenExpression {
 
-  public LiveScriptReferenceExpressionImpl(ASTNode node) {
+  public LiveScriptParenExpressionImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof LiveScriptVisitor) ((LiveScriptVisitor)visitor).visitReferenceExpression(this);
+    if (visitor instanceof LiveScriptVisitor) ((LiveScriptVisitor)visitor).visitParenExpression(this);
     else super.accept(visitor);
   }
 
   @Override
   @NotNull
-  public PsiElement getIdentifier() {
-    return findNotNullChildByType(IDENTIFIER);
+  public LiveScriptExpression getExpression() {
+    return findNotNullChildByClass(LiveScriptExpression.class);
   }
 
 }

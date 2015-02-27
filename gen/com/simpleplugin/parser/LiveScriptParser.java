@@ -31,6 +31,9 @@ public class LiveScriptParser implements PsiParser {
     else if (t == LITERAL_EXPRESSION) {
       r = LiteralExpression(b, 0);
     }
+    else if (t == PAREN_EXPRESSION) {
+      r = ParenExpression(b, 0);
+    }
     else if (t == REFERENCE_EXPRESSION) {
       r = ReferenceExpression(b, 0);
     }
@@ -51,7 +54,8 @@ public class LiveScriptParser implements PsiParser {
   }
 
   public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
-    create_token_set_(ASSIGNMENT_EXPRESSION, EXPRESSION, LITERAL_EXPRESSION, REFERENCE_EXPRESSION),
+    create_token_set_(ASSIGNMENT_EXPRESSION, EXPRESSION, LITERAL_EXPRESSION, PAREN_EXPRESSION,
+      REFERENCE_EXPRESSION),
   };
 
   /* ********************************************************** */
@@ -96,14 +100,16 @@ public class LiveScriptParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // AssignmentExpression
+  // ParenExpression
+  //     | AssignmentExpression
   //     | ReferenceExpression
   //     | LiteralExpression
   public static boolean Expression(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Expression")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _COLLAPSE_, "<expression>");
-    r = AssignmentExpression(b, l + 1);
+    r = ParenExpression(b, l + 1);
+    if (!r) r = AssignmentExpression(b, l + 1);
     if (!r) r = ReferenceExpression(b, l + 1);
     if (!r) r = LiteralExpression(b, l + 1);
     exit_section_(b, l, m, EXPRESSION, r, false, null);
@@ -120,6 +126,20 @@ public class LiveScriptParser implements PsiParser {
     r = consumeToken(b, NUMBER);
     if (!r) r = consumeToken(b, SIMPLE_STRING);
     exit_section_(b, l, m, LITERAL_EXPRESSION, r, false, null);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // PAREN_L Expression PAREN_R
+  public static boolean ParenExpression(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "ParenExpression")) return false;
+    if (!nextTokenIs(b, PAREN_L)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, PAREN_L);
+    r = r && Expression(b, l + 1);
+    r = r && consumeToken(b, PAREN_R);
+    exit_section_(b, m, PAREN_EXPRESSION, r);
     return r;
   }
 
@@ -142,7 +162,7 @@ public class LiveScriptParser implements PsiParser {
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, "<statement>");
     r = Expression(b, l + 1);
-    exit_section_(b, l, m, STATEMENT, r, false, null);
+    exit_section_(b, l, m, STATEMENT, r, false, recover_statement_parser_);
     return r;
   }
 
@@ -182,4 +202,20 @@ public class LiveScriptParser implements PsiParser {
     return r;
   }
 
+  /* ********************************************************** */
+  // !NEWLINE
+  static boolean recover_statement(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "recover_statement")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NOT_, null);
+    r = !consumeToken(b, NEWLINE);
+    exit_section_(b, l, m, null, r, false, null);
+    return r;
+  }
+
+  final static Parser recover_statement_parser_ = new Parser() {
+    public boolean parse(PsiBuilder b, int l) {
+      return recover_statement(b, l + 1);
+    }
+  };
 }
