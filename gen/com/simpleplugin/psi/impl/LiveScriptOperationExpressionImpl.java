@@ -10,15 +10,21 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static com.simpleplugin.psi.LiveScriptTypes.*;
 import com.simpleplugin.psi.*;
 
-public class LiveScriptAssignmentExpressionImpl extends LiveScriptExpressionImpl implements LiveScriptAssignmentExpression {
+public class LiveScriptOperationExpressionImpl extends LiveScriptExpressionImpl implements LiveScriptOperationExpression {
 
-  public LiveScriptAssignmentExpressionImpl(ASTNode node) {
+  public LiveScriptOperationExpressionImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof LiveScriptVisitor) ((LiveScriptVisitor)visitor).visitAssignmentExpression(this);
+    if (visitor instanceof LiveScriptVisitor) ((LiveScriptVisitor)visitor).visitOperationExpression(this);
     else super.accept(visitor);
+  }
+
+  @Override
+  @Nullable
+  public LiveScriptBlockStatement getBlockStatement() {
+    return findChildByClass(LiveScriptBlockStatement.class);
   }
 
   @Override

@@ -7,19 +7,19 @@ import com.intellij.psi.PsiElement;
 
 public class LiveScriptVisitor extends PsiElementVisitor {
 
-  public void visitAssignmentExpression(@NotNull LiveScriptAssignmentExpression o) {
-    visitExpression(o);
+  public void visitBlockStatement(@NotNull LiveScriptBlockStatement o) {
+    visitPsiElement(o);
   }
 
   public void visitExpression(@NotNull LiveScriptExpression o) {
     visitPsiElement(o);
   }
 
-  public void visitInterExpression(@NotNull LiveScriptInterExpression o) {
+  public void visitLiteralExpression(@NotNull LiveScriptLiteralExpression o) {
     visitExpression(o);
   }
 
-  public void visitLiteralExpression(@NotNull LiveScriptLiteralExpression o) {
+  public void visitOperationExpression(@NotNull LiveScriptOperationExpression o) {
     visitExpression(o);
   }
 

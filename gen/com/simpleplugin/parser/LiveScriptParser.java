@@ -22,17 +22,17 @@ public class LiveScriptParser implements PsiParser {
     boolean r;
     b = adapt_builder_(t, b, this, EXTENDS_SETS_);
     Marker m = enter_section_(b, 0, _COLLAPSE_, null);
-    if (t == ASSIGNMENT_EXPRESSION) {
-      r = AssignmentExpression(b, 0);
+    if (t == BLOCK_STATEMENT) {
+      r = BlockStatement(b, 0);
     }
     else if (t == EXPRESSION) {
       r = Expression(b, 0);
     }
-    else if (t == INTER_EXPRESSION) {
-      r = InterExpression(b, 0);
-    }
     else if (t == LITERAL_EXPRESSION) {
       r = LiteralExpression(b, 0);
+    }
+    else if (t == OPERATION_EXPRESSION) {
+      r = OperationExpression(b, 0);
     }
     else if (t == PAREN_EXPRESSION) {
       r = ParenExpression(b, 0);
@@ -57,65 +57,73 @@ public class LiveScriptParser implements PsiParser {
   }
 
   public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
-    create_token_set_(ASSIGNMENT_EXPRESSION, EXPRESSION, INTER_EXPRESSION, LITERAL_EXPRESSION,
-      PAREN_EXPRESSION, REFERENCE_EXPRESSION, STRING_EXPRESSION),
+    create_token_set_(EXPRESSION, LITERAL_EXPRESSION, OPERATION_EXPRESSION, PAREN_EXPRESSION,
+      REFERENCE_EXPRESSION, STRING_EXPRESSION),
   };
 
   /* ********************************************************** */
-  // ReferenceExpression (GLOBAL_EQ | EQ) Expression
-  public static boolean AssignmentExpression(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "AssignmentExpression")) return false;
-    if (!nextTokenIs(b, IDENTIFIER)) return false;
+  // BLOCK_START (COMMENT | INDENT Expression | NEWLINE)* BLOCK_END
+  public static boolean BlockStatement(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "BlockStatement")) return false;
+    if (!nextTokenIs(b, BLOCK_START)) return false;
     boolean r;
-    Marker m = enter_section_(b, l, _COLLAPSE_, null);
-    r = ReferenceExpression(b, l + 1);
-    r = r && AssignmentExpression_1(b, l + 1);
-    r = r && Expression(b, l + 1);
-    exit_section_(b, l, m, ASSIGNMENT_EXPRESSION, r, false, null);
+    Marker m = enter_section_(b);
+    r = consumeToken(b, BLOCK_START);
+    r = r && BlockStatement_1(b, l + 1);
+    r = r && consumeToken(b, BLOCK_END);
+    exit_section_(b, m, BLOCK_STATEMENT, r);
     return r;
   }
 
-  // GLOBAL_EQ | EQ
-  private static boolean AssignmentExpression_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "AssignmentExpression_1")) return false;
+  // (COMMENT | INDENT Expression | NEWLINE)*
+  private static boolean BlockStatement_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "BlockStatement_1")) return false;
+    int c = current_position_(b);
+    while (true) {
+      if (!BlockStatement_1_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "BlockStatement_1", c)) break;
+      c = current_position_(b);
+    }
+    return true;
+  }
+
+  // COMMENT | INDENT Expression | NEWLINE
+  private static boolean BlockStatement_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "BlockStatement_1_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeToken(b, GLOBAL_EQ);
-    if (!r) r = consumeToken(b, EQ);
+    r = consumeToken(b, COMMENT);
+    if (!r) r = BlockStatement_1_0_1(b, l + 1);
+    if (!r) r = consumeToken(b, NEWLINE);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // INDENT Expression
+  private static boolean BlockStatement_1_0_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "BlockStatement_1_0_1")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, INDENT);
+    r = r && Expression(b, l + 1);
     exit_section_(b, m, null, r);
     return r;
   }
 
   /* ********************************************************** */
-  // InterExpression
-  //     | ParenExpression
-  //     | AssignmentExpression
+  // ParenExpression
+  //     | OperationExpression
   //     | LiteralExpression
   //     | ReferenceExpression
   public static boolean Expression(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Expression")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _COLLAPSE_, "<expression>");
-    r = InterExpression(b, l + 1);
-    if (!r) r = ParenExpression(b, l + 1);
-    if (!r) r = AssignmentExpression(b, l + 1);
+    r = ParenExpression(b, l + 1);
+    if (!r) r = OperationExpression(b, l + 1);
     if (!r) r = LiteralExpression(b, l + 1);
     if (!r) r = ReferenceExpression(b, l + 1);
     exit_section_(b, l, m, EXPRESSION, r, false, null);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // INTER_START Statement INTER_END
-  public static boolean InterExpression(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "InterExpression")) return false;
-    if (!nextTokenIs(b, INTER_START)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, INTER_START);
-    r = r && Statement(b, l + 1);
-    r = r && consumeToken(b, INTER_END);
-    exit_section_(b, m, INTER_EXPRESSION, r);
     return r;
   }
 
@@ -130,6 +138,31 @@ public class LiveScriptParser implements PsiParser {
     if (!r) r = consumeToken(b, NUMBER);
     if (!r) r = StringExpression(b, l + 1);
     exit_section_(b, l, m, LITERAL_EXPRESSION, r, false, null);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // ReferenceExpression OPERATOR (BlockStatement | Expression)
+  public static boolean OperationExpression(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "OperationExpression")) return false;
+    if (!nextTokenIs(b, IDENTIFIER)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = ReferenceExpression(b, l + 1);
+    r = r && consumeToken(b, OPERATOR);
+    r = r && OperationExpression_2(b, l + 1);
+    exit_section_(b, m, OPERATION_EXPRESSION, r);
+    return r;
+  }
+
+  // BlockStatement | Expression
+  private static boolean OperationExpression_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "OperationExpression_2")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = BlockStatement(b, l + 1);
+    if (!r) r = Expression(b, l + 1);
+    exit_section_(b, m, null, r);
     return r;
   }
 
@@ -160,30 +193,15 @@ public class LiveScriptParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // COMMENT | Expression+
+  // BlockStatement | COMMENT | Expression
   public static boolean Statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Statement")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, "<statement>");
-    r = consumeToken(b, COMMENT);
-    if (!r) r = Statement_1(b, l + 1);
+    r = BlockStatement(b, l + 1);
+    if (!r) r = consumeToken(b, COMMENT);
+    if (!r) r = Expression(b, l + 1);
     exit_section_(b, l, m, STATEMENT, r, false, recover_statement_parser_);
-    return r;
-  }
-
-  // Expression+
-  private static boolean Statement_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "Statement_1")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = Expression(b, l + 1);
-    int c = current_position_(b);
-    while (r) {
-      if (!Expression(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "Statement_1", c)) break;
-      c = current_position_(b);
-    }
-    exit_section_(b, m, null, r);
     return r;
   }
 
@@ -249,21 +267,32 @@ public class LiveScriptParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // (Statement | NEWLINE)*
+  // (Statement | NEWLINE)* <<eof>>
   static boolean file(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "file")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = file_0(b, l + 1);
+    r = r && eof(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // (Statement | NEWLINE)*
+  private static boolean file_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "file_0")) return false;
     int c = current_position_(b);
     while (true) {
-      if (!file_0(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "file", c)) break;
+      if (!file_0_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "file_0", c)) break;
       c = current_position_(b);
     }
     return true;
   }
 
   // Statement | NEWLINE
-  private static boolean file_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "file_0")) return false;
+  private static boolean file_0_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "file_0_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = Statement(b, l + 1);

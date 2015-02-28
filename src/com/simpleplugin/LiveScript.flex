@@ -14,7 +14,47 @@ import com.intellij.util.containers.Stack;
 %function advance
 
 %{
-  private final Stack<Integer> stack = new Stack<Integer>();
+  private Stack<Integer> stack = new Stack<Integer>();
+
+  /**
+   * Track statement block indentation levels.
+   */
+  private Stack<Integer> blockStack = new Stack<Integer>();
+
+    /**
+     * Minimum indent level for current block;
+     */
+    private int currentBlockIndent = 0;
+
+    /**
+     *
+     */
+	private int currentIndent = 0;
+
+    /**
+     * Using tabs for indentation instead of spaces?
+     */
+    private Boolean tabIndents= null;
+
+    /**
+     * Start a new function block.
+     */
+    private void enterNewBlock() {
+        blockStack.push(currentIndent);
+        currentBlockIndent = currentIndent;
+        currentIndent = 0;
+    }
+
+    private boolean exitBlock() {
+        if (!blockStack.empty()) {
+            currentBlockIndent = blockStack.pop();
+            return true;
+        }
+        else {
+            currentBlockIndent = 0;
+            return false;
+        }
+    }
 
   /**
    * Push the actual state on top of the stack
@@ -46,6 +86,18 @@ import com.intellij.util.containers.Stack;
             yybegin(YYINITIAL);
             return false;
         }
+    }
+
+    /**
+     * Cancel/end current state and move to a new one without
+     * modifying the stack.
+     */
+    private void changeStateTo(int newState) { yybegin(newState); }
+
+
+    private LiveScriptLexer rewind() {
+        yypushback(yylength());
+        return this;
     }
 
 
@@ -128,10 +180,13 @@ NUMBER = [0-9][0-9_]*\.?[0-9_]*[a-zA-Z]*
 IDENTIFIER = [$_a-zA-Z][-$_a-zA-Z0-9]*
 BACKSTRING = \\[^,;\]\)\} \t\r\n]+
 
-BINARY_OP = [-+*/]
+// Normal operators - will take the operand(s) from the next line if necessary
+OP = [-+*/]
 
-EQ = "="
-GLOBAL_EQ = ":="
+// Operators that require block indent if the operand is on the next line
+BLOCK_OP = [=:]|:=
+
+
 HEREDOC = \'\'\'(.|[\r\n])*\'\'\'
 
 PAREN_L = "("
@@ -140,38 +195,31 @@ PAREN_R = ")"
 
 WHITE_SPACE = [\t\ ]+
 
-/*
-FIRST_VALUE_CHARACTER=[^ \n\r\f\\] | "\\"{CRLF} | "\\".
-VALUE_CHARACTER=[^\n\r\f\\] | "\\"{CRLF} | "\\".
-END_OF_LINE_COMMENT=("#"|"!")[^\r\n]*
-SEPARATOR=[:=]
-KEY_CHARACTER=[^:=\ \n\r\t\f\\] | "\\"{CRLF} | "\\".
-*/
-
 %state SIMPLE_STRING_STARTED, FULL_STRING_STARTED, STRING_SUSPENDED, BACK_STRING_STARTED, STRING_VARIABLE
+%state INDENTED, BLOCK_OP, CHECK_BLOCK_END
 
 %%
 
 <YYINITIAL> {
-    {NULL}                                                      { return LiveScriptTypes.NULL; }
+    {NULL}          { return LiveScriptTypes.NULL; }
 
-    {BOOLEAN}                                                   { return LiveScriptTypes.BOOLEAN; }
+    {BOOLEAN}       { return LiveScriptTypes.BOOLEAN; }
 
-    {BASED_NUMBER}                                              { return LiveScriptTypes.NUMBER; }
+    {BASED_NUMBER}  { return LiveScriptTypes.NUMBER; }
 
-    {NUMBER}                                                    { return LiveScriptTypes.NUMBER; }
+    {NUMBER}        { return LiveScriptTypes.NUMBER; }
 
-    {PAREN_L}                                                   { return LiveScriptTypes.PAREN_L; }
+    {PAREN_L}       { return LiveScriptTypes.PAREN_L; }
 
-    {PAREN_R}                                                   { return LiveScriptTypes.PAREN_R; }
+    {PAREN_R}       { return LiveScriptTypes.PAREN_R; }
 
-    {IDENTIFIER}                                                { return LiveScriptTypes.IDENTIFIER; }
+    {IDENTIFIER}    { return LiveScriptTypes.IDENTIFIER; }
 
-    {EQ}                                                        { return LiveScriptTypes.EQ; }
+    {OP}            { return LiveScriptTypes.OPERATOR; }
 
-    {GLOBAL_EQ}                                                 { return LiveScriptTypes.GLOBAL_EQ; }
+    {BLOCK_OP}      { enterState(BLOCK_OP); return LiveScriptTypes.OPERATOR; }
 
-    {WHITE_SPACE}                                               { return TokenType.WHITE_SPACE; }
+    {WHITE_SPACE}   { return TokenType.WHITE_SPACE; }
 
     {HEREDOC}       { return LiveScriptTypes.HEREDOC; }
 
@@ -185,6 +233,60 @@ KEY_CHARACTER=[^:=\ \n\r\t\f\\] | "\\"{CRLF} | "\\".
 
     {BLOCK_COMMENT} { return LiveScriptTypes.COMMENT; }
 }
+
+/**
+ * Check if the next statements are in a function block.
+ */
+<BLOCK_OP> {
+    /**
+     * Block operator followed immediately by newline means a new block has started
+     */
+    {NEWLINE}   {
+                    enterNewBlock();
+                    changeStateTo(INDENTED);
+                    return LiveScriptTypes.BLOCK_START;
+                }
+
+    /**
+     * Anything other than a newline means no block, continue on the same line.
+     */
+    .           { leaveState(); rewindBy(1); }
+}
+
+// Track indentation.
+<INDENTED> {
+
+    {NEWLINE}   {
+                    if (currentIndent <= currentBlockIndent) {
+                        exitBlock();
+                        currentIndent = 0;
+                        return LiveScriptTypes.BLOCK_END;
+                    }
+                    currentIndent = 0;
+                    return LiveScriptTypes.NEWLINE;
+                }
+
+    \t          {
+                    if (tabIndents == null) tabIndents = true;
+                    if (tabIndents) currentIndent++;
+                    if (currentIndent == 1)
+                        return LiveScriptTypes.INDENT;
+                }
+
+    " "         {
+                    if (tabIndents == null) tabIndents = false;
+                    if (!tabIndents) currentIndent++;
+                    if (currentIndent == 1)
+                        return LiveScriptTypes.INDENT;
+                }
+
+    .           {
+                    enterState(YYINITIAL);
+                    rewindBy(1);
+                }
+
+}
+
 
 <SIMPLE_STRING_STARTED> {
 
@@ -228,6 +330,12 @@ KEY_CHARACTER=[^:=\ \n\r\t\f\\] | "\\"{CRLF} | "\\".
 // in an infinite loop.
 "}"                 { if (leaveState()) rewindBy(1); }
 
-{NEWLINE}           { return LiveScriptTypes.NEWLINE; }
+{NEWLINE}           {
+                        // If we are in a special state, rewind the position so that
+                        // the newline gets processed by the previous state.
+                        if (leaveState()) rewind();
+
+                        return LiveScriptTypes.NEWLINE;
+                    }
 
 .                   { return TokenType.BAD_CHARACTER; }
