@@ -24,7 +24,7 @@ import com.intellij.util.containers.Stack;
     /**
      * Stack for keeping track of lexical states.
      */
-    private static Stack<Integer> _states = new Stack<Integer>();
+    private Stack<Integer> _states = new Stack<Integer>();
 
     /**
      * Are indents tabs instead of spaces?
@@ -141,9 +141,13 @@ HEREDOC = \'\'\'(.|[\r\n])*\'\'\'
 SSS = \' // Simple string start
 FSS = %\"|\" // Full string start
 
-
-
+// Operators
 OPERATOR = [-+*/=]
+COLON = ":"
+COMMA = ","
+CURL_L = "{"
+CURL_R = "}"
+
 IDENTIFIER = [$_a-zA-Z][-$_a-zA-Z0-9]*
 
 // Comments
@@ -155,6 +159,8 @@ CRLF = [\r\n]
 NEWLINE = \r\n|{CRLF}
 SPACE = [\f\t ]
 
+TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
+
 
 %state INDENTED, BLOCK_STATEMENT
 %state SIMPLE_STRING_STARTED, FULL_STRING_STARTED, STRING_VARIABLE, STRING_SUSPENDED
@@ -162,12 +168,14 @@ SPACE = [\f\t ]
 %%
 
 <YYINITIAL> {
+    // Literals
     {NO_VALUE}              { return LiveScriptTypes.RESERVED_LITERAL; }
 
     {BOOLEAN}               { return LiveScriptTypes.RESERVED_LITERAL; }
 
-    {IDENTIFIER}            { return _out(LiveScriptTypes.IDENTIFIER); }
 
+    {NUMBER}|{BASED_NUMBER} { return LiveScriptTypes.NUMBER; }
+    
     // Strings
 
     {BACKSTRING}            { return LiveScriptTypes.BACKSTRING; }
@@ -177,10 +185,21 @@ SPACE = [\f\t ]
     {SSS}                   { _enterState(SIMPLE_STRING_STARTED); return LiveScriptTypes.STRING_START; }
 
     {FSS}                   { _enterState(FULL_STRING_STARTED); return LiveScriptTypes.STRING_START; }
+    
+
+    {IDENTIFIER}            { return _out(LiveScriptTypes.IDENTIFIER); }
+    
+
+    // Operators
 
     {OPERATOR}              { return LiveScriptTypes.OPERATOR; }
 
-    {NUMBER}|{BASED_NUMBER} { return LiveScriptTypes.NUMBER; }
+    {COLON}                 { return LiveScriptTypes.COLON; }
+
+    {COMMA}{SPACE}*         { return LiveScriptTypes.COMMA; }
+    
+    {CURL_L}                { return LiveScriptTypes.CURL_L; }
+
 
     // Non-code
     {SPACE}+                { return _out(TokenType.WHITE_SPACE); }
@@ -190,6 +209,9 @@ SPACE = [\f\t ]
     {COMMENT_LINE}          { return LiveScriptTypes.COMMENT; }
 
     {COMMENT_BLOCK}         { return LiveScriptTypes.COMMENT; }
+
+
+    {TEST}                  { return LiveScriptTypes.TEST; }
 }
 
 
@@ -254,6 +276,6 @@ SPACE = [\f\t ]
 // Only rewind if we're actually moving up the state stack,
 // if we rewind with the stack empty we'll just get stuck
 // in an infinite loop.
-"}" { if (_exitState()) _rewindBy(1); }
+{CURL_R}    { if (_exitState()) _rewindBy(1); else return LiveScriptTypes.CURL_R; }
 
-.   { return TokenType.BAD_CHARACTER; }
+.           { return TokenType.BAD_CHARACTER; }

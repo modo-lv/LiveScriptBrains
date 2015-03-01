@@ -12,10 +12,15 @@
   elementTypeClass="com.simpleplugin.psi.LiveScriptElementType"
   tokenTypeClass="com.simpleplugin.psi.LiveScriptTokenType"
 
+  parserUtilClass="com.simpleplugin.psi.LiveScriptParserUtil"
+
   extends(".*Expression$")=Expression
 }
 
 file ::= (Statement | COMMENT | NEWLINE)* <<eof>>
+
+external objDef ::= objDef
+
 private recover_statement ::= !NEWLINE
 private recover_inter ::= !(NEWLINE | STRING_INTER_END)
 
@@ -25,9 +30,17 @@ InterLines ::= Expression* {recoverWhile="recover_inter"}
 
 BlockStatement ::= INDENT Statement+ DEDENT?
 
-Expression ::= InterpolatedStringExpression
+Expression ::=
+      TestExpression
+    | InterpolatedStringExpression
     | OpExpression
+    | ObjDefExpression
+    | PropDefExpression
     | LiteralExpression
+
+PropDefExpression ::= Expression COLON Expression
+
+ObjDefExpression ::= PropDefExpression (NewlineSeparator PropDefExpression)*
 
 OpExpression ::= Expression OPERATOR Expression
 
@@ -35,7 +48,7 @@ LiteralExpression ::= RESERVED_LITERAL | IDENTIFIER | NUMBER | StringExpression
 
 StringExpression ::= STRING_START string STRING_END | BACKSTRING | HEREDOC
 
-private string ::= STRING* (IDENTIFIER | STRING)*
+TestExpression ::= TEST | COLON | CURL_L | CURL_R
 
 InterStringExpression ::= STRING_START string STRING_INTER_START
     | STRING_INTER_END string STRING_INTER_START
@@ -43,38 +56,7 @@ InterStringExpression ::= STRING_START string STRING_INTER_START
 
 InterpolatedStringExpression ::= InterStringExpression+ InterLines InterStringExpression+
 
-
-
-/*
-file ::= (Statement | NEWLINE)* <<eof>>
-
-Statement ::= BlockStatement | COMMENT | Expression {recoverWhile="recover_statement"}
-
-BlockStatement ::= BLOCK_START (COMMENT | INDENT Expression | NEWLINE)* BLOCK_END
-
-// On any errors, ignore everything until the next line.
-private recover_statement ::= !NEWLINE
-
-
-*/
-/** EXPRESSIONS **//*
-
-
-Expression ::= ParenExpression
-    | OperationExpression
-    | LiteralExpression
-    | ReferenceExpression
-
-ParenExpression ::= PAREN_L Expression PAREN_R
-
-OperationExpression ::= ReferenceExpression OPERATOR (BlockStatement | Expression)
-
-ReferenceExpression ::= IDENTIFIER
-
-// Anything that is a pure value - strings, numbers, booleans, Nulls ...
-LiteralExpression ::= NULL | BOOLEAN | NUMBER | StringExpression
-
-StringExpression ::= STRING_START STRING* (IDENTIFIER | STRING)* STRING_END | BACKSTRING | HEREDOC
-*/
-
-
+// Pieces
+Separator ::= COMMA | WHITE_SPACE+
+NewlineSeparator ::= Separator | SPACE* NEWLINE SPACE*
+private string ::= STRING* (IDENTIFIER | STRING)*
