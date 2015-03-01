@@ -7,8 +7,8 @@ import com.intellij.psi.PsiElement;
 
 public class LiveScriptVisitor extends PsiElementVisitor {
 
-  public void visitBlockExpression(@NotNull LiveScriptBlockExpression o) {
-    visitExpression(o);
+  public void visitBlockStatement(@NotNull LiveScriptBlockStatement o) {
+    visitPsiElement(o);
   }
 
   public void visitExpression(@NotNull LiveScriptExpression o) {

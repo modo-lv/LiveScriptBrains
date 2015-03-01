@@ -22,8 +22,8 @@ public class LiveScriptParser implements PsiParser {
     boolean r;
     b = adapt_builder_(t, b, this, EXTENDS_SETS_);
     Marker m = enter_section_(b, 0, _COLLAPSE_, null);
-    if (t == BLOCK_EXPRESSION) {
-      r = BlockExpression(b, 0);
+    if (t == BLOCK_STATEMENT) {
+      r = BlockStatement(b, 0);
     }
     else if (t == EXPRESSION) {
       r = Expression(b, 0);
@@ -48,33 +48,33 @@ public class LiveScriptParser implements PsiParser {
   }
 
   public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
-    create_token_set_(BLOCK_EXPRESSION, EXPRESSION, LITERAL_EXPRESSION, OP_EXPRESSION),
+    create_token_set_(EXPRESSION, LITERAL_EXPRESSION, OP_EXPRESSION),
   };
 
   /* ********************************************************** */
   // INDENT Statement+ DEDENT?
-  public static boolean BlockExpression(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "BlockExpression")) return false;
+  public static boolean BlockStatement(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "BlockStatement")) return false;
     if (!nextTokenIs(b, INDENT)) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, INDENT);
-    r = r && BlockExpression_1(b, l + 1);
-    r = r && BlockExpression_2(b, l + 1);
-    exit_section_(b, m, BLOCK_EXPRESSION, r);
+    r = r && BlockStatement_1(b, l + 1);
+    r = r && BlockStatement_2(b, l + 1);
+    exit_section_(b, m, BLOCK_STATEMENT, r);
     return r;
   }
 
   // Statement+
-  private static boolean BlockExpression_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "BlockExpression_1")) return false;
+  private static boolean BlockStatement_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "BlockStatement_1")) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = Statement(b, l + 1);
     int c = current_position_(b);
     while (r) {
       if (!Statement(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "BlockExpression_1", c)) break;
+      if (!empty_element_parsed_guard_(b, "BlockStatement_1", c)) break;
       c = current_position_(b);
     }
     exit_section_(b, m, null, r);
@@ -82,22 +82,21 @@ public class LiveScriptParser implements PsiParser {
   }
 
   // DEDENT?
-  private static boolean BlockExpression_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "BlockExpression_2")) return false;
+  private static boolean BlockStatement_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "BlockStatement_2")) return false;
     consumeToken(b, DEDENT);
     return true;
   }
 
   /* ********************************************************** */
-  // BlockExpression
-  //     | OpExpression
+  // OpExpression
   //     | LiteralExpression
   public static boolean Expression(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Expression")) return false;
+    if (!nextTokenIs(b, "<expression>", IDENTIFIER, NUMBER)) return false;
     boolean r;
     Marker m = enter_section_(b, l, _COLLAPSE_, "<expression>");
-    r = BlockExpression(b, l + 1);
-    if (!r) r = OpExpression(b, l + 1);
+    r = OpExpression(b, l + 1);
     if (!r) r = LiteralExpression(b, l + 1);
     exit_section_(b, l, m, EXPRESSION, r, false, null);
     return r;
@@ -136,23 +135,23 @@ public class LiveScriptParser implements PsiParser {
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, "<statement>");
     r = Expression(b, l + 1);
-    exit_section_(b, l, m, STATEMENT, r, false, null);
+    exit_section_(b, l, m, STATEMENT, r, false, recover_statement_parser_);
     return r;
   }
 
   /* ********************************************************** */
-  // (Statement COMMENT? | COMMENT)* <<eof>>
+  // (Statement | COMMENT | NEWLINE)* <<eof>>
   static boolean file(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "file")) return false;
     boolean r;
-    Marker m = enter_section_(b, l, _NONE_, null);
+    Marker m = enter_section_(b);
     r = file_0(b, l + 1);
     r = r && eof(b, l + 1);
-    exit_section_(b, l, m, null, r, false, recover_statement_parser_);
+    exit_section_(b, m, null, r);
     return r;
   }
 
-  // (Statement COMMENT? | COMMENT)*
+  // (Statement | COMMENT | NEWLINE)*
   private static boolean file_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "file_0")) return false;
     int c = current_position_(b);
@@ -164,54 +163,26 @@ public class LiveScriptParser implements PsiParser {
     return true;
   }
 
-  // Statement COMMENT? | COMMENT
+  // Statement | COMMENT | NEWLINE
   private static boolean file_0_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "file_0_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = file_0_0_0(b, l + 1);
-    if (!r) r = consumeToken(b, COMMENT);
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  // Statement COMMENT?
-  private static boolean file_0_0_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "file_0_0_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
     r = Statement(b, l + 1);
-    r = r && file_0_0_0_1(b, l + 1);
+    if (!r) r = consumeToken(b, COMMENT);
+    if (!r) r = consumeToken(b, NEWLINE);
     exit_section_(b, m, null, r);
     return r;
-  }
-
-  // COMMENT?
-  private static boolean file_0_0_0_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "file_0_0_0_1")) return false;
-    consumeToken(b, COMMENT);
-    return true;
   }
 
   /* ********************************************************** */
-  // !(COMMENT | <<eof>>)
+  // !NEWLINE
   static boolean recover_statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "recover_statement")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NOT_, null);
-    r = !recover_statement_0(b, l + 1);
+    r = !consumeToken(b, NEWLINE);
     exit_section_(b, l, m, null, r, false, null);
-    return r;
-  }
-
-  // COMMENT | <<eof>>
-  private static boolean recover_statement_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "recover_statement_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, COMMENT);
-    if (!r) r = eof(b, l + 1);
-    exit_section_(b, m, null, r);
     return r;
   }
 

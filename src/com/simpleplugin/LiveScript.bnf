@@ -15,16 +15,15 @@
   extends(".*Expression$")=Expression
 }
 
-file ::= (Statement COMMENT? | COMMENT)* <<eof>> {recoverWhile="recover_statement"}
-private recover_statement ::= !(COMMENT | <<eof>>)
+file ::= (Statement | COMMENT | NEWLINE)* <<eof>>
+private recover_statement ::= !NEWLINE
 
-Statement ::= Expression
+Statement ::= Expression {recoverWhile="recover_statement"}
 
-Expression ::= BlockExpression
-    | OpExpression
+BlockStatement ::= INDENT Statement+ DEDENT?
+
+Expression ::= OpExpression
     | LiteralExpression
-
-BlockExpression ::= INDENT Statement+ DEDENT?
 
 OpExpression ::= IDENTIFIER OPERATOR Expression
 

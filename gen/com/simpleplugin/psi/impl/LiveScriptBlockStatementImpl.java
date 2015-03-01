@@ -8,16 +8,17 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static com.simpleplugin.psi.LiveScriptTypes.*;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.simpleplugin.psi.*;
 
-public class LiveScriptBlockExpressionImpl extends LiveScriptExpressionImpl implements LiveScriptBlockExpression {
+public class LiveScriptBlockStatementImpl extends ASTWrapperPsiElement implements LiveScriptBlockStatement {
 
-  public LiveScriptBlockExpressionImpl(ASTNode node) {
+  public LiveScriptBlockStatementImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof LiveScriptVisitor) ((LiveScriptVisitor)visitor).visitBlockExpression(this);
+    if (visitor instanceof LiveScriptVisitor) ((LiveScriptVisitor)visitor).visitBlockStatement(this);
     else super.accept(visitor);
   }
 

@@ -129,44 +129,45 @@ import com.intellij.util.containers.Stack;
 %}
 
 
-// Comments
-COMMENT_LINE = #.*
-COMMENT_BLOCK = \/\*(.|{CRLF})*\*\/
-
 // Literals
 BASED_NUMBER = ([0-9]|[1-2][0-9]|3[0-2])\~[0-9a-zA-Z]+
 NUMBER = [0-9][0-9_]*\.?[0-9_]*[a-zA-Z]*
 
-
 OPERATOR = [-+*/=]
 IDENTIFIER = [$_a-zA-Z][-$_a-zA-Z0-9]*
+
+// Comments
+COMMENT_LINE = #.*
+COMMENT_BLOCK = \/\*(.|{CRLF})*\*\/
 
 // Whitespace
 CRLF = [\r\n]
 NEWLINE = \r\n|{CRLF}
 SPACE = [\f\t ]
-WHITE_SPACE = {NEWLINE}|{SPACE}
 
-%state INDENTED
+
+%state INDENTED, BLOCK_STATEMENT
 
 %%
 
-^{SPACE}+[^\r\n\t ]     {
-                            System.out.println("State is " + yystate() + ", text is [" + yytext() + "]");
-                            _rewindBy(1);
-                            IElementType result = _parseIndent(yylength());
-                            if (result != null) return result;
-                        }
+<BLOCK_STATEMENT> {
+    ^{SPACE}+[^\r\n\t ] {
+        System.out.println("State is " + yystate() + ", text is [" + yytext() + "]");
+        _rewindBy(1);
+        IElementType result = _parseIndent(yylength());
+        if (result != null) return result;
+    }
 
-<INDENTED> {
-    // Line comments don't affect indentation.
-    ^{SPACE}*{COMMENT_LINE} { _rewindTo("#"); _exitState(); return TokenType.WHITE_SPACE; }
+    <INDENTED> {
+        // Line comments don't affect indentation.
+        ^{SPACE}*{COMMENT_LINE} { _rewindTo("#"); _exitState(); return TokenType.WHITE_SPACE; }
 
-    ^[^\r\n\t ].*       {
-                            System.out.println("I> text is [" + yytext() + "], dedenting");
-                            _rewind();
-                            return _parseIndent(0);
-                        }
+        ^[^\r\n\t ].* {
+            System.out.println("I> text is [" + yytext() + "], dedenting");
+            _rewind();
+            return _parseIndent(0);
+        }
+    }
 }
 
 {IDENTIFIER}            { return _out(LiveScriptTypes.IDENTIFIER); }
@@ -178,7 +179,7 @@ WHITE_SPACE = {NEWLINE}|{SPACE}
 // Non-code
 {SPACE}+                { return _out(TokenType.WHITE_SPACE); }
 
-{NEWLINE}               { return _out(TokenType.WHITE_SPACE); }
+{NEWLINE}               { return _out(LiveScriptTypes.NEWLINE); }
 
 {COMMENT_LINE}          { return LiveScriptTypes.COMMENT; }
 

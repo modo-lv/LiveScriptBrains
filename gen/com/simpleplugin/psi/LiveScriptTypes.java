@@ -8,7 +8,7 @@ import com.simpleplugin.psi.impl.*;
 
 public interface LiveScriptTypes {
 
-  IElementType BLOCK_EXPRESSION = new LiveScriptElementType("BLOCK_EXPRESSION");
+  IElementType BLOCK_STATEMENT = new LiveScriptElementType("BLOCK_STATEMENT");
   IElementType EXPRESSION = new LiveScriptElementType("EXPRESSION");
   IElementType LITERAL_EXPRESSION = new LiveScriptElementType("LITERAL_EXPRESSION");
   IElementType OP_EXPRESSION = new LiveScriptElementType("OP_EXPRESSION");
@@ -18,14 +18,15 @@ public interface LiveScriptTypes {
   IElementType DEDENT = new LiveScriptTokenType("DEDENT");
   IElementType IDENTIFIER = new LiveScriptTokenType("IDENTIFIER");
   IElementType INDENT = new LiveScriptTokenType("INDENT");
+  IElementType NEWLINE = new LiveScriptTokenType("NEWLINE");
   IElementType NUMBER = new LiveScriptTokenType("NUMBER");
   IElementType OPERATOR = new LiveScriptTokenType("OPERATOR");
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {
       IElementType type = node.getElementType();
-       if (type == BLOCK_EXPRESSION) {
-        return new LiveScriptBlockExpressionImpl(node);
+       if (type == BLOCK_STATEMENT) {
+        return new LiveScriptBlockStatementImpl(node);
       }
       else if (type == EXPRESSION) {
         return new LiveScriptExpressionImpl(node);
