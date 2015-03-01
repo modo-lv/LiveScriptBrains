@@ -21,4 +21,10 @@ public class LiveScriptBlockExpressionImpl extends LiveScriptExpressionImpl impl
     else super.accept(visitor);
   }
 
+  @Override
+  @NotNull
+  public List<LiveScriptStatement> getStatementList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, LiveScriptStatement.class);
+  }
+
 }

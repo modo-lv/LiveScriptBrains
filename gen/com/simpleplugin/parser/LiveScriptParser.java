@@ -52,7 +52,7 @@ public class LiveScriptParser implements PsiParser {
   };
 
   /* ********************************************************** */
-  // INDENT IDENTIFIER+ DEDENT?
+  // INDENT Statement+ DEDENT?
   public static boolean BlockExpression(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "BlockExpression")) return false;
     if (!nextTokenIs(b, INDENT)) return false;
@@ -65,15 +65,15 @@ public class LiveScriptParser implements PsiParser {
     return r;
   }
 
-  // IDENTIFIER+
+  // Statement+
   private static boolean BlockExpression_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "BlockExpression_1")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeToken(b, IDENTIFIER);
+    r = Statement(b, l + 1);
     int c = current_position_(b);
     while (r) {
-      if (!consumeToken(b, IDENTIFIER)) break;
+      if (!Statement(b, l + 1)) break;
       if (!empty_element_parsed_guard_(b, "BlockExpression_1", c)) break;
       c = current_position_(b);
     }

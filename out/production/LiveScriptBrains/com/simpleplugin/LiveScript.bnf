@@ -24,7 +24,7 @@ Expression ::= BlockExpression
     | OpExpression
     | LiteralExpression
 
-BlockExpression ::= INDENT IDENTIFIER+ DEDENT?
+BlockExpression ::= INDENT Statement+ DEDENT?
 
 OpExpression ::= IDENTIFIER OPERATOR Expression
 

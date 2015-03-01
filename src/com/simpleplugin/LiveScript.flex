@@ -49,13 +49,21 @@ import com.intellij.util.containers.Stack;
     /**
      * Start a new indented block (increase indent).
      */
-    private IElementType _parseIndent() {
-        int count = yylength();
+    private IElementType _parseIndent(int count) {
         if (count > _currentIndent) {
             _indents.push(_currentIndent);
             _currentIndent += count;
             _enterState(INDENTED);
             return _out(LiveScriptTypes.INDENT);
+        }
+        else if (count < _currentIndent) {
+            if (!_indents.empty())
+                _currentIndent = _indents.pop();
+            _exitState();
+            if (_currentIndent < 1) {
+                _isIndented = false;
+            }
+            return _out(LiveScriptTypes.DEDENT);
         }
         return null;
     }
@@ -146,7 +154,7 @@ WHITE_SPACE = {NEWLINE}|{SPACE}
 ^{SPACE}+[^\r\n\t ]     {
                             System.out.println("State is " + yystate() + ", text is [" + yytext() + "]");
                             _rewindBy(1);
-                            IElementType result = _parseIndent();
+                            IElementType result = _parseIndent(yylength());
                             if (result != null) return result;
                         }
 
@@ -157,14 +165,7 @@ WHITE_SPACE = {NEWLINE}|{SPACE}
     ^[^\r\n\t ].*       {
                             System.out.println("I> text is [" + yytext() + "], dedenting");
                             _rewind();
-                            if (!_indents.empty())
-                                _currentIndent = _indents.pop();
-                            if (_currentIndent < 1) {
-                                _isIndented = false;
-                                if (yystate() == INDENTED)
-                                    _exitState();
-                            }
-                            return _out(LiveScriptTypes.DEDENT);
+                            return _parseIndent(0);
                         }
 }
 
