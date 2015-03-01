@@ -195,33 +195,35 @@ SPACE = [\f\t ]
 
 <SIMPLE_STRING_STARTED> {
 
-    (\\\'|[^\'])+       { return LiveScriptTypes.STRING; }
+    (\\{SSS}|[^\'])+       { return LiveScriptTypes.STRING; }
 
-    \'                  { _exitState(); return LiveScriptTypes.STRING_END; }
+    {SSS}                  { _exitState(); return LiveScriptTypes.STRING_END; }
 }
 
 
 <FULL_STRING_STARTED> {
-    (\\\"|[^\"#]|\\#)+  { return LiveScriptTypes.STRING; }
+    (\\{FSS}|[^\"#]|\\#)+  { return LiveScriptTypes.STRING; }
 
-    "\""                { _exitState(); return LiveScriptTypes.STRING_END; }
+    {FSS}                   { _exitState(); return LiveScriptTypes.STRING_END; }
 
-    "#{"                { _enterState(STRING_SUSPENDED); return LiveScriptTypes.STRING_END; }
+    "#{"                    { _enterState(STRING_SUSPENDED); return LiveScriptTypes.STRING_INTER_START; }
 
-    "#"{IDENTIFIER}     { _rewind(); _rewindBy(-1); _enterState(STRING_VARIABLE); return LiveScriptTypes.STRING; }
+    "#"{IDENTIFIER}         { _rewind(); _rewindBy(-1); _enterState(STRING_VARIABLE); return LiveScriptTypes.STRING; }
 
-    "#"                 { return LiveScriptTypes.STRING; }
+    "#"                     { return LiveScriptTypes.STRING; }
 }
+
 
 <STRING_VARIABLE> {
     // Return simple variables.
     {IDENTIFIER}    { _exitState(); return LiveScriptTypes.IDENTIFIER; }
 }
 
+
 // Intermediary state between FULL_STRING_STARTED and YYINITIAL, to properly handle entry/exit
 <STRING_SUSPENDED> {
     // Once the interpolation is closed, leave the "Suspended" state and resume normal string.
-    "}"             { _exitState(); return LiveScriptTypes.STRING_START; }
+    "}"             { _exitState(); return LiveScriptTypes.STRING_INTER_END; }
 
     // This state can only be reached by opening or closing a string interpolation,
     // so if it's not closing (handled above), it must be opening.
@@ -255,188 +257,3 @@ SPACE = [\f\t ]
 "}" { if (_exitState()) _rewindBy(1); }
 
 .   { return TokenType.BAD_CHARACTER; }
-
-
-
-
-
-/*
-%type IElementType
-%eof{  return;
-%eof}
-
-NEWLINE = \r\n|[\r\n]
-
-NULL=null|void
-BOOLEAN = true|false|on|off|yes|no
-
-BASED_NUMBER = ([0-9]|[1-2][0-9]|3[0-2])\~[0-9a-zA-Z]+
-NUMBER = [0-9][0-9_]*\.?[0-9_]*[a-zA-Z]*
-
-IDENTIFIER = [$_a-zA-Z][-$_a-zA-Z0-9]*
-BACKSTRING = \\[^,;\]\)\} \t\r\n]+
-
-// Normal operators - will take the operand(s) from the next line if necessary
-OP = [-+*//*
-]
-
-// Operators that require block indent if the operand is on the next line
-BLOCK_OP = [=:]|:=
-
-
-HEREDOC = \'\'\'(.|[\r\n])*\'\'\'
-
-PAREN_L = "("
-PAREN_R = ")"
-
-
-WHITE_SPACE = [\t\ ]+
-
-%state SIMPLE_STRING_STARTED, FULL_STRING_STARTED, STRING_SUSPENDED, BACK_STRING_STARTED, STRING_VARIABLE
-%state INDENTED, BLOCK_OP, CHECK_BLOCK_END
-
-%%
-
-<YYINITIAL> {
-    {NULL}          { return LiveScriptTypes.NULL; }
-
-    {BOOLEAN}       { return LiveScriptTypes.BOOLEAN; }
-
-    {BASED_NUMBER}  { return LiveScriptTypes.NUMBER; }
-
-    {NUMBER}        { return LiveScriptTypes.NUMBER; }
-
-    {PAREN_L}       { return LiveScriptTypes.PAREN_L; }
-
-    {PAREN_R}       { return LiveScriptTypes.PAREN_R; }
-
-    {IDENTIFIER}    { return LiveScriptTypes.IDENTIFIER; }
-
-    {OP}            { return LiveScriptTypes.OPERATOR; }
-
-    {BLOCK_OP}      { enterState(BLOCK_OP); return LiveScriptTypes.OPERATOR; }
-
-    {WHITE_SPACE}   { return TokenType.WHITE_SPACE; }
-
-    {HEREDOC}       { return LiveScriptTypes.HEREDOC; }
-
-    \'              { enterState(SIMPLE_STRING_STARTED); return LiveScriptTypes.STRING_START; }
-
-    \"|%\"          { enterState(FULL_STRING_STARTED); return LiveScriptTypes.STRING_START; }
-
-    {BACKSTRING}    { return LiveScriptTypes.BACKSTRING; }
-
-}
-
-*/
-/**
- * Check if the next statements are in a function block.
- *//*
-
-<BLOCK_OP> {
-    */
-/**
-     * Block operator followed immediately by newline means a new block has started
-     *//*
-
-    {NEWLINE}   {
-                    enterNewBlock();
-                    changeStateTo(INDENTED);
-                    return LiveScriptTypes.BLOCK_START;
-                }
-
-    */
-/**
-     * Anything other than a newline means no block, continue on the same line.
-     *//*
-
-    .           { leaveState(); rewindBy(1); }
-}
-
-// Track indentation.
-<INDENTED> {
-
-    {NEWLINE}   {
-                    if (currentIndent <= currentBlockIndent) {
-                        exitBlock();
-                        currentIndent = 0;
-                        return LiveScriptTypes.BLOCK_END;
-                    }
-                    currentIndent = 0;
-                    return LiveScriptTypes.NEWLINE;
-                }
-
-    \t          {
-                    if (tabIndents == null) tabIndents = true;
-                    if (tabIndents) currentIndent++;
-                    if (currentIndent == 1)
-                        return LiveScriptTypes.INDENT;
-                }
-
-    " "         {
-                    if (tabIndents == null) tabIndents = false;
-                    if (!tabIndents) currentIndent++;
-                    if (currentIndent == 1)
-                        return LiveScriptTypes.INDENT;
-                }
-
-    .           {
-                    enterState(YYINITIAL);
-                    rewindBy(1);
-                }
-
-}
-
-
-<SIMPLE_STRING_STARTED> {
-
-    (\\\'|[^\'])+       { return LiveScriptTypes.STRING; }
-
-    \'                  { leaveState(); return LiveScriptTypes.STRING_END; }
-}
-
-<FULL_STRING_STARTED> {
-    (\\\"|[^\"#]|\\#)+  { return LiveScriptTypes.STRING; }
-
-    "\""                { leaveState(); return LiveScriptTypes.STRING_END; }
-
-    "#{"                { enterState(STRING_SUSPENDED); return LiveScriptTypes.STRING_END; }
-
-    "#"{IDENTIFIER}     { rewindTo("#"); advanceBy(1); enterState(STRING_VARIABLE); return LiveScriptTypes.STRING; }
-
-    "#"                 { return LiveScriptTypes.STRING; }
-}
-
-<STRING_VARIABLE> {
-    // Return simple variables.
-    {IDENTIFIER}    { leaveState(); return LiveScriptTypes.IDENTIFIER; }
-}
-
-// Intermediary state between FULL_STRING_STARTED and YYINITIAL, to properly handle entry/exit
-<STRING_SUSPENDED> {
-    // Once the interpolation is closed, leave the "Suspended" state and resume normal string.
-    "}"             { leaveState(); return LiveScriptTypes.STRING_START; }
-
-    // This state can only be reached by opening or closing a string interpolation,
-    // so if it's not closing (handled above), it must be opening.
-    .               { rewindBy(1); enterState(YYINITIAL); }
-}
-
-
-//{CURL_L}            { return LiveScriptTypes.CURL_L; }
-
-// Only rewind if we're actually moving up the state stack,
-// if we rewind with the stack empty we'll just get stuck
-// in an infinite loop.
-"}"                 { if (leaveState()) rewindBy(1); }
-
-{NEWLINE}           {
-                        // If we are in a special state, rewind the position so that
-                        // the newline gets processed by the previous state.
-                        if (leaveState()) rewind();
-
-                        return LiveScriptTypes.NEWLINE;
-                    }
-
-.                   { return TokenType.BAD_CHARACTER; }
-*/

@@ -8,9 +8,9 @@ import com.intellij.psi.PsiElement;
 public interface LiveScriptInterpolatedStringExpression extends LiveScriptExpression {
 
   @NotNull
-  LiveScriptStatement getStatement();
+  LiveScriptInterLines getInterLines();
 
   @NotNull
-  List<LiveScriptStringExpression> getStringExpressionList();
+  List<LiveScriptInterStringExpression> getInterStringExpressionList();
 
 }

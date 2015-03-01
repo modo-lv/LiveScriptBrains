@@ -11,21 +11,21 @@ import static com.simpleplugin.psi.LiveScriptTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.simpleplugin.psi.*;
 
-public class LiveScriptStatementImpl extends ASTWrapperPsiElement implements LiveScriptStatement {
+public class LiveScriptInterLinesImpl extends ASTWrapperPsiElement implements LiveScriptInterLines {
 
-  public LiveScriptStatementImpl(ASTNode node) {
+  public LiveScriptInterLinesImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof LiveScriptVisitor) ((LiveScriptVisitor)visitor).visitStatement(this);
+    if (visitor instanceof LiveScriptVisitor) ((LiveScriptVisitor)visitor).visitInterLines(this);
     else super.accept(visitor);
   }
 
   @Override
   @NotNull
-  public LiveScriptExpression getExpression() {
-    return findNotNullChildByClass(LiveScriptExpression.class);
+  public List<LiveScriptExpression> getExpressionList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, LiveScriptExpression.class);
   }
 
 }

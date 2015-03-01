@@ -17,19 +17,31 @@
 
 file ::= (Statement | COMMENT | NEWLINE)* <<eof>>
 private recover_statement ::= !NEWLINE
+private recover_inter ::= !(NEWLINE | STRING_INTER_END)
 
-Statement ::= Expression+ {recoverWhile="recover_statement"}
+Statement ::= Expression {recoverWhile="recover_statement"}
+
+InterLines ::= Expression* {recoverWhile="recover_inter"}
 
 BlockStatement ::= INDENT Statement+ DEDENT?
 
-Expression ::= OpExpression
+Expression ::= InterpolatedStringExpression
+    | OpExpression
     | LiteralExpression
 
 OpExpression ::= Expression OPERATOR Expression
 
 LiteralExpression ::= RESERVED_LITERAL | IDENTIFIER | NUMBER | StringExpression
 
-StringExpression ::= STRING_START STRING* (IDENTIFIER | STRING)* STRING_END | BACKSTRING | HEREDOC
+StringExpression ::= STRING_START string STRING_END | BACKSTRING | HEREDOC
+
+private string ::= STRING* (IDENTIFIER | STRING)*
+
+InterStringExpression ::= STRING_START string STRING_INTER_START
+    | STRING_INTER_END string STRING_INTER_START
+    | STRING_INTER_END string STRING_END
+
+InterpolatedStringExpression ::= InterStringExpression+ InterLines InterStringExpression+
 
 
 

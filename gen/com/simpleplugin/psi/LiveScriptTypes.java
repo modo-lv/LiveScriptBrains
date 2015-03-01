@@ -10,6 +10,9 @@ public interface LiveScriptTypes {
 
   IElementType BLOCK_STATEMENT = new LiveScriptElementType("BLOCK_STATEMENT");
   IElementType EXPRESSION = new LiveScriptElementType("EXPRESSION");
+  IElementType INTERPOLATED_STRING_EXPRESSION = new LiveScriptElementType("INTERPOLATED_STRING_EXPRESSION");
+  IElementType INTER_LINES = new LiveScriptElementType("INTER_LINES");
+  IElementType INTER_STRING_EXPRESSION = new LiveScriptElementType("INTER_STRING_EXPRESSION");
   IElementType LITERAL_EXPRESSION = new LiveScriptElementType("LITERAL_EXPRESSION");
   IElementType OP_EXPRESSION = new LiveScriptElementType("OP_EXPRESSION");
   IElementType STATEMENT = new LiveScriptElementType("STATEMENT");
@@ -27,6 +30,8 @@ public interface LiveScriptTypes {
   IElementType RESERVED_LITERAL = new LiveScriptTokenType("RESERVED_LITERAL");
   IElementType STRING = new LiveScriptTokenType("STRING");
   IElementType STRING_END = new LiveScriptTokenType("STRING_END");
+  IElementType STRING_INTER_END = new LiveScriptTokenType("STRING_INTER_END");
+  IElementType STRING_INTER_START = new LiveScriptTokenType("STRING_INTER_START");
   IElementType STRING_START = new LiveScriptTokenType("STRING_START");
 
   class Factory {
@@ -37,6 +42,15 @@ public interface LiveScriptTypes {
       }
       else if (type == EXPRESSION) {
         return new LiveScriptExpressionImpl(node);
+      }
+      else if (type == INTERPOLATED_STRING_EXPRESSION) {
+        return new LiveScriptInterpolatedStringExpressionImpl(node);
+      }
+      else if (type == INTER_LINES) {
+        return new LiveScriptInterLinesImpl(node);
+      }
+      else if (type == INTER_STRING_EXPRESSION) {
+        return new LiveScriptInterStringExpressionImpl(node);
       }
       else if (type == LITERAL_EXPRESSION) {
         return new LiveScriptLiteralExpressionImpl(node);
