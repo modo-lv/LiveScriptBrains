@@ -1,0 +1,74 @@
+{
+  parserClass="com.simpleplugin.parser.LiveScriptParser"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="LiveScript"
+  psiImplClassSuffix="Impl"
+  psiPackage="com.simpleplugin.psi"
+  psiImplPackage="com.simpleplugin.psi.impl"
+
+  elementTypeHolderClass="com.simpleplugin.psi.LiveScriptTypes"
+  elementTypeClass="com.simpleplugin.psi.LiveScriptElementType"
+  tokenTypeClass="com.simpleplugin.psi.LiveScriptTokenType"
+
+  parserUtilClass="com.simpleplugin.psi.LiveScriptParserUtil"
+
+  extends(".*Expression$")=Expression
+}
+
+file ::= (Statement | Com | NEWLINE)* <<eof>>
+
+external objDef ::= objDef
+
+private recover_statement ::= !NEWLINE
+private recover_inter ::= !(NEWLINE | STRING_INTER_END)
+
+Statement ::= Expression {recoverWhile="recover_statement"}
+
+InterLines ::= Expression* {recoverWhile="recover_inter"}
+
+BlockStatement ::= INDENT Statement+ DEDENT?
+
+Expression ::= TestExpression
+    | ParenExpression
+    | InterpolatedStringExpression
+    | OpExpression
+    | CurlObjDefExpression
+    | ObjDefExpression
+    | PropDefExpression
+    | LiteralExpression
+    | ReferenceExpression
+    //| ShortPropDefExpression
+
+ParenExpression ::= PAREN_L Expression PAREN_R
+
+PropDefExpression ::= Expression COLON Expression
+
+//ShortPropDefExpression ::= ReferenceExpression
+
+ObjDefExpression ::= PropDefExpression (AnySeparator PropDefExpression)*
+
+CurlObjDefExpression ::= CURL_L ObjDefExpression CURL_R
+
+OpExpression ::= Expression OPERATOR NEWLINE? Expression
+
+LiteralExpression ::= RESERVED_LITERAL | ReferenceExpression | NUMBER | StringExpression
+
+ReferenceExpression ::= IDENTIFIER (DOT IDENTIFIER)*
+
+StringExpression ::= STRING_START string STRING_END | BACKSTRING | HEREDOC
+
+TestExpression ::= TEST
+
+InterStringExpression ::= STRING_START string STRING_INTER_START
+    | STRING_INTER_END string STRING_INTER_START
+    | STRING_INTER_END string STRING_END
+
+InterpolatedStringExpression ::= InterStringExpression+ InterLines InterStringExpression+
+
+// Pieces
+Com ::= COMMENT_LINE | COMMENT_BLOCK
+InlineSeparator::= COMMA | SPACE+
+AnySeparator::= InlineSeparator| SPACE* NEWLINE SPACE*
+private string ::= STRING* (IDENTIFIER | STRING)*
