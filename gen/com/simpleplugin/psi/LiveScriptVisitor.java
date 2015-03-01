@@ -7,8 +7,8 @@ import com.intellij.psi.PsiElement;
 
 public class LiveScriptVisitor extends PsiElementVisitor {
 
-  public void visitBlockStatement(@NotNull LiveScriptBlockStatement o) {
-    visitPsiElement(o);
+  public void visitBlockExpression(@NotNull LiveScriptBlockExpression o) {
+    visitExpression(o);
   }
 
   public void visitExpression(@NotNull LiveScriptExpression o) {
@@ -19,24 +19,12 @@ public class LiveScriptVisitor extends PsiElementVisitor {
     visitExpression(o);
   }
 
-  public void visitOperationExpression(@NotNull LiveScriptOperationExpression o) {
-    visitExpression(o);
-  }
-
-  public void visitParenExpression(@NotNull LiveScriptParenExpression o) {
-    visitExpression(o);
-  }
-
-  public void visitReferenceExpression(@NotNull LiveScriptReferenceExpression o) {
+  public void visitOpExpression(@NotNull LiveScriptOpExpression o) {
     visitExpression(o);
   }
 
   public void visitStatement(@NotNull LiveScriptStatement o) {
     visitPsiElement(o);
-  }
-
-  public void visitStringExpression(@NotNull LiveScriptStringExpression o) {
-    visitExpression(o);
   }
 
   public void visitPsiElement(@NotNull PsiElement o) {

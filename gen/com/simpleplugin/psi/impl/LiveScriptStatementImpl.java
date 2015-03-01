@@ -23,15 +23,9 @@ public class LiveScriptStatementImpl extends ASTWrapperPsiElement implements Liv
   }
 
   @Override
-  @Nullable
-  public LiveScriptBlockStatement getBlockStatement() {
-    return findChildByClass(LiveScriptBlockStatement.class);
-  }
-
-  @Override
-  @Nullable
+  @NotNull
   public LiveScriptExpression getExpression() {
-    return findChildByClass(LiveScriptExpression.class);
+    return findNotNullChildByClass(LiveScriptExpression.class);
   }
 
 }

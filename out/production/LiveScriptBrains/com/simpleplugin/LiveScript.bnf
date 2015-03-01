@@ -15,6 +15,23 @@
   extends(".*Expression$")=Expression
 }
 
+file ::= (Statement COMMENT? | COMMENT)* <<eof>> {recoverWhile="recover_statement"}
+private recover_statement ::= !(COMMENT | <<eof>>)
+
+Statement ::= Expression
+
+Expression ::= BlockExpression
+    | OpExpression
+    | LiteralExpression
+
+BlockExpression ::= INDENT IDENTIFIER+ DEDENT?
+
+OpExpression ::= IDENTIFIER OPERATOR Expression
+
+LiteralExpression ::= IDENTIFIER | NUMBER
+
+
+/*
 file ::= (Statement | NEWLINE)* <<eof>>
 
 Statement ::= BlockStatement | COMMENT | Expression {recoverWhile="recover_statement"}
@@ -25,7 +42,9 @@ BlockStatement ::= BLOCK_START (COMMENT | INDENT Expression | NEWLINE)* BLOCK_EN
 private recover_statement ::= !NEWLINE
 
 
-/** EXPRESSIONS **/
+*/
+/** EXPRESSIONS **//*
+
 
 Expression ::= ParenExpression
     | OperationExpression
@@ -42,5 +61,6 @@ ReferenceExpression ::= IDENTIFIER
 LiteralExpression ::= NULL | BOOLEAN | NUMBER | StringExpression
 
 StringExpression ::= STRING_START STRING* (IDENTIFIER | STRING)* STRING_END | BACKSTRING | HEREDOC
+*/
 
 

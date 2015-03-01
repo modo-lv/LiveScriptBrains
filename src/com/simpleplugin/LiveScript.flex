@@ -12,33 +12,219 @@ import com.intellij.util.containers.Stack;
 %implements FlexLexer
 %unicode
 %function advance
+%type IElementType
+%eof{
+    System.out.println("End of file reached, clearing out indentation stack.");
+    _currentIndent = 0;
+    _indents.clear();
+    return;
+%eof}
 
+%{
+    /**
+     * Stack for keeping track of lexical states.
+     */
+    private static Stack<Integer> _states = new Stack<Integer>();
+
+    /**
+     * Are indents tabs instead of spaces?
+     */
+    private static Boolean _tabIndents = null;
+
+    /**
+     * Indent stack to keep track of indentation levels.
+     */
+    private static Stack<Integer> _indents = new Stack<Integer>();
+
+    /**
+     * Current indent baseline.
+     */
+    private static int _currentIndent = 0;
+
+    /**
+     * Are we currently inside an indented block?
+     */
+    private static boolean _isIndented = false;
+
+    /**
+     * Start a new indented block (increase indent).
+     */
+    private IElementType _parseIndent() {
+        int count = yylength();
+        if (count > _currentIndent) {
+            _indents.push(_currentIndent);
+            _currentIndent += count;
+            _enterState(INDENTED);
+            return _out(LiveScriptTypes.INDENT);
+        }
+        return null;
+    }
+
+    /**
+     * Enter a lexical state and push the previous one to the stack.
+     */
+    private void _enterState(int state) {
+        System.out.println("Entering state " + state);
+        _states.push(yystate());
+        yybegin(state);
+    }
+
+    /**
+     * Leave a lexical state and return to the previous one (if any).
+     * @returns boolean True if state was switched to a previous one, false if already at YYINITIAL.
+     */
+    private boolean _exitState() {
+        if (_states.empty()) {
+            System.out.println("State stack empty, defaulting to YYINITIAL.");
+            yybegin(YYINITIAL);
+            return false;
+        }
+        else {
+            System.out.println("Exiting state...");
+            yybegin(_states.pop());
+            return true;
+        }
+    }
+
+    /**
+     * Move the input position back to the start of the matched string.
+     */
+    private void _rewind() {
+        yypushback(yylength());
+    }
+
+    /**
+     * Move input position backwards.
+     */
+    private void _rewindBy(int count) {
+        yypushback(count);
+    }
+
+    /**
+     * Move the input position back to the first position of a given string
+     */
+    private boolean _rewindTo(String text) {
+        final int position = yytext().toString().indexOf(text);
+
+        if (position != -1) {
+          _rewindBy(position);
+          return true;
+        }
+
+        return false;
+    }
+
+    private IElementType _out(IElementType input) {
+        System.out.println("Matched [" + yytext() + "] as " + input);
+        return input;
+    }
+%}
+
+
+// Comments
+COMMENT_LINE = #.*
+COMMENT_BLOCK = \/\*(.|{CRLF})*\*\/
+
+// Literals
+BASED_NUMBER = ([0-9]|[1-2][0-9]|3[0-2])\~[0-9a-zA-Z]+
+NUMBER = [0-9][0-9_]*\.?[0-9_]*[a-zA-Z]*
+
+
+OPERATOR = [-+*/=]
+IDENTIFIER = [$_a-zA-Z][-$_a-zA-Z0-9]*
+
+// Whitespace
+CRLF = [\r\n]
+NEWLINE = \r\n|{CRLF}
+SPACE = [\f\t ]
+WHITE_SPACE = {NEWLINE}|{SPACE}
+
+%state INDENTED
+
+%%
+
+^{SPACE}+[^\r\n\t ]     {
+                            System.out.println("State is " + yystate() + ", text is [" + yytext() + "]");
+                            _rewindBy(1);
+                            IElementType result = _parseIndent();
+                            if (result != null) return result;
+                        }
+
+<INDENTED> {
+    // Line comments don't affect indentation.
+    ^{SPACE}*{COMMENT_LINE} { _rewindTo("#"); _exitState(); return TokenType.WHITE_SPACE; }
+
+    ^[^\r\n\t ].*       {
+                            System.out.println("I> text is [" + yytext() + "], dedenting");
+                            _rewind();
+                            if (!_indents.empty())
+                                _currentIndent = _indents.pop();
+                            if (_currentIndent < 1) {
+                                _isIndented = false;
+                                if (yystate() == INDENTED)
+                                    _exitState();
+                            }
+                            return _out(LiveScriptTypes.DEDENT);
+                        }
+}
+
+{IDENTIFIER}            { return _out(LiveScriptTypes.IDENTIFIER); }
+
+{OPERATOR}              { return LiveScriptTypes.OPERATOR; }
+
+{NUMBER}|{BASED_NUMBER} { return LiveScriptTypes.NUMBER; }
+
+// Non-code
+{SPACE}+                { return _out(TokenType.WHITE_SPACE); }
+
+{NEWLINE}               { return _out(TokenType.WHITE_SPACE); }
+
+{COMMENT_LINE}          { return LiveScriptTypes.COMMENT; }
+
+{COMMENT_BLOCK}         { return LiveScriptTypes.COMMENT; }
+
+.                       { return TokenType.BAD_CHARACTER; }
+
+
+
+
+/*
 %{
   private Stack<Integer> stack = new Stack<Integer>();
 
-  /**
+  */
+/**
    * Track statement block indentation levels.
-   */
+   *//*
+
   private Stack<Integer> blockStack = new Stack<Integer>();
 
-    /**
+    */
+/**
      * Minimum indent level for current block;
-     */
+     *//*
+
     private int currentBlockIndent = 0;
 
-    /**
+    */
+/**
      *
-     */
+     *//*
+
 	private int currentIndent = 0;
 
-    /**
+    */
+/**
      * Using tabs for indentation instead of spaces?
-     */
+     *//*
+
     private Boolean tabIndents= null;
 
-    /**
+    */
+/**
      * Start a new function block.
-     */
+     *//*
+
     private void enterNewBlock() {
         blockStack.push(currentIndent);
         currentBlockIndent = currentIndent;
@@ -56,28 +242,34 @@ import com.intellij.util.containers.Stack;
         }
     }
 
-  /**
+  */
+/**
    * Push the actual state on top of the stack
-   */
+   *//*
+
   private void pushState() {
     stack.push(yystate());
   }
 
-  /**
+  */
+/**
    * Push the actual state on top of the stack
    * and change into another state
    *
    * @param state The new state
-   */
+   *//*
+
   private void enterState(int state) {
     stack.push(yystate());
     yybegin(state);
   }
 
-  /**
+  */
+/**
    * Pop the last state from the stack and change to it.
    * If the stack is empty, go to YYINITIAL
-   */
+   *//*
+
     private boolean leaveState() {
         if (!stack.empty()) {
             yybegin(stack.pop());
@@ -88,10 +280,12 @@ import com.intellij.util.containers.Stack;
         }
     }
 
-    /**
+    */
+/**
      * Cancel/end current state and move to a new one without
      * modifying the stack.
-     */
+     *//*
+
     private void changeStateTo(int newState) { yybegin(newState); }
 
 
@@ -101,12 +295,14 @@ import com.intellij.util.containers.Stack;
     }
 
 
-  /**
+  */
+/**
    * Push the stream back to the position before the text match
    *
    * @param text The text to match
    * @return true when matched
-   */
+   *//*
+
   private boolean rewindTo(String text) {
     final int position = yytext().toString().indexOf(text);
 
@@ -132,10 +328,12 @@ import com.intellij.util.containers.Stack;
     }
 
 
-    /**
+    */
+/**
      * Rewind the input stream back to the position before
      * the text match and leave current state.
-     */
+     *//*
+
     private boolean rewindAndLeaveState(String text) {
         final boolean success = rewindTo(text);
         if (success) {
@@ -144,14 +342,16 @@ import com.intellij.util.containers.Stack;
         return true;
     }
 
-  /**
+  */
+/**
    * Push the stream back to the position before the text match
    * and change into the given state
    *
    * @param text The text to match
    * @param state The new state
    * @return true when matched
-   */
+   *//*
+
   private boolean pushBackAndState(String text, int state) {
     final boolean success = rewindTo(text);
 
@@ -171,8 +371,6 @@ NEWLINE = \r\n|[\r\n]
 
 NULL=null|void
 BOOLEAN = true|false|on|off|yes|no
-LINE_COMMENT = #.+
-BLOCK_COMMENT = \/\*(.|[\r\n])*\*\/
 
 BASED_NUMBER = ([0-9]|[1-2][0-9]|3[0-2])\~[0-9a-zA-Z]+
 NUMBER = [0-9][0-9_]*\.?[0-9_]*[a-zA-Z]*
@@ -181,7 +379,8 @@ IDENTIFIER = [$_a-zA-Z][-$_a-zA-Z0-9]*
 BACKSTRING = \\[^,;\]\)\} \t\r\n]+
 
 // Normal operators - will take the operand(s) from the next line if necessary
-OP = [-+*/]
+OP = [-+*//*
+]
 
 // Operators that require block indent if the operand is on the next line
 BLOCK_OP = [=:]|:=
@@ -229,27 +428,30 @@ WHITE_SPACE = [\t\ ]+
 
     {BACKSTRING}    { return LiveScriptTypes.BACKSTRING; }
 
-    {LINE_COMMENT}  { return LiveScriptTypes.COMMENT; }
-
-    {BLOCK_COMMENT} { return LiveScriptTypes.COMMENT; }
 }
 
+*/
 /**
  * Check if the next statements are in a function block.
- */
+ *//*
+
 <BLOCK_OP> {
-    /**
+    */
+/**
      * Block operator followed immediately by newline means a new block has started
-     */
+     *//*
+
     {NEWLINE}   {
                     enterNewBlock();
                     changeStateTo(INDENTED);
                     return LiveScriptTypes.BLOCK_START;
                 }
 
-    /**
+    */
+/**
      * Anything other than a newline means no block, continue on the same line.
-     */
+     *//*
+
     .           { leaveState(); rewindBy(1); }
 }
 
@@ -339,3 +541,4 @@ WHITE_SPACE = [\t\ ]+
                     }
 
 .                   { return TokenType.BAD_CHARACTER; }
+*/

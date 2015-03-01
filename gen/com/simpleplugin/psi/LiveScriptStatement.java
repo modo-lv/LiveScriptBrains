@@ -7,10 +7,7 @@ import com.intellij.psi.PsiElement;
 
 public interface LiveScriptStatement extends PsiElement {
 
-  @Nullable
-  LiveScriptBlockStatement getBlockStatement();
-
-  @Nullable
+  @NotNull
   LiveScriptExpression getExpression();
 
 }
