@@ -8,7 +8,7 @@ import com.intellij.psi.PsiElement;
 public interface LiveScriptObjDefExpression extends LiveScriptExpression {
 
   @NotNull
-  List<LiveScriptNewlineSeparator> getNewlineSeparatorList();
+  List<LiveScriptAnySeparator> getAnySeparatorList();
 
   @NotNull
   List<LiveScriptPropDefExpression> getPropDefExpressionList();

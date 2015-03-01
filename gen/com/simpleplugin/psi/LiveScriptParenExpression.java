@@ -5,9 +5,9 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface LiveScriptBlockExpression extends LiveScriptExpression {
+public interface LiveScriptParenExpression extends LiveScriptExpression {
 
-  @NotNull
-  List<LiveScriptStatement> getStatementList();
+  @Nullable
+  LiveScriptExpression getExpression();
 
 }

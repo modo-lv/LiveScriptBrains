@@ -5,6 +5,9 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface LiveScriptSeparator extends PsiElement {
+public interface LiveScriptAnySeparator extends PsiElement {
+
+  @Nullable
+  LiveScriptInlineSeparator getInlineSeparator();
 
 }

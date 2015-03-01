@@ -8,18 +8,21 @@ import com.simpleplugin.psi.impl.*;
 
 public interface LiveScriptTypes {
 
+  IElementType ANY_SEPARATOR = new LiveScriptElementType("ANY_SEPARATOR");
   IElementType BLOCK_STATEMENT = new LiveScriptElementType("BLOCK_STATEMENT");
+  IElementType COM = new LiveScriptElementType("COM");
   IElementType CURL_OBJ_DEF_EXPRESSION = new LiveScriptElementType("CURL_OBJ_DEF_EXPRESSION");
   IElementType EXPRESSION = new LiveScriptElementType("EXPRESSION");
+  IElementType INLINE_SEPARATOR = new LiveScriptElementType("INLINE_SEPARATOR");
   IElementType INTERPOLATED_STRING_EXPRESSION = new LiveScriptElementType("INTERPOLATED_STRING_EXPRESSION");
   IElementType INTER_LINES = new LiveScriptElementType("INTER_LINES");
   IElementType INTER_STRING_EXPRESSION = new LiveScriptElementType("INTER_STRING_EXPRESSION");
   IElementType LITERAL_EXPRESSION = new LiveScriptElementType("LITERAL_EXPRESSION");
-  IElementType NEWLINE_SEPARATOR = new LiveScriptElementType("NEWLINE_SEPARATOR");
   IElementType OBJ_DEF_EXPRESSION = new LiveScriptElementType("OBJ_DEF_EXPRESSION");
   IElementType OP_EXPRESSION = new LiveScriptElementType("OP_EXPRESSION");
+  IElementType PAREN_EXPRESSION = new LiveScriptElementType("PAREN_EXPRESSION");
   IElementType PROP_DEF_EXPRESSION = new LiveScriptElementType("PROP_DEF_EXPRESSION");
-  IElementType SEPARATOR = new LiveScriptElementType("SEPARATOR");
+  IElementType REFERENCE_EXPRESSION = new LiveScriptElementType("REFERENCE_EXPRESSION");
   IElementType STATEMENT = new LiveScriptElementType("STATEMENT");
   IElementType STRING_EXPRESSION = new LiveScriptElementType("STRING_EXPRESSION");
   IElementType TEST_EXPRESSION = new LiveScriptElementType("TEST_EXPRESSION");
@@ -27,16 +30,20 @@ public interface LiveScriptTypes {
   IElementType BACKSTRING = new LiveScriptTokenType("BACKSTRING");
   IElementType COLON = new LiveScriptTokenType("COLON");
   IElementType COMMA = new LiveScriptTokenType("COMMA");
-  IElementType COMMENT = new LiveScriptTokenType("COMMENT");
+  IElementType COMMENT_BLOCK = new LiveScriptTokenType("COMMENT_BLOCK");
+  IElementType COMMENT_LINE = new LiveScriptTokenType("COMMENT_LINE");
   IElementType CURL_L = new LiveScriptTokenType("CURL_L");
   IElementType CURL_R = new LiveScriptTokenType("CURL_R");
   IElementType DEDENT = new LiveScriptTokenType("DEDENT");
+  IElementType DOT = new LiveScriptTokenType("DOT");
   IElementType HEREDOC = new LiveScriptTokenType("HEREDOC");
   IElementType IDENTIFIER = new LiveScriptTokenType("IDENTIFIER");
   IElementType INDENT = new LiveScriptTokenType("INDENT");
   IElementType NEWLINE = new LiveScriptTokenType("NEWLINE");
   IElementType NUMBER = new LiveScriptTokenType("NUMBER");
   IElementType OPERATOR = new LiveScriptTokenType("OPERATOR");
+  IElementType PAREN_L = new LiveScriptTokenType("PAREN_L");
+  IElementType PAREN_R = new LiveScriptTokenType("PAREN_R");
   IElementType RESERVED_LITERAL = new LiveScriptTokenType("RESERVED_LITERAL");
   IElementType SPACE = new LiveScriptTokenType("SPACE");
   IElementType STRING = new LiveScriptTokenType("STRING");
@@ -45,19 +52,27 @@ public interface LiveScriptTypes {
   IElementType STRING_INTER_START = new LiveScriptTokenType("STRING_INTER_START");
   IElementType STRING_START = new LiveScriptTokenType("STRING_START");
   IElementType TEST = new LiveScriptTokenType("TEST");
-  IElementType WHITE_SPACE = new LiveScriptTokenType("WHITE_SPACE");
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {
       IElementType type = node.getElementType();
-       if (type == BLOCK_STATEMENT) {
+       if (type == ANY_SEPARATOR) {
+        return new LiveScriptAnySeparatorImpl(node);
+      }
+      else if (type == BLOCK_STATEMENT) {
         return new LiveScriptBlockStatementImpl(node);
+      }
+      else if (type == COM) {
+        return new LiveScriptComImpl(node);
       }
       else if (type == CURL_OBJ_DEF_EXPRESSION) {
         return new LiveScriptCurlObjDefExpressionImpl(node);
       }
       else if (type == EXPRESSION) {
         return new LiveScriptExpressionImpl(node);
+      }
+      else if (type == INLINE_SEPARATOR) {
+        return new LiveScriptInlineSeparatorImpl(node);
       }
       else if (type == INTERPOLATED_STRING_EXPRESSION) {
         return new LiveScriptInterpolatedStringExpressionImpl(node);
@@ -71,20 +86,20 @@ public interface LiveScriptTypes {
       else if (type == LITERAL_EXPRESSION) {
         return new LiveScriptLiteralExpressionImpl(node);
       }
-      else if (type == NEWLINE_SEPARATOR) {
-        return new LiveScriptNewlineSeparatorImpl(node);
-      }
       else if (type == OBJ_DEF_EXPRESSION) {
         return new LiveScriptObjDefExpressionImpl(node);
       }
       else if (type == OP_EXPRESSION) {
         return new LiveScriptOpExpressionImpl(node);
       }
+      else if (type == PAREN_EXPRESSION) {
+        return new LiveScriptParenExpressionImpl(node);
+      }
       else if (type == PROP_DEF_EXPRESSION) {
         return new LiveScriptPropDefExpressionImpl(node);
       }
-      else if (type == SEPARATOR) {
-        return new LiveScriptSeparatorImpl(node);
+      else if (type == REFERENCE_EXPRESSION) {
+        return new LiveScriptReferenceExpressionImpl(node);
       }
       else if (type == STATEMENT) {
         return new LiveScriptStatementImpl(node);

@@ -28,6 +28,10 @@
         <!-- Add your extensions here -->
         <fileTypeFactory implementation="com.simpleplugin.LiveScriptFileTypeFactory"/>
         <lang.parserDefinition language="LiveScript" implementationClass="com.simpleplugin.LiveScriptParserDefinition"/>
+
+        <lang.syntaxHighlighterFactory key="LiveScript" implementationClass="com.simpleplugin.features.LiveScriptSyntaxHighlighterFactory"/>
+
+        <colorSettingsPage implementation="com.simpleplugin.features.LiveScriptColorSettingsPage"/>
     </extensions>
 
     <application-components>

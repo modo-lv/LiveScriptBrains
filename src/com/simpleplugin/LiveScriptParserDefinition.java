@@ -22,7 +22,7 @@ import java.io.Reader;
 
 public class LiveScriptParserDefinition implements ParserDefinition{
     public static final TokenSet WHITE_SPACES = TokenSet.create(TokenType.WHITE_SPACE);
-    public static final TokenSet COMMENTS = TokenSet.create(LiveScriptTypes.COMMENT);
+    public static final TokenSet COMMENTS = TokenSet.create(LiveScriptTypes.COMMENT_LINE, LiveScriptTypes.COMMENT_BLOCK);
 
     public static final IFileElementType FILE = new IFileElementType(Language.<LiveScriptLanguage>findInstance(LiveScriptLanguage.class));
 

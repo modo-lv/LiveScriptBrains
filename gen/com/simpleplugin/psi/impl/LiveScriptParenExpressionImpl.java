@@ -8,18 +8,23 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static com.simpleplugin.psi.LiveScriptTypes.*;
-import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.simpleplugin.psi.*;
 
-public class LiveScriptSeparatorImpl extends ASTWrapperPsiElement implements LiveScriptSeparator {
+public class LiveScriptParenExpressionImpl extends LiveScriptExpressionImpl implements LiveScriptParenExpression {
 
-  public LiveScriptSeparatorImpl(ASTNode node) {
+  public LiveScriptParenExpressionImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof LiveScriptVisitor) ((LiveScriptVisitor)visitor).visitSeparator(this);
+    if (visitor instanceof LiveScriptVisitor) ((LiveScriptVisitor)visitor).visitParenExpression(this);
     else super.accept(visitor);
+  }
+
+  @Override
+  @Nullable
+  public LiveScriptExpression getExpression() {
+    return findChildByClass(LiveScriptExpression.class);
   }
 
 }

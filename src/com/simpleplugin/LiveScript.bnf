@@ -17,7 +17,7 @@
   extends(".*Expression$")=Expression
 }
 
-file ::= (Statement | COMMENT | NEWLINE)* <<eof>>
+file ::= (Statement | Com | NEWLINE)* <<eof>>
 
 external objDef ::= objDef
 
@@ -31,22 +31,31 @@ InterLines ::= Expression* {recoverWhile="recover_inter"}
 BlockStatement ::= INDENT Statement+ DEDENT?
 
 Expression ::= TestExpression
+    | ParenExpression
     | InterpolatedStringExpression
     | OpExpression
     | CurlObjDefExpression
     | ObjDefExpression
     | PropDefExpression
     | LiteralExpression
+    | ReferenceExpression
+    //| ShortPropDefExpression
+
+ParenExpression ::= PAREN_L Expression PAREN_R
 
 PropDefExpression ::= Expression COLON Expression
 
-ObjDefExpression ::= PropDefExpression (NewlineSeparator PropDefExpression)*
+//ShortPropDefExpression ::= ReferenceExpression
+
+ObjDefExpression ::= PropDefExpression (AnySeparator PropDefExpression)*
 
 CurlObjDefExpression ::= CURL_L ObjDefExpression CURL_R
 
-OpExpression ::= Expression OPERATOR Expression
+OpExpression ::= Expression OPERATOR NEWLINE? Expression
 
-LiteralExpression ::= RESERVED_LITERAL | IDENTIFIER | NUMBER | StringExpression
+LiteralExpression ::= RESERVED_LITERAL | ReferenceExpression | NUMBER | StringExpression
+
+ReferenceExpression ::= IDENTIFIER (DOT IDENTIFIER)*
 
 StringExpression ::= STRING_START string STRING_END | BACKSTRING | HEREDOC
 
@@ -59,6 +68,7 @@ InterStringExpression ::= STRING_START string STRING_INTER_START
 InterpolatedStringExpression ::= InterStringExpression+ InterLines InterStringExpression+
 
 // Pieces
-Separator ::= COMMA | WHITE_SPACE+
-NewlineSeparator ::= Separator | SPACE* NEWLINE SPACE*
+Com ::= COMMENT_LINE | COMMENT_BLOCK
+InlineSeparator::= COMMA | SPACE+
+AnySeparator::= InlineSeparator| SPACE* NEWLINE SPACE*
 private string ::= STRING* (IDENTIFIER | STRING)*

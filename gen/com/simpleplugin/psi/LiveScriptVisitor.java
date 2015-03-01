@@ -7,7 +7,15 @@ import com.intellij.psi.PsiElement;
 
 public class LiveScriptVisitor extends PsiElementVisitor {
 
+  public void visitAnySeparator(@NotNull LiveScriptAnySeparator o) {
+    visitPsiElement(o);
+  }
+
   public void visitBlockStatement(@NotNull LiveScriptBlockStatement o) {
+    visitPsiElement(o);
+  }
+
+  public void visitCom(@NotNull LiveScriptCom o) {
     visitPsiElement(o);
   }
 
@@ -16,6 +24,10 @@ public class LiveScriptVisitor extends PsiElementVisitor {
   }
 
   public void visitExpression(@NotNull LiveScriptExpression o) {
+    visitPsiElement(o);
+  }
+
+  public void visitInlineSeparator(@NotNull LiveScriptInlineSeparator o) {
     visitPsiElement(o);
   }
 
@@ -35,10 +47,6 @@ public class LiveScriptVisitor extends PsiElementVisitor {
     visitExpression(o);
   }
 
-  public void visitNewlineSeparator(@NotNull LiveScriptNewlineSeparator o) {
-    visitPsiElement(o);
-  }
-
   public void visitObjDefExpression(@NotNull LiveScriptObjDefExpression o) {
     visitExpression(o);
   }
@@ -47,12 +55,16 @@ public class LiveScriptVisitor extends PsiElementVisitor {
     visitExpression(o);
   }
 
+  public void visitParenExpression(@NotNull LiveScriptParenExpression o) {
+    visitExpression(o);
+  }
+
   public void visitPropDefExpression(@NotNull LiveScriptPropDefExpression o) {
     visitExpression(o);
   }
 
-  public void visitSeparator(@NotNull LiveScriptSeparator o) {
-    visitPsiElement(o);
+  public void visitReferenceExpression(@NotNull LiveScriptReferenceExpression o) {
+    visitExpression(o);
   }
 
   public void visitStatement(@NotNull LiveScriptStatement o) {

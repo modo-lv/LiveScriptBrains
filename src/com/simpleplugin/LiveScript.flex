@@ -8,7 +8,7 @@ import com.intellij.util.containers.Stack;
 
 %%
 
-%class LiveScriptLexer
+%public %class LiveScriptLexer
 %implements FlexLexer
 %unicode
 %function advance
@@ -147,6 +147,9 @@ COLON = ":"
 COMMA = ","
 CURL_L = "{"
 CURL_R = "}"
+PAREN_L = "("
+PAREN_R = ")"
+DOT = "."
 
 IDENTIFIER = [$_a-zA-Z][-$_a-zA-Z0-9]*
 
@@ -198,7 +201,13 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
 
     {COMMA}{SPACE}*         { return LiveScriptTypes.COMMA; }
     
+    {PAREN_L}               { return LiveScriptTypes.PAREN_L; }
+    
+    {PAREN_R}               { return LiveScriptTypes.PAREN_R; }
+    
     {CURL_L}                { return LiveScriptTypes.CURL_L; }
+
+    {DOT}                   { return LiveScriptTypes.DOT; }
 
 
     // Non-code
@@ -206,9 +215,9 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
 
     {NEWLINE}               { return _out(LiveScriptTypes.NEWLINE); }
 
-    {COMMENT_LINE}          { return LiveScriptTypes.COMMENT; }
+    {COMMENT_LINE}          { return LiveScriptTypes.COMMENT_LINE; }
 
-    {COMMENT_BLOCK}         { return LiveScriptTypes.COMMENT; }
+    {COMMENT_BLOCK}         { return LiveScriptTypes.COMMENT_BLOCK; }
 
 
     {TEST}                  { return LiveScriptTypes.TEST; }

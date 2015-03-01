@@ -23,8 +23,8 @@ public class LiveScriptObjDefExpressionImpl extends LiveScriptExpressionImpl imp
 
   @Override
   @NotNull
-  public List<LiveScriptNewlineSeparator> getNewlineSeparatorList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, LiveScriptNewlineSeparator.class);
+  public List<LiveScriptAnySeparator> getAnySeparatorList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, LiveScriptAnySeparator.class);
   }
 
   @Override
