@@ -28,9 +28,6 @@ public class LiveScriptParser implements PsiParser {
     else if (t == EXPRESSION) {
       r = Expression(b, 0, -1);
     }
-    else if (t == INTERPOLATED_STRING_EXPRESSION) {
-      r = InterpolatedStringExpression(b, 0);
-    }
     else if (t == LITERAL_EXPRESSION) {
       r = LiteralExpression(b, 0);
     }
@@ -54,8 +51,7 @@ public class LiveScriptParser implements PsiParser {
   }
 
   public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
-    create_token_set_(EXPRESSION, INTERPOLATED_STRING_EXPRESSION, LITERAL_EXPRESSION, OP_EXPRESSION,
-      STRING_EXPRESSION),
+    create_token_set_(EXPRESSION, LITERAL_EXPRESSION, OP_EXPRESSION, STRING_EXPRESSION),
   };
 
   /* ********************************************************** */
@@ -96,26 +92,18 @@ public class LiveScriptParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // StringExpression file StringExpression
-  public static boolean InterpolatedStringExpression(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "InterpolatedStringExpression")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, "<interpolated string expression>");
-    r = StringExpression(b, l + 1);
-    r = r && file(b, l + 1);
-    r = r && StringExpression(b, l + 1);
-    exit_section_(b, l, m, INTERPOLATED_STRING_EXPRESSION, r, false, null);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // InterpolatedStringExpression | Expression
+  // Expression+
   public static boolean Statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Statement")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, "<statement>");
-    r = InterpolatedStringExpression(b, l + 1);
-    if (!r) r = Expression(b, l + 1, -1);
+    r = Expression(b, l + 1, -1);
+    int c = current_position_(b);
+    while (r) {
+      if (!Expression(b, l + 1, -1)) break;
+      if (!empty_element_parsed_guard_(b, "Statement", c)) break;
+      c = current_position_(b);
+    }
     exit_section_(b, l, m, STATEMENT, r, false, recover_statement_parser_);
     return r;
   }

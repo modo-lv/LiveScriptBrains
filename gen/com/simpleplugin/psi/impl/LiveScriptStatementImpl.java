@@ -24,8 +24,8 @@ public class LiveScriptStatementImpl extends ASTWrapperPsiElement implements Liv
 
   @Override
   @NotNull
-  public LiveScriptExpression getExpression() {
-    return findNotNullChildByClass(LiveScriptExpression.class);
+  public List<LiveScriptExpression> getExpressionList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, LiveScriptExpression.class);
   }
 
 }
