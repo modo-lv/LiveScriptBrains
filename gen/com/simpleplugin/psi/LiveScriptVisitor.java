@@ -15,6 +15,10 @@ public class LiveScriptVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitInterpolatedStringExpression(@NotNull LiveScriptInterpolatedStringExpression o) {
+    visitExpression(o);
+  }
+
   public void visitLiteralExpression(@NotNull LiveScriptLiteralExpression o) {
     visitExpression(o);
   }
@@ -25,6 +29,10 @@ public class LiveScriptVisitor extends PsiElementVisitor {
 
   public void visitStatement(@NotNull LiveScriptStatement o) {
     visitPsiElement(o);
+  }
+
+  public void visitStringExpression(@NotNull LiveScriptStringExpression o) {
+    visitExpression(o);
   }
 
   public void visitPsiElement(@NotNull PsiElement o) {

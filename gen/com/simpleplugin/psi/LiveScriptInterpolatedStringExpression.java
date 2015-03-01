@@ -5,9 +5,12 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface LiveScriptOpExpression extends LiveScriptExpression {
+public interface LiveScriptInterpolatedStringExpression extends LiveScriptExpression {
 
   @NotNull
-  List<LiveScriptExpression> getExpressionList();
+  List<LiveScriptStringExpression> getStringExpressionList();
+
+  @NotNull
+  LiveScriptFile getFile();
 
 }

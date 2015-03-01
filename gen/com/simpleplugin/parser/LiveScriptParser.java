@@ -26,16 +26,22 @@ public class LiveScriptParser implements PsiParser {
       r = BlockStatement(b, 0);
     }
     else if (t == EXPRESSION) {
-      r = Expression(b, 0);
+      r = Expression(b, 0, -1);
+    }
+    else if (t == INTERPOLATED_STRING_EXPRESSION) {
+      r = InterpolatedStringExpression(b, 0);
     }
     else if (t == LITERAL_EXPRESSION) {
       r = LiteralExpression(b, 0);
     }
     else if (t == OP_EXPRESSION) {
-      r = OpExpression(b, 0);
+      r = Expression(b, 0, -1);
     }
     else if (t == STATEMENT) {
       r = Statement(b, 0);
+    }
+    else if (t == STRING_EXPRESSION) {
+      r = StringExpression(b, 0);
     }
     else {
       r = parse_root_(t, b, 0);
@@ -48,7 +54,8 @@ public class LiveScriptParser implements PsiParser {
   }
 
   public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
-    create_token_set_(EXPRESSION, LITERAL_EXPRESSION, OP_EXPRESSION),
+    create_token_set_(EXPRESSION, INTERPOLATED_STRING_EXPRESSION, LITERAL_EXPRESSION, OP_EXPRESSION,
+      STRING_EXPRESSION),
   };
 
   /* ********************************************************** */
@@ -89,53 +96,88 @@ public class LiveScriptParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // OpExpression
-  //     | LiteralExpression
-  public static boolean Expression(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "Expression")) return false;
-    if (!nextTokenIs(b, "<expression>", IDENTIFIER, NUMBER)) return false;
+  // StringExpression file StringExpression
+  public static boolean InterpolatedStringExpression(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "InterpolatedStringExpression")) return false;
     boolean r;
-    Marker m = enter_section_(b, l, _COLLAPSE_, "<expression>");
-    r = OpExpression(b, l + 1);
-    if (!r) r = LiteralExpression(b, l + 1);
-    exit_section_(b, l, m, EXPRESSION, r, false, null);
+    Marker m = enter_section_(b, l, _NONE_, "<interpolated string expression>");
+    r = StringExpression(b, l + 1);
+    r = r && file(b, l + 1);
+    r = r && StringExpression(b, l + 1);
+    exit_section_(b, l, m, INTERPOLATED_STRING_EXPRESSION, r, false, null);
     return r;
   }
 
   /* ********************************************************** */
-  // IDENTIFIER | NUMBER
-  public static boolean LiteralExpression(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "LiteralExpression")) return false;
-    if (!nextTokenIs(b, "<literal expression>", IDENTIFIER, NUMBER)) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, "<literal expression>");
-    r = consumeToken(b, IDENTIFIER);
-    if (!r) r = consumeToken(b, NUMBER);
-    exit_section_(b, l, m, LITERAL_EXPRESSION, r, false, null);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // IDENTIFIER OPERATOR Expression
-  public static boolean OpExpression(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "OpExpression")) return false;
-    if (!nextTokenIs(b, IDENTIFIER)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeTokens(b, 0, IDENTIFIER, OPERATOR);
-    r = r && Expression(b, l + 1);
-    exit_section_(b, m, OP_EXPRESSION, r);
-    return r;
-  }
-
-  /* ********************************************************** */
-  // Expression
+  // InterpolatedStringExpression | Expression
   public static boolean Statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Statement")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, "<statement>");
-    r = Expression(b, l + 1);
+    r = InterpolatedStringExpression(b, l + 1);
+    if (!r) r = Expression(b, l + 1, -1);
     exit_section_(b, l, m, STATEMENT, r, false, recover_statement_parser_);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // STRING_START STRING* (IDENTIFIER | STRING)* STRING_END | BACKSTRING | HEREDOC
+  public static boolean StringExpression(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "StringExpression")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, "<string expression>");
+    r = StringExpression_0(b, l + 1);
+    if (!r) r = consumeToken(b, BACKSTRING);
+    if (!r) r = consumeToken(b, HEREDOC);
+    exit_section_(b, l, m, STRING_EXPRESSION, r, false, null);
+    return r;
+  }
+
+  // STRING_START STRING* (IDENTIFIER | STRING)* STRING_END
+  private static boolean StringExpression_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "StringExpression_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, STRING_START);
+    r = r && StringExpression_0_1(b, l + 1);
+    r = r && StringExpression_0_2(b, l + 1);
+    r = r && consumeToken(b, STRING_END);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // STRING*
+  private static boolean StringExpression_0_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "StringExpression_0_1")) return false;
+    int c = current_position_(b);
+    while (true) {
+      if (!consumeToken(b, STRING)) break;
+      if (!empty_element_parsed_guard_(b, "StringExpression_0_1", c)) break;
+      c = current_position_(b);
+    }
+    return true;
+  }
+
+  // (IDENTIFIER | STRING)*
+  private static boolean StringExpression_0_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "StringExpression_0_2")) return false;
+    int c = current_position_(b);
+    while (true) {
+      if (!StringExpression_0_2_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "StringExpression_0_2", c)) break;
+      c = current_position_(b);
+    }
+    return true;
+  }
+
+  // IDENTIFIER | STRING
+  private static boolean StringExpression_0_2_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "StringExpression_0_2_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, IDENTIFIER);
+    if (!r) r = consumeToken(b, STRING);
+    exit_section_(b, m, null, r);
     return r;
   }
 
@@ -183,6 +225,53 @@ public class LiveScriptParser implements PsiParser {
     Marker m = enter_section_(b, l, _NOT_, null);
     r = !consumeToken(b, NEWLINE);
     exit_section_(b, l, m, null, r, false, null);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // Expression root: Expression
+  // Operator priority table:
+  // 0: BINARY(OpExpression)
+  // 1: ATOM(LiteralExpression)
+  public static boolean Expression(PsiBuilder b, int l, int g) {
+    if (!recursion_guard_(b, l, "Expression")) return false;
+    addVariant(b, "<expression>");
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, "<expression>");
+    r = LiteralExpression(b, l + 1);
+    p = r;
+    r = r && Expression_0(b, l + 1, g);
+    exit_section_(b, l, m, null, r, p, null);
+    return r || p;
+  }
+
+  public static boolean Expression_0(PsiBuilder b, int l, int g) {
+    if (!recursion_guard_(b, l, "Expression_0")) return false;
+    boolean r = true;
+    while (true) {
+      Marker m = enter_section_(b, l, _LEFT_, null);
+      if (g < 0 && consumeTokenSmart(b, OPERATOR)) {
+        r = Expression(b, l, 0);
+        exit_section_(b, l, m, OP_EXPRESSION, r, true, null);
+      }
+      else {
+        exit_section_(b, l, m, null, false, false, null);
+        break;
+      }
+    }
+    return r;
+  }
+
+  // RESERVED_LITERAL | IDENTIFIER | NUMBER | StringExpression
+  public static boolean LiteralExpression(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "LiteralExpression")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _COLLAPSE_, "<literal expression>");
+    r = consumeTokenSmart(b, RESERVED_LITERAL);
+    if (!r) r = consumeTokenSmart(b, IDENTIFIER);
+    if (!r) r = consumeTokenSmart(b, NUMBER);
+    if (!r) r = StringExpression(b, l + 1);
+    exit_section_(b, l, m, LITERAL_EXPRESSION, r, false, null);
     return r;
   }
 

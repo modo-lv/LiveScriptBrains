@@ -18,16 +18,20 @@
 file ::= (Statement | COMMENT | NEWLINE)* <<eof>>
 private recover_statement ::= !NEWLINE
 
-Statement ::= Expression {recoverWhile="recover_statement"}
+Statement ::= InterpolatedStringExpression | Expression {recoverWhile="recover_statement"}
 
 BlockStatement ::= INDENT Statement+ DEDENT?
 
 Expression ::= OpExpression
     | LiteralExpression
 
-OpExpression ::= IDENTIFIER OPERATOR Expression
+OpExpression ::= Expression OPERATOR Expression
 
-LiteralExpression ::= IDENTIFIER | NUMBER
+LiteralExpression ::= RESERVED_LITERAL | IDENTIFIER | NUMBER | StringExpression
+
+StringExpression ::= STRING_START STRING* (IDENTIFIER | STRING)* STRING_END | BACKSTRING | HEREDOC
+
+InterpolatedStringExpression ::= StringExpression file StringExpression
 
 
 /*
