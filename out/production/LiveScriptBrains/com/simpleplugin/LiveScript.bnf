@@ -30,10 +30,10 @@ InterLines ::= Expression* {recoverWhile="recover_inter"}
 
 BlockStatement ::= INDENT Statement+ DEDENT?
 
-Expression ::=
-      TestExpression
+Expression ::= TestExpression
     | InterpolatedStringExpression
     | OpExpression
+    | CurlObjDefExpression
     | ObjDefExpression
     | PropDefExpression
     | LiteralExpression
@@ -42,13 +42,15 @@ PropDefExpression ::= Expression COLON Expression
 
 ObjDefExpression ::= PropDefExpression (NewlineSeparator PropDefExpression)*
 
+CurlObjDefExpression ::= CURL_L ObjDefExpression CURL_R
+
 OpExpression ::= Expression OPERATOR Expression
 
 LiteralExpression ::= RESERVED_LITERAL | IDENTIFIER | NUMBER | StringExpression
 
 StringExpression ::= STRING_START string STRING_END | BACKSTRING | HEREDOC
 
-TestExpression ::= TEST | COLON | CURL_L | CURL_R
+TestExpression ::= TEST
 
 InterStringExpression ::= STRING_START string STRING_INTER_START
     | STRING_INTER_END string STRING_INTER_START

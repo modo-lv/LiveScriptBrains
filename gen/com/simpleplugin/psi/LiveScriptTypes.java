@@ -9,6 +9,7 @@ import com.simpleplugin.psi.impl.*;
 public interface LiveScriptTypes {
 
   IElementType BLOCK_STATEMENT = new LiveScriptElementType("BLOCK_STATEMENT");
+  IElementType CURL_OBJ_DEF_EXPRESSION = new LiveScriptElementType("CURL_OBJ_DEF_EXPRESSION");
   IElementType EXPRESSION = new LiveScriptElementType("EXPRESSION");
   IElementType INTERPOLATED_STRING_EXPRESSION = new LiveScriptElementType("INTERPOLATED_STRING_EXPRESSION");
   IElementType INTER_LINES = new LiveScriptElementType("INTER_LINES");
@@ -51,6 +52,9 @@ public interface LiveScriptTypes {
       IElementType type = node.getElementType();
        if (type == BLOCK_STATEMENT) {
         return new LiveScriptBlockStatementImpl(node);
+      }
+      else if (type == CURL_OBJ_DEF_EXPRESSION) {
+        return new LiveScriptCurlObjDefExpressionImpl(node);
       }
       else if (type == EXPRESSION) {
         return new LiveScriptExpressionImpl(node);
