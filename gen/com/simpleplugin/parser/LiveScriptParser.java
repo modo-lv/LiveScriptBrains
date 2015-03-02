@@ -383,6 +383,116 @@ public class LiveScriptParser implements PsiParser {
   }
 
   /* ********************************************************** */
+  // (THIS_AT + IDENTIFIER (DOT IDENTIFIER)*) | ((IDENTIFIER|THIS) (DOT IDENTIFIER)+)
+  static boolean PropReference(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "PropReference")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = PropReference_0(b, l + 1);
+    if (!r) r = PropReference_1(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // THIS_AT + IDENTIFIER (DOT IDENTIFIER)*
+  private static boolean PropReference_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "PropReference_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = PropReference_0_0(b, l + 1);
+    r = r && consumeToken(b, IDENTIFIER);
+    r = r && PropReference_0_2(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // THIS_AT +
+  private static boolean PropReference_0_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "PropReference_0_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, THIS_AT);
+    int c = current_position_(b);
+    while (r) {
+      if (!consumeToken(b, THIS_AT)) break;
+      if (!empty_element_parsed_guard_(b, "PropReference_0_0", c)) break;
+      c = current_position_(b);
+    }
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // (DOT IDENTIFIER)*
+  private static boolean PropReference_0_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "PropReference_0_2")) return false;
+    int c = current_position_(b);
+    while (true) {
+      if (!PropReference_0_2_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "PropReference_0_2", c)) break;
+      c = current_position_(b);
+    }
+    return true;
+  }
+
+  // DOT IDENTIFIER
+  private static boolean PropReference_0_2_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "PropReference_0_2_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeTokens(b, 0, DOT, IDENTIFIER);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // (IDENTIFIER|THIS) (DOT IDENTIFIER)+
+  private static boolean PropReference_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "PropReference_1")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = PropReference_1_0(b, l + 1);
+    r = r && PropReference_1_1(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // IDENTIFIER|THIS
+  private static boolean PropReference_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "PropReference_1_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, IDENTIFIER);
+    if (!r) r = consumeToken(b, THIS);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // (DOT IDENTIFIER)+
+  private static boolean PropReference_1_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "PropReference_1_1")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = PropReference_1_1_0(b, l + 1);
+    int c = current_position_(b);
+    while (r) {
+      if (!PropReference_1_1_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "PropReference_1_1", c)) break;
+      c = current_position_(b);
+    }
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // DOT IDENTIFIER
+  private static boolean PropReference_1_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "PropReference_1_1_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeTokens(b, 0, DOT, IDENTIFIER);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  /* ********************************************************** */
   // <<optionalParens Expression>>
   public static boolean Statement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Statement")) return false;
@@ -427,6 +537,19 @@ public class LiveScriptParser implements PsiParser {
     r = ReferenceExpression(b, l + 1);
     if (!r) r = LiteralExpression(b, l + 1);
     exit_section_(b, l, m, VALUE_EXPRESSION, r, false, null);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // IDENTIFIER | THIS | THIS_AT
+  static boolean VarReference(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "VarReference")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, IDENTIFIER);
+    if (!r) r = consumeToken(b, THIS);
+    if (!r) r = consumeToken(b, THIS_AT);
+    exit_section_(b, m, null, r);
     return r;
   }
 
@@ -764,37 +887,14 @@ public class LiveScriptParser implements PsiParser {
     return r;
   }
 
-  // IDENTIFIER (DOT IDENTIFIER)*
+  // PropReference | VarReference
   public static boolean ReferenceExpression(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "ReferenceExpression")) return false;
-    if (!nextTokenIsFast(b, IDENTIFIER)) return false;
     boolean r;
-    Marker m = enter_section_(b);
-    r = consumeTokenSmart(b, IDENTIFIER);
-    r = r && ReferenceExpression_1(b, l + 1);
-    exit_section_(b, m, REFERENCE_EXPRESSION, r);
-    return r;
-  }
-
-  // (DOT IDENTIFIER)*
-  private static boolean ReferenceExpression_1(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "ReferenceExpression_1")) return false;
-    int c = current_position_(b);
-    while (true) {
-      if (!ReferenceExpression_1_0(b, l + 1)) break;
-      if (!empty_element_parsed_guard_(b, "ReferenceExpression_1", c)) break;
-      c = current_position_(b);
-    }
-    return true;
-  }
-
-  // DOT IDENTIFIER
-  private static boolean ReferenceExpression_1_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "ReferenceExpression_1_0")) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeTokens(b, 0, DOT, IDENTIFIER);
-    exit_section_(b, m, null, r);
+    Marker m = enter_section_(b, l, _NONE_, "<reference expression>");
+    r = PropReference(b, l + 1);
+    if (!r) r = VarReference(b, l + 1);
+    exit_section_(b, l, m, REFERENCE_EXPRESSION, r, false, null);
     return r;
   }
 

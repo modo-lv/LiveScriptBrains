@@ -55,6 +55,8 @@ public interface LiveScriptTypes {
   IElementType STRING_INTER_START = new LiveScriptTokenType("STRING_INTER_START");
   IElementType STRING_START = new LiveScriptTokenType("STRING_START");
   IElementType TEST = new LiveScriptTokenType("TEST");
+  IElementType THIS = new LiveScriptTokenType("THIS");
+  IElementType THIS_AT = new LiveScriptTokenType("THIS_AT");
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {

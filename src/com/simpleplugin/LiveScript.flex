@@ -135,6 +135,10 @@ NUMBER = [0-9][0-9_]*\.?[0-9_]*[a-zA-Z]*
 NO_VALUE=null|void
 BOOLEAN=true|false|yes|no|on|off
 
+// Specials
+THIS="this"
+THIS_AT="@"
+
 // Strings
 BACKSTRING = \\[^,;\]\)\} \t\r\n]+
 HEREDOC = \'\'\'(.|[\r\n])*\'\'\'
@@ -177,7 +181,6 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
 
     {BOOLEAN}               { return LiveScriptTypes.RESERVED_LITERAL; }
 
-
     {NUMBER}|{BASED_NUMBER} { return LiveScriptTypes.NUMBER; }
     
     // Strings
@@ -190,6 +193,11 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
 
     {FSS}                   { _enterState(FULL_STRING_STARTED); return LiveScriptTypes.STRING_START; }
     
+
+    // Identifiers
+    {THIS}                  { return LiveScriptTypes.THIS; }
+
+    {THIS_AT}               { return LiveScriptTypes.THIS_AT; }
 
     {IDENTIFIER}            { return _out(LiveScriptTypes.IDENTIFIER); }
     

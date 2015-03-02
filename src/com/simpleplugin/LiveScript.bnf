@@ -55,7 +55,11 @@ ValueExpression ::= ReferenceExpression | LiteralExpression
 
 LiteralExpression ::= RESERVED_LITERAL | ReferenceExpression | NUMBER | InterpolatedStringExpression | StringExpression
 
-ReferenceExpression ::= IDENTIFIER (DOT IDENTIFIER)*
+ReferenceExpression ::= PropReference | VarReference
+
+private VarReference ::= IDENTIFIER | THIS | THIS_AT
+
+private PropReference ::= (THIS_AT + IDENTIFIER (DOT IDENTIFIER)*) | ((IDENTIFIER|THIS) (DOT IDENTIFIER)+)
 
 StringExpression ::= STRING_START string STRING_END | BACKSTRING | HEREDOC
 
