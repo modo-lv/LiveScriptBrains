@@ -1,4 +1,4 @@
-package com.simpleplugin;
+package com.simpleplugin.psi;
 
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.Language;
@@ -13,9 +13,9 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
+import com.simpleplugin.LiveScriptLanguage;
+import com.simpleplugin.LiveScriptLexer;
 import com.simpleplugin.parser.LiveScriptParser;
-import com.simpleplugin.psi.LiveScriptFile;
-import com.simpleplugin.psi.LiveScriptTypes;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Reader;

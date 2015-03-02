@@ -27,7 +27,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
         <fileTypeFactory implementation="com.simpleplugin.LiveScriptFileTypeFactory"/>
-        <lang.parserDefinition language="LiveScript" implementationClass="com.simpleplugin.LiveScriptParserDefinition"/>
+        <lang.parserDefinition language="LiveScript" implementationClass="com.simpleplugin.psi.LiveScriptParserDefinition"/>
 
         <lang.syntaxHighlighterFactory key="LiveScript" implementationClass="com.simpleplugin.features.LiveScriptSyntaxHighlighterFactory"/>
 

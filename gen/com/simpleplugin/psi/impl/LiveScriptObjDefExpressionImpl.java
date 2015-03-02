@@ -29,8 +29,8 @@ public class LiveScriptObjDefExpressionImpl extends LiveScriptExpressionImpl imp
 
   @Override
   @NotNull
-  public List<LiveScriptPropDefExpression> getPropDefExpressionList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, LiveScriptPropDefExpression.class);
+  public List<LiveScriptExplicitPropDefExpression> getExplicitPropDefExpressionList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, LiveScriptExplicitPropDefExpression.class);
   }
 
 }

@@ -24,36 +24,36 @@ external objDef ::= objDef
 private recover_statement ::= !NEWLINE
 private recover_inter ::= !(NEWLINE | STRING_INTER_END)
 
-Statement ::= Expression {recoverWhile="recover_statement"}
-
-InterLines ::= Expression* {recoverWhile="recover_inter"}
-
-BlockStatement ::= INDENT Statement+ DEDENT?
-
 Expression ::= TestExpression
-    | ParenExpression
-    | InterpolatedStringExpression
+    | RightOpExpression
     | OpExpression
     | CurlObjDefExpression
     | ObjDefExpression
-    | PropDefExpression
     | LiteralExpression
     | ReferenceExpression
-    //| ShortPropDefExpression
 
-ParenExpression ::= PAREN_L Expression PAREN_R
+Statement ::= <<optionalParens Expression>> {recoverWhile="recover_statement"}
 
-PropDefExpression ::= Expression COLON Expression
+InterLines ::= <<optionalParens Expression>>* {recoverWhile="recover_inter"}
 
-//ShortPropDefExpression ::= ReferenceExpression
+BlockStatement ::= INDENT Statement+ DEDENT?
 
-ObjDefExpression ::= PropDefExpression (AnySeparator PropDefExpression)*
+CurlObjDefExpression ::= CURL_L (<<multiLineArgList (ExplicitPropDefExpression | ImplicitPropDefExpression)>>)* CURL_R
 
-CurlObjDefExpression ::= CURL_L ObjDefExpression CURL_R
+ObjDefExpression ::= <<multiLineArgList ExplicitPropDefExpression>>
+
+ExplicitPropDefExpression ::= (<<optionalParens ValueExpression>> COLON Expression) {rightAssociative=true}
+
+ImplicitPropDefExpression ::= (("+"|"-")? <<optionalParens ValueExpression>>)
+
 
 OpExpression ::= Expression OPERATOR NEWLINE? Expression
 
-LiteralExpression ::= RESERVED_LITERAL | ReferenceExpression | NUMBER | StringExpression
+RightOpExpression ::= ReferenceExpression RIGHT_OP NEWLINE? Expression {rightAssociative=true}
+
+ValueExpression ::= ReferenceExpression | LiteralExpression
+
+LiteralExpression ::= RESERVED_LITERAL | ReferenceExpression | NUMBER | InterpolatedStringExpression | StringExpression
 
 ReferenceExpression ::= IDENTIFIER (DOT IDENTIFIER)*
 
@@ -68,7 +68,9 @@ InterStringExpression ::= STRING_START string STRING_INTER_START
 InterpolatedStringExpression ::= InterStringExpression+ InterLines InterStringExpression+
 
 // Pieces
+private meta optionalParens ::= PAREN_L <<param>> PAREN_R | <<param>>
+private meta multiLineArgList ::= <<param>> (AnySeparator <<param>>)* {rightAssociative=true}
 Com ::= COMMENT_LINE | COMMENT_BLOCK
 InlineSeparator::= COMMA | SPACE+
-AnySeparator::= InlineSeparator| SPACE* NEWLINE SPACE*
+AnySeparator::= InlineSeparator | SPACE* NEWLINE SPACE*
 private string ::= STRING* (IDENTIFIER | STRING)*

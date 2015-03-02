@@ -142,7 +142,8 @@ SSS = \' // Simple string start
 FSS = %\"|\" // Full string start
 
 // Operators
-OPERATOR = [-+*/=]
+OPERATOR = [-+*/]
+RIGHT_OP = [=]
 COLON = ":"
 COMMA = ","
 CURL_L = "{"
@@ -196,6 +197,8 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
     // Operators
 
     {OPERATOR}              { return LiveScriptTypes.OPERATOR; }
+
+    {RIGHT_OP}              { return LiveScriptTypes.RIGHT_OP; }
 
     {COLON}                 { return LiveScriptTypes.COLON; }
 

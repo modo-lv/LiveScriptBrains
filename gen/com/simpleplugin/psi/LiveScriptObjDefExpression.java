@@ -11,6 +11,6 @@ public interface LiveScriptObjDefExpression extends LiveScriptExpression {
   List<LiveScriptAnySeparator> getAnySeparatorList();
 
   @NotNull
-  List<LiveScriptPropDefExpression> getPropDefExpressionList();
+  List<LiveScriptExplicitPropDefExpression> getExplicitPropDefExpressionList();
 
 }

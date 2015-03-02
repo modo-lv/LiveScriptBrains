@@ -23,8 +23,16 @@ public class LiveScriptVisitor extends PsiElementVisitor {
     visitExpression(o);
   }
 
+  public void visitExplicitPropDefExpression(@NotNull LiveScriptExplicitPropDefExpression o) {
+    visitExpression(o);
+  }
+
   public void visitExpression(@NotNull LiveScriptExpression o) {
     visitPsiElement(o);
+  }
+
+  public void visitImplicitPropDefExpression(@NotNull LiveScriptImplicitPropDefExpression o) {
+    visitExpression(o);
   }
 
   public void visitInlineSeparator(@NotNull LiveScriptInlineSeparator o) {
@@ -55,15 +63,11 @@ public class LiveScriptVisitor extends PsiElementVisitor {
     visitExpression(o);
   }
 
-  public void visitParenExpression(@NotNull LiveScriptParenExpression o) {
-    visitExpression(o);
-  }
-
-  public void visitPropDefExpression(@NotNull LiveScriptPropDefExpression o) {
-    visitExpression(o);
-  }
-
   public void visitReferenceExpression(@NotNull LiveScriptReferenceExpression o) {
+    visitExpression(o);
+  }
+
+  public void visitRightOpExpression(@NotNull LiveScriptRightOpExpression o) {
     visitExpression(o);
   }
 
@@ -76,6 +80,10 @@ public class LiveScriptVisitor extends PsiElementVisitor {
   }
 
   public void visitTestExpression(@NotNull LiveScriptTestExpression o) {
+    visitExpression(o);
+  }
+
+  public void visitValueExpression(@NotNull LiveScriptValueExpression o) {
     visitExpression(o);
   }
 

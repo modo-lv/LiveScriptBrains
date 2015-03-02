@@ -12,7 +12,9 @@ public interface LiveScriptTypes {
   IElementType BLOCK_STATEMENT = new LiveScriptElementType("BLOCK_STATEMENT");
   IElementType COM = new LiveScriptElementType("COM");
   IElementType CURL_OBJ_DEF_EXPRESSION = new LiveScriptElementType("CURL_OBJ_DEF_EXPRESSION");
+  IElementType EXPLICIT_PROP_DEF_EXPRESSION = new LiveScriptElementType("EXPLICIT_PROP_DEF_EXPRESSION");
   IElementType EXPRESSION = new LiveScriptElementType("EXPRESSION");
+  IElementType IMPLICIT_PROP_DEF_EXPRESSION = new LiveScriptElementType("IMPLICIT_PROP_DEF_EXPRESSION");
   IElementType INLINE_SEPARATOR = new LiveScriptElementType("INLINE_SEPARATOR");
   IElementType INTERPOLATED_STRING_EXPRESSION = new LiveScriptElementType("INTERPOLATED_STRING_EXPRESSION");
   IElementType INTER_LINES = new LiveScriptElementType("INTER_LINES");
@@ -20,12 +22,12 @@ public interface LiveScriptTypes {
   IElementType LITERAL_EXPRESSION = new LiveScriptElementType("LITERAL_EXPRESSION");
   IElementType OBJ_DEF_EXPRESSION = new LiveScriptElementType("OBJ_DEF_EXPRESSION");
   IElementType OP_EXPRESSION = new LiveScriptElementType("OP_EXPRESSION");
-  IElementType PAREN_EXPRESSION = new LiveScriptElementType("PAREN_EXPRESSION");
-  IElementType PROP_DEF_EXPRESSION = new LiveScriptElementType("PROP_DEF_EXPRESSION");
   IElementType REFERENCE_EXPRESSION = new LiveScriptElementType("REFERENCE_EXPRESSION");
+  IElementType RIGHT_OP_EXPRESSION = new LiveScriptElementType("RIGHT_OP_EXPRESSION");
   IElementType STATEMENT = new LiveScriptElementType("STATEMENT");
   IElementType STRING_EXPRESSION = new LiveScriptElementType("STRING_EXPRESSION");
   IElementType TEST_EXPRESSION = new LiveScriptElementType("TEST_EXPRESSION");
+  IElementType VALUE_EXPRESSION = new LiveScriptElementType("VALUE_EXPRESSION");
 
   IElementType BACKSTRING = new LiveScriptTokenType("BACKSTRING");
   IElementType COLON = new LiveScriptTokenType("COLON");
@@ -45,6 +47,7 @@ public interface LiveScriptTypes {
   IElementType PAREN_L = new LiveScriptTokenType("PAREN_L");
   IElementType PAREN_R = new LiveScriptTokenType("PAREN_R");
   IElementType RESERVED_LITERAL = new LiveScriptTokenType("RESERVED_LITERAL");
+  IElementType RIGHT_OP = new LiveScriptTokenType("RIGHT_OP");
   IElementType SPACE = new LiveScriptTokenType("SPACE");
   IElementType STRING = new LiveScriptTokenType("STRING");
   IElementType STRING_END = new LiveScriptTokenType("STRING_END");
@@ -68,8 +71,14 @@ public interface LiveScriptTypes {
       else if (type == CURL_OBJ_DEF_EXPRESSION) {
         return new LiveScriptCurlObjDefExpressionImpl(node);
       }
+      else if (type == EXPLICIT_PROP_DEF_EXPRESSION) {
+        return new LiveScriptExplicitPropDefExpressionImpl(node);
+      }
       else if (type == EXPRESSION) {
         return new LiveScriptExpressionImpl(node);
+      }
+      else if (type == IMPLICIT_PROP_DEF_EXPRESSION) {
+        return new LiveScriptImplicitPropDefExpressionImpl(node);
       }
       else if (type == INLINE_SEPARATOR) {
         return new LiveScriptInlineSeparatorImpl(node);
@@ -92,14 +101,11 @@ public interface LiveScriptTypes {
       else if (type == OP_EXPRESSION) {
         return new LiveScriptOpExpressionImpl(node);
       }
-      else if (type == PAREN_EXPRESSION) {
-        return new LiveScriptParenExpressionImpl(node);
-      }
-      else if (type == PROP_DEF_EXPRESSION) {
-        return new LiveScriptPropDefExpressionImpl(node);
-      }
       else if (type == REFERENCE_EXPRESSION) {
         return new LiveScriptReferenceExpressionImpl(node);
+      }
+      else if (type == RIGHT_OP_EXPRESSION) {
+        return new LiveScriptRightOpExpressionImpl(node);
       }
       else if (type == STATEMENT) {
         return new LiveScriptStatementImpl(node);
@@ -109,6 +115,9 @@ public interface LiveScriptTypes {
       }
       else if (type == TEST_EXPRESSION) {
         return new LiveScriptTestExpressionImpl(node);
+      }
+      else if (type == VALUE_EXPRESSION) {
+        return new LiveScriptValueExpressionImpl(node);
       }
       throw new AssertionError("Unknown element type: " + type);
     }

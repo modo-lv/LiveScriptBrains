@@ -10,21 +10,15 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static com.simpleplugin.psi.LiveScriptTypes.*;
 import com.simpleplugin.psi.*;
 
-public class LiveScriptCurlObjDefExpressionImpl extends LiveScriptExpressionImpl implements LiveScriptCurlObjDefExpression {
+public class LiveScriptRightOpExpressionImpl extends LiveScriptExpressionImpl implements LiveScriptRightOpExpression {
 
-  public LiveScriptCurlObjDefExpressionImpl(ASTNode node) {
+  public LiveScriptRightOpExpressionImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof LiveScriptVisitor) ((LiveScriptVisitor)visitor).visitCurlObjDefExpression(this);
+    if (visitor instanceof LiveScriptVisitor) ((LiveScriptVisitor)visitor).visitRightOpExpression(this);
     else super.accept(visitor);
-  }
-
-  @Override
-  @NotNull
-  public List<LiveScriptAnySeparator> getAnySeparatorList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, LiveScriptAnySeparator.class);
   }
 
   @Override

@@ -7,7 +7,10 @@ import com.intellij.psi.PsiElement;
 
 public interface LiveScriptCurlObjDefExpression extends LiveScriptExpression {
 
-  @Nullable
-  LiveScriptExpression getExpression();
+  @NotNull
+  List<LiveScriptAnySeparator> getAnySeparatorList();
+
+  @NotNull
+  List<LiveScriptExpression> getExpressionList();
 
 }
