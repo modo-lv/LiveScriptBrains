@@ -145,6 +145,11 @@ HEREDOC = \'\'\'(.|[\r\n])*\'\'\'
 SSS = \' // Simple string start
 FSS = %\"|\" // Full string start
 
+// Regex
+REGEX = \/[^\/] ~\/g?m?i?
+REGEX_MULTI_START = "//"
+REGEX_MULTI_END = \/\/g?m?i?
+
 // Operators
 OPERATOR = [-+*/]
 RIGHT_OP = [=]
@@ -172,6 +177,7 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
 
 %state INDENTED, BLOCK_STATEMENT
 %state SIMPLE_STRING_STARTED, FULL_STRING_STARTED, STRING_VARIABLE, STRING_SUSPENDED
+%state REGEX
 
 %%
 
@@ -192,6 +198,12 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
     {SSS}                   { _enterState(SIMPLE_STRING_STARTED); return LiveScriptTypes.STRING_START; }
 
     {FSS}                   { _enterState(FULL_STRING_STARTED); return LiveScriptTypes.STRING_START; }
+
+
+    // Regex
+    {REGEX}                 { return _out(LiveScriptTypes.REGEX); }
+
+    {REGEX_MULTI_START}     { _enterState(REGEX); return _out(LiveScriptTypes.REGEX); }
     
 
     // Identifiers
@@ -232,6 +244,29 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
 
 
     {TEST}                  { return LiveScriptTypes.TEST; }
+
+    // Only rewind if we're actually moving up the state stack,
+    // if we rewind with the stack empty we'll just get stuck
+    // in an infinite loop.
+    {CURL_R}    { if (_exitState()) _rewindBy(1); else return LiveScriptTypes.CURL_R; }
+}
+
+<REGEX> {
+
+    {COMMENT_LINE}                  { return _out(LiveScriptTypes.COMMENT_LINE);}
+
+    {REGEX_MULTI_END}               { _exitState(); return _out(LiveScriptTypes.REGEX); }
+
+    ~(#|"//") {
+        char c = yycharat(yylength() - 1);
+        if (c == '#')
+            _rewindBy(1);
+        else if (c == '/')
+            _rewindBy(2);
+        else
+            throw new Error("Unexpected character: [" + c + "] at the end of regex line.");
+        return _out(LiveScriptTypes.REGEX);
+    }
 }
 
 
@@ -292,10 +327,5 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
         }
     }
 }
-
-// Only rewind if we're actually moving up the state stack,
-// if we rewind with the stack empty we'll just get stuck
-// in an infinite loop.
-{CURL_R}    { if (_exitState()) _rewindBy(1); else return LiveScriptTypes.CURL_R; }
 
 .           { return TokenType.BAD_CHARACTER; }

@@ -23,6 +23,7 @@ public interface LiveScriptTypes {
   IElementType OBJ_DEF_EXPRESSION = new LiveScriptElementType("OBJ_DEF_EXPRESSION");
   IElementType OP_EXPRESSION = new LiveScriptElementType("OP_EXPRESSION");
   IElementType REFERENCE_EXPRESSION = new LiveScriptElementType("REFERENCE_EXPRESSION");
+  IElementType REGEX_EXPRESSION = new LiveScriptElementType("REGEX_EXPRESSION");
   IElementType RIGHT_OP_EXPRESSION = new LiveScriptElementType("RIGHT_OP_EXPRESSION");
   IElementType STATEMENT = new LiveScriptElementType("STATEMENT");
   IElementType STRING_EXPRESSION = new LiveScriptElementType("STRING_EXPRESSION");
@@ -46,6 +47,7 @@ public interface LiveScriptTypes {
   IElementType OPERATOR = new LiveScriptTokenType("OPERATOR");
   IElementType PAREN_L = new LiveScriptTokenType("PAREN_L");
   IElementType PAREN_R = new LiveScriptTokenType("PAREN_R");
+  IElementType REGEX = new LiveScriptTokenType("REGEX");
   IElementType RESERVED_LITERAL = new LiveScriptTokenType("RESERVED_LITERAL");
   IElementType RIGHT_OP = new LiveScriptTokenType("RIGHT_OP");
   IElementType SPACE = new LiveScriptTokenType("SPACE");
@@ -105,6 +107,9 @@ public interface LiveScriptTypes {
       }
       else if (type == REFERENCE_EXPRESSION) {
         return new LiveScriptReferenceExpressionImpl(node);
+      }
+      else if (type == REGEX_EXPRESSION) {
+        return new LiveScriptRegexExpressionImpl(node);
       }
       else if (type == RIGHT_OP_EXPRESSION) {
         return new LiveScriptRightOpExpressionImpl(node);

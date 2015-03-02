@@ -67,6 +67,9 @@ public class LiveScriptParser implements PsiParser {
     else if (t == REFERENCE_EXPRESSION) {
       r = ReferenceExpression(b, 0);
     }
+    else if (t == REGEX_EXPRESSION) {
+      r = RegexExpression(b, 0);
+    }
     else if (t == RIGHT_OP_EXPRESSION) {
       r = Expression(b, 0, 0);
     }
@@ -95,8 +98,8 @@ public class LiveScriptParser implements PsiParser {
   public static final TokenSet[] EXTENDS_SETS_ = new TokenSet[] {
     create_token_set_(CURL_OBJ_DEF_EXPRESSION, EXPLICIT_PROP_DEF_EXPRESSION, EXPRESSION, IMPLICIT_PROP_DEF_EXPRESSION,
       INTERPOLATED_STRING_EXPRESSION, INTER_STRING_EXPRESSION, LITERAL_EXPRESSION, OBJ_DEF_EXPRESSION,
-      OP_EXPRESSION, REFERENCE_EXPRESSION, RIGHT_OP_EXPRESSION, STRING_EXPRESSION,
-      TEST_EXPRESSION, VALUE_EXPRESSION),
+      OP_EXPRESSION, REFERENCE_EXPRESSION, REGEX_EXPRESSION, RIGHT_OP_EXPRESSION,
+      STRING_EXPRESSION, TEST_EXPRESSION, VALUE_EXPRESSION),
   };
 
   /* ********************************************************** */
@@ -736,8 +739,9 @@ public class LiveScriptParser implements PsiParser {
   // 2: BINARY(OpExpression)
   // 3: ATOM(CurlObjDefExpression)
   // 4: ATOM(ObjDefExpression)
-  // 5: ATOM(LiteralExpression)
-  // 6: ATOM(ReferenceExpression)
+  // 5: ATOM(RegexExpression)
+  // 6: ATOM(LiteralExpression)
+  // 7: ATOM(ReferenceExpression)
   public static boolean Expression(PsiBuilder b, int l, int g) {
     if (!recursion_guard_(b, l, "Expression")) return false;
     addVariant(b, "<expression>");
@@ -746,6 +750,7 @@ public class LiveScriptParser implements PsiParser {
     r = TestExpression(b, l + 1);
     if (!r) r = CurlObjDefExpression(b, l + 1);
     if (!r) r = ObjDefExpression(b, l + 1);
+    if (!r) r = RegexExpression(b, l + 1);
     if (!r) r = LiteralExpression(b, l + 1);
     if (!r) r = ReferenceExpression(b, l + 1);
     p = r;
@@ -870,6 +875,41 @@ public class LiveScriptParser implements PsiParser {
     Marker m = enter_section_(b, l, _COLLAPSE_, "<obj def expression>");
     r = multiLineArgList(b, l + 1, ExplicitPropDefExpression_parser_);
     exit_section_(b, l, m, OBJ_DEF_EXPRESSION, r, false, null);
+    return r;
+  }
+
+  // REGEX (COMMENT_LINE | REGEX)*
+  public static boolean RegexExpression(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "RegexExpression")) return false;
+    if (!nextTokenIsFast(b, REGEX)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeTokenSmart(b, REGEX);
+    r = r && RegexExpression_1(b, l + 1);
+    exit_section_(b, m, REGEX_EXPRESSION, r);
+    return r;
+  }
+
+  // (COMMENT_LINE | REGEX)*
+  private static boolean RegexExpression_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "RegexExpression_1")) return false;
+    int c = current_position_(b);
+    while (true) {
+      if (!RegexExpression_1_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "RegexExpression_1", c)) break;
+      c = current_position_(b);
+    }
+    return true;
+  }
+
+  // COMMENT_LINE | REGEX
+  private static boolean RegexExpression_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "RegexExpression_1_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeTokenSmart(b, COMMENT_LINE);
+    if (!r) r = consumeTokenSmart(b, REGEX);
+    exit_section_(b, m, null, r);
     return r;
   }
 

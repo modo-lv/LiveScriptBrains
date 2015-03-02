@@ -24,19 +24,23 @@ external objDef ::= objDef
 private recover_statement ::= !NEWLINE
 private recover_inter ::= !(NEWLINE | STRING_INTER_END)
 
+Statement ::= <<optionalParens Expression>> {recoverWhile="recover_statement"}
+
 Expression ::= TestExpression
     | RightOpExpression
     | OpExpression
     | CurlObjDefExpression
     | ObjDefExpression
+    | RegexExpression
     | LiteralExpression
     | ReferenceExpression
-
-Statement ::= <<optionalParens Expression>> {recoverWhile="recover_statement"}
 
 InterLines ::= <<optionalParens Expression>>* {recoverWhile="recover_inter"}
 
 BlockStatement ::= INDENT Statement+ DEDENT?
+
+// Regex
+RegexExpression ::= REGEX (COMMENT_LINE | REGEX)*;
 
 CurlObjDefExpression ::= CURL_L (<<multiLineArgList (ExplicitPropDefExpression | ImplicitPropDefExpression)>>)* CURL_R
 
@@ -45,7 +49,6 @@ ObjDefExpression ::= <<multiLineArgList ExplicitPropDefExpression>>
 ExplicitPropDefExpression ::= (<<optionalParens ValueExpression>> COLON Expression) {rightAssociative=true}
 
 ImplicitPropDefExpression ::= (("+"|"-")? <<optionalParens ValueExpression>>)
-
 
 OpExpression ::= Expression OPERATOR NEWLINE? Expression
 

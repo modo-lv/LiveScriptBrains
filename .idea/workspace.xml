@@ -25,11 +25,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="LiveScript.bnf" pinned="false" current-in-tab="true">
+      <file leaf-file-name="LiveScript.bnf" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/LiveScript.bnf">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.39219016" vertical-offset="966" max-vertical-offset="1785">
-              <caret line="57" column="40" selection-start-line="57" selection-start-column="40" selection-end-line="57" selection-end-column="40" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="521" max-vertical-offset="1848">
+              <caret line="38" column="0" selection-start-line="38" selection-start-column="0" selection-end-line="38" selection-end-column="0" />
               <folding>
                 <element signature="e#0#549#0" expanded="true" />
               </folding>
@@ -37,11 +37,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="LiveScript.flex" pinned="false" current-in-tab="false">
+      <file leaf-file-name="LiveScript.flex" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/LiveScript.flex">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="3885" max-vertical-offset="6426">
-              <caret line="199" column="62" selection-start-line="199" selection-start-column="62" selection-end-line="199" selection-end-column="62" />
+            <state vertical-scroll-proportion="0.41860464" vertical-offset="5145" max-vertical-offset="7056">
+              <caret line="257" column="75" selection-start-line="257" selection-start-column="75" selection-end-line="257" selection-end-column="75" />
               <folding />
             </state>
           </provider>
@@ -80,7 +80,6 @@
         <option value="$PROJECT_DIR$/gen/com/simpleplugin/psi/LiveScriptVisitor.java" />
         <option value="/LiveScript.bnf.preview" />
         <option value="$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptParserUtil.java" />
-        <option value="$PROJECT_DIR$/src/com/simpleplugin/LiveScriptLexer.java" />
         <option value="$PROJECT_DIR$/src/com/simpleplugin/features/LiveScriptSyntaxHighlighterFactory.java" />
         <option value="$PROJECT_DIR$/src/com/simpleplugin/LiveScriptParserDefinition.java" />
         <option value="$PROJECT_DIR$/META-INF/plugin.xml" />
@@ -90,8 +89,9 @@
         <option value="$PROJECT_DIR$/gen/com/simpleplugin/psi/LiveScriptTypes.java" />
         <option value="$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptParser.java" />
         <option value="$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptParserDefinition.java" />
-        <option value="$PROJECT_DIR$/src/com/simpleplugin/LiveScript.flex" />
         <option value="$PROJECT_DIR$/src/com/simpleplugin/LiveScript.bnf" />
+        <option value="$PROJECT_DIR$/src/com/simpleplugin/LiveScriptLexer.java" />
+        <option value="$PROJECT_DIR$/src/com/simpleplugin/LiveScript.flex" />
       </list>
     </option>
   </component>
@@ -859,37 +859,29 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/LiveScriptLexer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.3327787" vertical-offset="15739" max-vertical-offset="17682">
-          <caret line="783" column="34" selection-start-line="783" selection-start-column="34" selection-end-line="783" selection-end-column="34" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptParserDefinition.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.71428573" vertical-offset="1029" max-vertical-offset="1617">
           <caret line="69" column="8" selection-start-line="69" selection-start-column="8" selection-end-line="69" selection-end-column="8" />
           <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#1087#1107#0" expanded="true" />
-            <element signature="e#1222#1223#0" expanded="true" />
-            <element signature="e#1296#1297#0" expanded="true" />
-            <element signature="e#1354#1355#0" expanded="true" />
-            <element signature="e#1389#1390#0" expanded="true" />
-            <element signature="e#1444#1445#0" expanded="true" />
-            <element signature="e#1475#1476#0" expanded="true" />
-            <element signature="e#1538#1539#0" expanded="true" />
-            <element signature="e#1575#1576#0" expanded="true" />
-            <element signature="e#1648#1649#0" expanded="true" />
-            <element signature="e#1693#1694#0" expanded="true" />
-            <element signature="e#1756#1757#0" expanded="true" />
-            <element signature="e#1783#1784#0" expanded="true" />
-            <element signature="e#1847#1848#0" expanded="true" />
-            <element signature="e#1902#1903#0" expanded="true" />
-            <element signature="e#2105#2106#0" expanded="true" />
-            <element signature="e#2171#2172#0" expanded="true" />
+            <element signature="imports" expanded="false" />
+            <element signature="e#1087#1107#0" expanded="false" />
+            <element signature="e#1222#1223#0" expanded="false" />
+            <element signature="e#1296#1297#0" expanded="false" />
+            <element signature="e#1354#1355#0" expanded="false" />
+            <element signature="e#1389#1390#0" expanded="false" />
+            <element signature="e#1444#1445#0" expanded="false" />
+            <element signature="e#1475#1476#0" expanded="false" />
+            <element signature="e#1538#1539#0" expanded="false" />
+            <element signature="e#1575#1576#0" expanded="false" />
+            <element signature="e#1648#1649#0" expanded="false" />
+            <element signature="e#1693#1694#0" expanded="false" />
+            <element signature="e#1756#1757#0" expanded="false" />
+            <element signature="e#1783#1784#0" expanded="false" />
+            <element signature="e#1847#1848#0" expanded="false" />
+            <element signature="e#1902#1903#0" expanded="false" />
+            <element signature="e#2105#2106#0" expanded="false" />
+            <element signature="e#2171#2172#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -899,27 +891,50 @@
         <state vertical-scroll-proportion="0.3327787" vertical-offset="9439" max-vertical-offset="16338">
           <caret line="468" column="13" selection-start-line="468" selection-start-column="13" selection-end-line="468" selection-end-column="13" />
           <folding>
-            <element signature="e#31818#31930#0" expanded="true" />
-            <element signature="e#31929#31930#0" expanded="true" />
+            <element signature="e#33147#33259#0" expanded="true" />
+            <element signature="e#33258#33259#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/LiveScript.bnf">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="521" max-vertical-offset="1848">
+          <caret line="38" column="0" selection-start-line="38" selection-start-column="0" selection-end-line="38" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#549#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://C:/Program Files/Java/jdk1.8.0_31/src.zip!/java/lang/Error.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.33222592" vertical-offset="703" max-vertical-offset="2205">
+          <caret line="68" column="11" selection-start-line="68" selection-start-column="11" selection-end-line="68" selection-end-column="11" />
+          <folding>
+            <element signature="e#1855#1856#0" expanded="true" />
+            <element signature="e#1885#1886#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/LiveScriptLexer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.3327787" vertical-offset="15277" max-vertical-offset="19257">
+          <caret line="757" column="38" selection-start-line="757" selection-start-column="38" selection-end-line="757" selection-end-column="38" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#14053#14062#0" expanded="true" />
+            <element signature="e#14301#14310#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/LiveScript.flex">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="3885" max-vertical-offset="6426">
-          <caret line="199" column="62" selection-start-line="199" selection-start-column="62" selection-end-line="199" selection-end-column="62" />
+        <state vertical-scroll-proportion="0.41860464" vertical-offset="5145" max-vertical-offset="7056">
+          <caret line="257" column="75" selection-start-line="257" selection-start-column="75" selection-end-line="257" selection-end-column="75" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/LiveScript.bnf">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.39219016" vertical-offset="966" max-vertical-offset="1785">
-          <caret line="57" column="40" selection-start-line="57" selection-start-column="40" selection-end-line="57" selection-end-column="40" />
-          <folding>
-            <element signature="e#0#549#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>

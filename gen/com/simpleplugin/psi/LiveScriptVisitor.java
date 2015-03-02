@@ -67,6 +67,10 @@ public class LiveScriptVisitor extends PsiElementVisitor {
     visitExpression(o);
   }
 
+  public void visitRegexExpression(@NotNull LiveScriptRegexExpression o) {
+    visitExpression(o);
+  }
+
   public void visitRightOpExpression(@NotNull LiveScriptRightOpExpression o) {
     visitExpression(o);
   }
