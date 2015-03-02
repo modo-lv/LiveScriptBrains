@@ -10,14 +10,14 @@ import com.intellij.psi.util.PsiTreeUtil;
 import static com.simpleplugin.psi.LiveScriptTypes.*;
 import com.simpleplugin.psi.*;
 
-public class LiveScriptRightOpExpressionImpl extends LiveScriptExpressionImpl implements LiveScriptRightOpExpression {
+public class LiveScriptAssignOpExpressionImpl extends LiveScriptExpressionImpl implements LiveScriptAssignOpExpression {
 
-  public LiveScriptRightOpExpressionImpl(ASTNode node) {
+  public LiveScriptAssignOpExpressionImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof LiveScriptVisitor) ((LiveScriptVisitor)visitor).visitRightOpExpression(this);
+    if (visitor instanceof LiveScriptVisitor) ((LiveScriptVisitor)visitor).visitAssignOpExpression(this);
     else super.accept(visitor);
   }
 

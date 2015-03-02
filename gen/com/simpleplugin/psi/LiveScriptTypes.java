@@ -9,28 +9,32 @@ import com.simpleplugin.psi.impl.*;
 public interface LiveScriptTypes {
 
   IElementType ANY_SEPARATOR = new LiveScriptElementType("ANY_SEPARATOR");
-  IElementType BLOCK_STATEMENT = new LiveScriptElementType("BLOCK_STATEMENT");
+  IElementType ASSIGN_OP_EXPRESSION = new LiveScriptElementType("ASSIGN_OP_EXPRESSION");
   IElementType COM = new LiveScriptElementType("COM");
   IElementType CURL_OBJ_DEF_EXPRESSION = new LiveScriptElementType("CURL_OBJ_DEF_EXPRESSION");
   IElementType EXPLICIT_PROP_DEF_EXPRESSION = new LiveScriptElementType("EXPLICIT_PROP_DEF_EXPRESSION");
   IElementType EXPRESSION = new LiveScriptElementType("EXPRESSION");
+  IElementType IMPLICIT_LIST_EXPRESSION = new LiveScriptElementType("IMPLICIT_LIST_EXPRESSION");
   IElementType IMPLICIT_PROP_DEF_EXPRESSION = new LiveScriptElementType("IMPLICIT_PROP_DEF_EXPRESSION");
   IElementType INLINE_SEPARATOR = new LiveScriptElementType("INLINE_SEPARATOR");
   IElementType INTERPOLATED_STRING_EXPRESSION = new LiveScriptElementType("INTERPOLATED_STRING_EXPRESSION");
   IElementType INTER_LINES = new LiveScriptElementType("INTER_LINES");
   IElementType INTER_STRING_EXPRESSION = new LiveScriptElementType("INTER_STRING_EXPRESSION");
+  IElementType LIST_EXPRESSION = new LiveScriptElementType("LIST_EXPRESSION");
   IElementType LITERAL_EXPRESSION = new LiveScriptElementType("LITERAL_EXPRESSION");
+  IElementType MULTILINE_SEPARATOR = new LiveScriptElementType("MULTILINE_SEPARATOR");
   IElementType OBJ_DEF_EXPRESSION = new LiveScriptElementType("OBJ_DEF_EXPRESSION");
   IElementType OP_EXPRESSION = new LiveScriptElementType("OP_EXPRESSION");
   IElementType REFERENCE_EXPRESSION = new LiveScriptElementType("REFERENCE_EXPRESSION");
   IElementType REGEX_EXPRESSION = new LiveScriptElementType("REGEX_EXPRESSION");
-  IElementType RIGHT_OP_EXPRESSION = new LiveScriptElementType("RIGHT_OP_EXPRESSION");
   IElementType STATEMENT = new LiveScriptElementType("STATEMENT");
   IElementType STRING_EXPRESSION = new LiveScriptElementType("STRING_EXPRESSION");
   IElementType TEST_EXPRESSION = new LiveScriptElementType("TEST_EXPRESSION");
   IElementType VALUE_EXPRESSION = new LiveScriptElementType("VALUE_EXPRESSION");
 
   IElementType BACKSTRING = new LiveScriptTokenType("BACKSTRING");
+  IElementType BRACK_L = new LiveScriptTokenType("BRACK_L");
+  IElementType BRACK_R = new LiveScriptTokenType("BRACK_R");
   IElementType COLON = new LiveScriptTokenType("COLON");
   IElementType COMMA = new LiveScriptTokenType("COMMA");
   IElementType COMMENT_BLOCK = new LiveScriptTokenType("COMMENT_BLOCK");
@@ -39,6 +43,7 @@ public interface LiveScriptTypes {
   IElementType CURL_R = new LiveScriptTokenType("CURL_R");
   IElementType DEDENT = new LiveScriptTokenType("DEDENT");
   IElementType DOT = new LiveScriptTokenType("DOT");
+  IElementType EQ = new LiveScriptTokenType("EQ");
   IElementType HEREDOC = new LiveScriptTokenType("HEREDOC");
   IElementType IDENTIFIER = new LiveScriptTokenType("IDENTIFIER");
   IElementType INDENT = new LiveScriptTokenType("INDENT");
@@ -49,8 +54,6 @@ public interface LiveScriptTypes {
   IElementType PAREN_R = new LiveScriptTokenType("PAREN_R");
   IElementType REGEX = new LiveScriptTokenType("REGEX");
   IElementType RESERVED_LITERAL = new LiveScriptTokenType("RESERVED_LITERAL");
-  IElementType RIGHT_OP = new LiveScriptTokenType("RIGHT_OP");
-  IElementType SPACE = new LiveScriptTokenType("SPACE");
   IElementType STRING = new LiveScriptTokenType("STRING");
   IElementType STRING_END = new LiveScriptTokenType("STRING_END");
   IElementType STRING_INTER_END = new LiveScriptTokenType("STRING_INTER_END");
@@ -66,8 +69,8 @@ public interface LiveScriptTypes {
        if (type == ANY_SEPARATOR) {
         return new LiveScriptAnySeparatorImpl(node);
       }
-      else if (type == BLOCK_STATEMENT) {
-        return new LiveScriptBlockStatementImpl(node);
+      else if (type == ASSIGN_OP_EXPRESSION) {
+        return new LiveScriptAssignOpExpressionImpl(node);
       }
       else if (type == COM) {
         return new LiveScriptComImpl(node);
@@ -80,6 +83,9 @@ public interface LiveScriptTypes {
       }
       else if (type == EXPRESSION) {
         return new LiveScriptExpressionImpl(node);
+      }
+      else if (type == IMPLICIT_LIST_EXPRESSION) {
+        return new LiveScriptImplicitListExpressionImpl(node);
       }
       else if (type == IMPLICIT_PROP_DEF_EXPRESSION) {
         return new LiveScriptImplicitPropDefExpressionImpl(node);
@@ -96,8 +102,14 @@ public interface LiveScriptTypes {
       else if (type == INTER_STRING_EXPRESSION) {
         return new LiveScriptInterStringExpressionImpl(node);
       }
+      else if (type == LIST_EXPRESSION) {
+        return new LiveScriptListExpressionImpl(node);
+      }
       else if (type == LITERAL_EXPRESSION) {
         return new LiveScriptLiteralExpressionImpl(node);
+      }
+      else if (type == MULTILINE_SEPARATOR) {
+        return new LiveScriptMultilineSeparatorImpl(node);
       }
       else if (type == OBJ_DEF_EXPRESSION) {
         return new LiveScriptObjDefExpressionImpl(node);
@@ -110,9 +122,6 @@ public interface LiveScriptTypes {
       }
       else if (type == REGEX_EXPRESSION) {
         return new LiveScriptRegexExpressionImpl(node);
-      }
-      else if (type == RIGHT_OP_EXPRESSION) {
-        return new LiveScriptRightOpExpressionImpl(node);
       }
       else if (type == STATEMENT) {
         return new LiveScriptStatementImpl(node);

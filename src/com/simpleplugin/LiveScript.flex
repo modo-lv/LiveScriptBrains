@@ -17,6 +17,7 @@ import com.intellij.util.containers.Stack;
     System.out.println("End of file reached, clearing out indentation stack.");
     _currentIndent = 0;
     _indents.clear();
+    _states.clear();
     return;
 %eof}
 
@@ -49,11 +50,12 @@ import com.intellij.util.containers.Stack;
     /**
      * Start a new indented block (increase indent).
      */
+
     private IElementType _parseIndent(int count) {
         if (count > _currentIndent) {
             _indents.push(_currentIndent);
             _currentIndent += count;
-            _enterState(INDENTED);
+            _switchToState(INDENTED);
             return _out(LiveScriptTypes.INDENT);
         }
         else if (count < _currentIndent) {
@@ -68,11 +70,16 @@ import com.intellij.util.containers.Stack;
         return null;
     }
 
+    private void _switchToState(int state) {
+        System.out.println("Switching to state " + _stateName(state) + ".");
+        yybegin(INDENTED);
+    }
+
     /**
      * Enter a lexical state and push the previous one to the stack.
      */
     private void _enterState(int state) {
-        System.out.println("Entering state " + state);
+        System.out.println("Entering state " + _stateName(state) + ".");
         _states.push(yystate());
         yybegin(state);
     }
@@ -88,8 +95,9 @@ import com.intellij.util.containers.Stack;
             return false;
         }
         else {
-            System.out.println("Exiting state...");
-            yybegin(_states.pop());
+            int newState = _states.pop();
+            System.out.println("Exiting state " + _stateName(yystate()) + ", state is now " + _stateName(newState));
+            yybegin(newState);
             return true;
         }
     }
@@ -106,6 +114,10 @@ import com.intellij.util.containers.Stack;
      */
     private void _rewindBy(int count) {
         yypushback(count);
+    }
+
+    private void _advanceBy(int count) {
+        _rewindBy(-count);
     }
 
     /**
@@ -152,13 +164,15 @@ REGEX_MULTI_END = \/\/g?m?i?
 
 // Operators
 OPERATOR = [-+*/]
-RIGHT_OP = [=]
+EQ = "="
 COLON = ":"
 COMMA = ","
 CURL_L = "{"
 CURL_R = "}"
 PAREN_L = "("
 PAREN_R = ")"
+BRACK_L = "["
+BRACK_R = "]"
 DOT = "."
 
 IDENTIFIER = [$_a-zA-Z][-$_a-zA-Z0-9]*
@@ -179,25 +193,41 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
 %state SIMPLE_STRING_STARTED, FULL_STRING_STARTED, STRING_VARIABLE, STRING_SUSPENDED
 %state REGEX
 
+%{
+    private String[] _stateNames = new String[] {
+        "YYINITIAL",
+        "INDENTED",
+        "BLOCK_STATEMENT",
+        "SIMPLE_STRING_STARTED",
+        "FULL_STRING_STARTED",
+        "STRING_VARIABLE",
+        "STRING_SUSPENDED",
+        "REGEX",
+    };
+    private String _stateName(int state) {
+        return _stateNames[state / 2];
+    }
+%}
+
 %%
 
-<YYINITIAL> {
+<YYINITIAL, INDENTED> {
     // Literals
-    {NO_VALUE}              { return LiveScriptTypes.RESERVED_LITERAL; }
+    {NO_VALUE}              { return _out(LiveScriptTypes.RESERVED_LITERAL); }
 
-    {BOOLEAN}               { return LiveScriptTypes.RESERVED_LITERAL; }
+    {BOOLEAN}               { return _out(LiveScriptTypes.RESERVED_LITERAL); }
 
-    {NUMBER}|{BASED_NUMBER} { return LiveScriptTypes.NUMBER; }
+    {NUMBER}|{BASED_NUMBER} { return _out(LiveScriptTypes.NUMBER); }
     
     // Strings
 
-    {BACKSTRING}            { return LiveScriptTypes.BACKSTRING; }
+    {BACKSTRING}            { return _out(LiveScriptTypes.BACKSTRING); }
 
-    {HEREDOC}               { return LiveScriptTypes.HEREDOC; }
+    {HEREDOC}               { return _out(LiveScriptTypes.HEREDOC); }
 
-    {SSS}                   { _enterState(SIMPLE_STRING_STARTED); return LiveScriptTypes.STRING_START; }
+    {SSS}                   { _enterState(SIMPLE_STRING_STARTED); return _out(LiveScriptTypes.STRING_START); }
 
-    {FSS}                   { _enterState(FULL_STRING_STARTED); return LiveScriptTypes.STRING_START; }
+    {FSS}                   { _enterState(FULL_STRING_STARTED); return _out(LiveScriptTypes.STRING_START); }
 
 
     // Regex
@@ -216,19 +246,30 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
 
     // Operators
 
-    {OPERATOR}              { return LiveScriptTypes.OPERATOR; }
+    {OPERATOR}              { return _out(LiveScriptTypes.OPERATOR); }
 
-    {RIGHT_OP}              { return LiveScriptTypes.RIGHT_OP; }
+    {EQ}{SPACE}*{NEWLINE}   { _enterState(BLOCK_STATEMENT); return _out(LiveScriptTypes.EQ); }
 
-    {COLON}                 { return LiveScriptTypes.COLON; }
+    {EQ}                    { return _out(LiveScriptTypes.EQ); }
 
-    {COMMA}{SPACE}*         { return LiveScriptTypes.COMMA; }
-    
-    {PAREN_L}               { return LiveScriptTypes.PAREN_L; }
-    
-    {PAREN_R}               { return LiveScriptTypes.PAREN_R; }
-    
-    {CURL_L}                { return LiveScriptTypes.CURL_L; }
+    {COLON}                 { return _out(LiveScriptTypes.COLON); }
+
+    {COMMA}{SPACE}*         { return _out(LiveScriptTypes.COMMA); }
+
+    {PAREN_L}               { return _out(LiveScriptTypes.PAREN_L); }
+
+    {PAREN_R}               { return _out(LiveScriptTypes.PAREN_R); }
+
+    {CURL_L}                { return _out(LiveScriptTypes.CURL_L); }
+
+    // Only rewind if we're actually moving up the state stack,
+    // if we rewind with the stack empty we'll just get stuck
+    // in an infinite loop.
+    {CURL_R}                { if (_exitState()) _rewindBy(1); else return LiveScriptTypes.CURL_R; }
+
+    {BRACK_L}               { return LiveScriptTypes.BRACK_L; }
+
+    {BRACK_R}               { return LiveScriptTypes.BRACK_R; }
 
     {DOT}                   { return LiveScriptTypes.DOT; }
 
@@ -238,17 +279,31 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
 
     {NEWLINE}               { return _out(LiveScriptTypes.NEWLINE); }
 
-    {COMMENT_LINE}          { return LiveScriptTypes.COMMENT_LINE; }
+    {COMMENT_LINE}          { return _out(LiveScriptTypes.COMMENT_LINE); }
 
     {COMMENT_BLOCK}         { return LiveScriptTypes.COMMENT_BLOCK; }
 
 
     {TEST}                  { return LiveScriptTypes.TEST; }
+}
 
-    // Only rewind if we're actually moving up the state stack,
-    // if we rewind with the stack empty we'll just get stuck
-    // in an infinite loop.
-    {CURL_R}    { if (_exitState()) _rewindBy(1); else return LiveScriptTypes.CURL_R; }
+<INDENTED, BLOCK_STATEMENT> {
+    ^{SPACE}+[^\r\n\t ] {
+        System.out.println("State is " + yystate() + ", text is [" + yytext() + "]");
+        _rewindBy(1);
+        IElementType result = _parseIndent(yylength());
+        if (result != null) return result;
+    }
+}
+
+<INDENTED> {
+    ^{SPACE}+{COMMENT_LINE} { _rewindTo("#"); return TokenType.WHITE_SPACE; }
+
+    ^[^\r\n\t ].* {
+        System.out.println("I> state is " + yystate() + " text is [" + yytext() + "], dedenting");
+        _rewind();
+        return _parseIndent(0);
+    }
 }
 
 <REGEX> {
@@ -272,16 +327,16 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
 
 <SIMPLE_STRING_STARTED> {
 
-    (\\{SSS}|[^\'])+       { return LiveScriptTypes.STRING; }
+    (\\{SSS}|[^\'])+       { return _out(LiveScriptTypes.STRING); }
 
-    {SSS}                  { _exitState(); return LiveScriptTypes.STRING_END; }
+    {SSS}                  { _exitState(); return _out(LiveScriptTypes.STRING_END); }
 }
 
 
 <FULL_STRING_STARTED> {
-    (\\{FSS}|[^\"#]|\\#)+  { return LiveScriptTypes.STRING; }
+    (\\{FSS}|[^\"#]|\\#)+  { return _out(LiveScriptTypes.STRING); }
 
-    {FSS}                   { _exitState(); return LiveScriptTypes.STRING_END; }
+    {FSS}                   { _exitState(); return _out(LiveScriptTypes.STRING_END); }
 
     "#{"                    { _enterState(STRING_SUSPENDED); return LiveScriptTypes.STRING_INTER_START; }
 
@@ -307,25 +362,5 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
     .               { _rewindBy(1); _enterState(YYINITIAL); }
 }
 
-
-<BLOCK_STATEMENT> {
-    ^{SPACE}+[^\r\n\t ] {
-        System.out.println("State is " + yystate() + ", text is [" + yytext() + "]");
-        _rewindBy(1);
-        IElementType result = _parseIndent(yylength());
-        if (result != null) return result;
-    }
-
-    <INDENTED> {
-        // Line comments don't affect indentation.
-        ^{SPACE}*{COMMENT_LINE} { _rewindTo("#"); _exitState(); return TokenType.WHITE_SPACE; }
-
-        ^[^\r\n\t ].* {
-            System.out.println("I> text is [" + yytext() + "], dedenting");
-            _rewind();
-            return _parseIndent(0);
-        }
-    }
-}
 
 .           { return TokenType.BAD_CHARACTER; }

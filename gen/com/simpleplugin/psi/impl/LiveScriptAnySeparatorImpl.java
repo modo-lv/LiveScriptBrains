@@ -28,4 +28,10 @@ public class LiveScriptAnySeparatorImpl extends ASTWrapperPsiElement implements 
     return findChildByClass(LiveScriptInlineSeparator.class);
   }
 
+  @Override
+  @Nullable
+  public LiveScriptMultilineSeparator getMultilineSeparator() {
+    return findChildByClass(LiveScriptMultilineSeparator.class);
+  }
+
 }

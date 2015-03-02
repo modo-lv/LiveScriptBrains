@@ -10,4 +10,7 @@ public interface LiveScriptAnySeparator extends PsiElement {
   @Nullable
   LiveScriptInlineSeparator getInlineSeparator();
 
+  @Nullable
+  LiveScriptMultilineSeparator getMultilineSeparator();
+
 }

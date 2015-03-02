@@ -27,17 +27,22 @@ private recover_inter ::= !(NEWLINE | STRING_INTER_END)
 Statement ::= <<optionalParens Expression>> {recoverWhile="recover_statement"}
 
 Expression ::= TestExpression
-    | RightOpExpression
+    | AssignOpExpression
     | OpExpression
-    | CurlObjDefExpression
-    | ObjDefExpression
     | RegexExpression
     | LiteralExpression
     | ReferenceExpression
+    | CurlObjDefExpression
+    | ObjDefExpression
+    | ListExpression
+    | ImplicitListExpression
 
 InterLines ::= <<optionalParens Expression>>* {recoverWhile="recover_inter"}
 
-BlockStatement ::= INDENT Statement+ DEDENT?
+// Lists
+ListExpression ::= BRACK_L <<multiLineArgList ValueExpression>> BRACK_R
+
+ImplicitListExpression ::= Assign INDENT Expression Expression+ DEDENT
 
 // Regex
 RegexExpression ::= REGEX (COMMENT_LINE | REGEX)*;
@@ -46,15 +51,21 @@ CurlObjDefExpression ::= CURL_L (<<multiLineArgList (ExplicitPropDefExpression |
 
 ObjDefExpression ::= <<multiLineArgList ExplicitPropDefExpression>>
 
-ExplicitPropDefExpression ::= (<<optionalParens ValueExpression>> COLON Expression) {rightAssociative=true}
+ExplicitPropDefExpression ::= (ValueExpression COLON Expression) {rightAssociative=true}
 
-ImplicitPropDefExpression ::= (("+"|"-")? <<optionalParens ValueExpression>>)
+ImplicitPropDefExpression ::= (("+"|"-")? ValueExpression)
+
+// Operations
+private Assign ::= ReferenceExpression EQ NEWLINE?
+
+AssignOpExpression ::= Assign Expression
 
 OpExpression ::= Expression OPERATOR NEWLINE? Expression
 
-RightOpExpression ::= ReferenceExpression RIGHT_OP NEWLINE? Expression {rightAssociative=true}
 
-ValueExpression ::= ReferenceExpression | LiteralExpression
+// Literal and value expressions
+
+ValueExpression ::= <<optionalParens (ReferenceExpression | LiteralExpression)>>
 
 LiteralExpression ::= RESERVED_LITERAL | ReferenceExpression | NUMBER | InterpolatedStringExpression | StringExpression
 
@@ -64,9 +75,11 @@ private VarReference ::= IDENTIFIER | THIS | THIS_AT
 
 private PropReference ::= (THIS_AT + IDENTIFIER (DOT IDENTIFIER)*) | ((IDENTIFIER|THIS) (DOT IDENTIFIER)+)
 
+
+// Strings
+
 StringExpression ::= STRING_START string STRING_END | BACKSTRING | HEREDOC
 
-TestExpression ::= TEST
 
 InterStringExpression ::= STRING_START string STRING_INTER_START
     | STRING_INTER_END string STRING_INTER_START
@@ -74,10 +87,15 @@ InterStringExpression ::= STRING_START string STRING_INTER_START
 
 InterpolatedStringExpression ::= InterStringExpression+ InterLines InterStringExpression+
 
+TestExpression ::= TEST
+
 // Pieces
 private meta optionalParens ::= PAREN_L <<param>> PAREN_R | <<param>>
+private meta inlineArgList ::= <<param>> (InlineSeparator <<param>>)*
 private meta multiLineArgList ::= <<param>> (AnySeparator <<param>>)* {rightAssociative=true}
+private meta indented ::= INDENT <<param>>+ DEDENT?
 Com ::= COMMENT_LINE | COMMENT_BLOCK
-InlineSeparator::= COMMA | SPACE+
-AnySeparator::= InlineSeparator | SPACE* NEWLINE SPACE*
+InlineSeparator::= COMMA?
+MultilineSeparator ::= COMMA? NEWLINE+
+AnySeparator::= MultilineSeparator | InlineSeparator
 private string ::= STRING* (IDENTIFIER | STRING)*
