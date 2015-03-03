@@ -11,15 +11,27 @@ import static com.simpleplugin.psi.LiveScriptTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.simpleplugin.psi.*;
 
-public class LiveScriptMultilineSeparatorImpl extends ASTWrapperPsiElement implements LiveScriptMultilineSeparator {
+public class LiveScriptOperationOrValueImpl extends ASTWrapperPsiElement implements LiveScriptOperationOrValue {
 
-  public LiveScriptMultilineSeparatorImpl(ASTNode node) {
+  public LiveScriptOperationOrValueImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof LiveScriptVisitor) ((LiveScriptVisitor)visitor).visitMultilineSeparator(this);
+    if (visitor instanceof LiveScriptVisitor) ((LiveScriptVisitor)visitor).visitOperationOrValue(this);
     else super.accept(visitor);
+  }
+
+  @Override
+  @Nullable
+  public LiveScriptOperation getOperation() {
+    return findChildByClass(LiveScriptOperation.class);
+  }
+
+  @Override
+  @Nullable
+  public LiveScriptValue getValue() {
+    return findChildByClass(LiveScriptValue.class);
   }
 
 }

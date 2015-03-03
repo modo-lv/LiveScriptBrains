@@ -8,132 +8,56 @@ import com.simpleplugin.psi.impl.*;
 
 public interface LiveScriptTypes {
 
-  IElementType ANY_SEPARATOR = new LiveScriptElementType("ANY_SEPARATOR");
-  IElementType ASSIGN_OP_EXPRESSION = new LiveScriptElementType("ASSIGN_OP_EXPRESSION");
-  IElementType COM = new LiveScriptElementType("COM");
-  IElementType CURL_OBJ_DEF_EXPRESSION = new LiveScriptElementType("CURL_OBJ_DEF_EXPRESSION");
-  IElementType EXPLICIT_PROP_DEF_EXPRESSION = new LiveScriptElementType("EXPLICIT_PROP_DEF_EXPRESSION");
-  IElementType EXPRESSION = new LiveScriptElementType("EXPRESSION");
-  IElementType IMPLICIT_LIST_EXPRESSION = new LiveScriptElementType("IMPLICIT_LIST_EXPRESSION");
-  IElementType IMPLICIT_PROP_DEF_EXPRESSION = new LiveScriptElementType("IMPLICIT_PROP_DEF_EXPRESSION");
-  IElementType INLINE_SEPARATOR = new LiveScriptElementType("INLINE_SEPARATOR");
-  IElementType INTERPOLATED_STRING_EXPRESSION = new LiveScriptElementType("INTERPOLATED_STRING_EXPRESSION");
-  IElementType INTER_LINES = new LiveScriptElementType("INTER_LINES");
-  IElementType INTER_STRING_EXPRESSION = new LiveScriptElementType("INTER_STRING_EXPRESSION");
-  IElementType LIST_EXPRESSION = new LiveScriptElementType("LIST_EXPRESSION");
-  IElementType LITERAL_EXPRESSION = new LiveScriptElementType("LITERAL_EXPRESSION");
-  IElementType MULTILINE_SEPARATOR = new LiveScriptElementType("MULTILINE_SEPARATOR");
-  IElementType OBJ_DEF_EXPRESSION = new LiveScriptElementType("OBJ_DEF_EXPRESSION");
-  IElementType OP_EXPRESSION = new LiveScriptElementType("OP_EXPRESSION");
-  IElementType REFERENCE_EXPRESSION = new LiveScriptElementType("REFERENCE_EXPRESSION");
-  IElementType REGEX_EXPRESSION = new LiveScriptElementType("REGEX_EXPRESSION");
+  IElementType ASSIGN_OPERATION = new LiveScriptElementType("ASSIGN_OPERATION");
+  IElementType COMMENT = new LiveScriptElementType("COMMENT");
+  IElementType I_STRING_STATEMENT = new LiveScriptElementType("I_STRING_STATEMENT");
+  IElementType LITERAL = new LiveScriptElementType("LITERAL");
+  IElementType MATH_OPERATION = new LiveScriptElementType("MATH_OPERATION");
+  IElementType OPERATION = new LiveScriptElementType("OPERATION");
+  IElementType OPERATION_OR_VALUE = new LiveScriptElementType("OPERATION_OR_VALUE");
   IElementType STATEMENT = new LiveScriptElementType("STATEMENT");
-  IElementType STRING_EXPRESSION = new LiveScriptElementType("STRING_EXPRESSION");
-  IElementType TEST_EXPRESSION = new LiveScriptElementType("TEST_EXPRESSION");
-  IElementType VALUE_EXPRESSION = new LiveScriptElementType("VALUE_EXPRESSION");
+  IElementType VALUE = new LiveScriptElementType("VALUE");
 
-  IElementType BACKSTRING = new LiveScriptTokenType("BACKSTRING");
-  IElementType BRACK_L = new LiveScriptTokenType("BRACK_L");
-  IElementType BRACK_R = new LiveScriptTokenType("BRACK_R");
-  IElementType COLON = new LiveScriptTokenType("COLON");
-  IElementType COMMA = new LiveScriptTokenType("COMMA");
-  IElementType COMMENT_BLOCK = new LiveScriptTokenType("COMMENT_BLOCK");
+  IElementType ASSIGN = new LiveScriptTokenType("ASSIGN");
+  IElementType BOOLEAN = new LiveScriptTokenType("BOOLEAN");
   IElementType COMMENT_LINE = new LiveScriptTokenType("COMMENT_LINE");
-  IElementType CURL_L = new LiveScriptTokenType("CURL_L");
-  IElementType CURL_R = new LiveScriptTokenType("CURL_R");
-  IElementType DEDENT = new LiveScriptTokenType("DEDENT");
-  IElementType DOT = new LiveScriptTokenType("DOT");
-  IElementType EQ = new LiveScriptTokenType("EQ");
-  IElementType HEREDOC = new LiveScriptTokenType("HEREDOC");
+  IElementType EMPTY = new LiveScriptTokenType("EMPTY");
   IElementType IDENTIFIER = new LiveScriptTokenType("IDENTIFIER");
-  IElementType INDENT = new LiveScriptTokenType("INDENT");
+  IElementType ISTRING = new LiveScriptTokenType("ISTRING");
+  IElementType MATH_OP = new LiveScriptTokenType("MATH_OP");
   IElementType NEWLINE = new LiveScriptTokenType("NEWLINE");
   IElementType NUMBER = new LiveScriptTokenType("NUMBER");
-  IElementType OPERATOR = new LiveScriptTokenType("OPERATOR");
-  IElementType PAREN_L = new LiveScriptTokenType("PAREN_L");
-  IElementType PAREN_R = new LiveScriptTokenType("PAREN_R");
-  IElementType REGEX = new LiveScriptTokenType("REGEX");
-  IElementType RESERVED_LITERAL = new LiveScriptTokenType("RESERVED_LITERAL");
   IElementType STRING = new LiveScriptTokenType("STRING");
-  IElementType STRING_END = new LiveScriptTokenType("STRING_END");
-  IElementType STRING_INTER_END = new LiveScriptTokenType("STRING_INTER_END");
-  IElementType STRING_INTER_START = new LiveScriptTokenType("STRING_INTER_START");
-  IElementType STRING_START = new LiveScriptTokenType("STRING_START");
-  IElementType TEST = new LiveScriptTokenType("TEST");
-  IElementType THIS = new LiveScriptTokenType("THIS");
-  IElementType THIS_AT = new LiveScriptTokenType("THIS_AT");
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {
       IElementType type = node.getElementType();
-       if (type == ANY_SEPARATOR) {
-        return new LiveScriptAnySeparatorImpl(node);
+       if (type == ASSIGN_OPERATION) {
+        return new LiveScriptAssignOperationImpl(node);
       }
-      else if (type == ASSIGN_OP_EXPRESSION) {
-        return new LiveScriptAssignOpExpressionImpl(node);
+      else if (type == COMMENT) {
+        return new LiveScriptCommentImpl(node);
       }
-      else if (type == COM) {
-        return new LiveScriptComImpl(node);
+      else if (type == I_STRING_STATEMENT) {
+        return new LiveScriptIStringStatementImpl(node);
       }
-      else if (type == CURL_OBJ_DEF_EXPRESSION) {
-        return new LiveScriptCurlObjDefExpressionImpl(node);
+      else if (type == LITERAL) {
+        return new LiveScriptLiteralImpl(node);
       }
-      else if (type == EXPLICIT_PROP_DEF_EXPRESSION) {
-        return new LiveScriptExplicitPropDefExpressionImpl(node);
+      else if (type == MATH_OPERATION) {
+        return new LiveScriptMathOperationImpl(node);
       }
-      else if (type == EXPRESSION) {
-        return new LiveScriptExpressionImpl(node);
+      else if (type == OPERATION) {
+        return new LiveScriptOperationImpl(node);
       }
-      else if (type == IMPLICIT_LIST_EXPRESSION) {
-        return new LiveScriptImplicitListExpressionImpl(node);
-      }
-      else if (type == IMPLICIT_PROP_DEF_EXPRESSION) {
-        return new LiveScriptImplicitPropDefExpressionImpl(node);
-      }
-      else if (type == INLINE_SEPARATOR) {
-        return new LiveScriptInlineSeparatorImpl(node);
-      }
-      else if (type == INTERPOLATED_STRING_EXPRESSION) {
-        return new LiveScriptInterpolatedStringExpressionImpl(node);
-      }
-      else if (type == INTER_LINES) {
-        return new LiveScriptInterLinesImpl(node);
-      }
-      else if (type == INTER_STRING_EXPRESSION) {
-        return new LiveScriptInterStringExpressionImpl(node);
-      }
-      else if (type == LIST_EXPRESSION) {
-        return new LiveScriptListExpressionImpl(node);
-      }
-      else if (type == LITERAL_EXPRESSION) {
-        return new LiveScriptLiteralExpressionImpl(node);
-      }
-      else if (type == MULTILINE_SEPARATOR) {
-        return new LiveScriptMultilineSeparatorImpl(node);
-      }
-      else if (type == OBJ_DEF_EXPRESSION) {
-        return new LiveScriptObjDefExpressionImpl(node);
-      }
-      else if (type == OP_EXPRESSION) {
-        return new LiveScriptOpExpressionImpl(node);
-      }
-      else if (type == REFERENCE_EXPRESSION) {
-        return new LiveScriptReferenceExpressionImpl(node);
-      }
-      else if (type == REGEX_EXPRESSION) {
-        return new LiveScriptRegexExpressionImpl(node);
+      else if (type == OPERATION_OR_VALUE) {
+        return new LiveScriptOperationOrValueImpl(node);
       }
       else if (type == STATEMENT) {
         return new LiveScriptStatementImpl(node);
       }
-      else if (type == STRING_EXPRESSION) {
-        return new LiveScriptStringExpressionImpl(node);
-      }
-      else if (type == TEST_EXPRESSION) {
-        return new LiveScriptTestExpressionImpl(node);
-      }
-      else if (type == VALUE_EXPRESSION) {
-        return new LiveScriptValueExpressionImpl(node);
+      else if (type == VALUE) {
+        return new LiveScriptValueImpl(node);
       }
       throw new AssertionError("Unknown element type: " + type);
     }

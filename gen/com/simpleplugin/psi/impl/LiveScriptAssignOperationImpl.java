@@ -8,23 +8,24 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static com.simpleplugin.psi.LiveScriptTypes.*;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.simpleplugin.psi.*;
 
-public class LiveScriptOpExpressionImpl extends LiveScriptExpressionImpl implements LiveScriptOpExpression {
+public class LiveScriptAssignOperationImpl extends ASTWrapperPsiElement implements LiveScriptAssignOperation {
 
-  public LiveScriptOpExpressionImpl(ASTNode node) {
+  public LiveScriptAssignOperationImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof LiveScriptVisitor) ((LiveScriptVisitor)visitor).visitOpExpression(this);
+    if (visitor instanceof LiveScriptVisitor) ((LiveScriptVisitor)visitor).visitAssignOperation(this);
     else super.accept(visitor);
   }
 
   @Override
-  @NotNull
-  public List<LiveScriptExpression> getExpressionList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, LiveScriptExpression.class);
+  @Nullable
+  public LiveScriptOperationOrValue getOperationOrValue() {
+    return findChildByClass(LiveScriptOperationOrValue.class);
   }
 
 }

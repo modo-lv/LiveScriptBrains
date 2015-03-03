@@ -8,17 +8,24 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static com.simpleplugin.psi.LiveScriptTypes.*;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.simpleplugin.psi.*;
 
-public class LiveScriptRegexExpressionImpl extends LiveScriptExpressionImpl implements LiveScriptRegexExpression {
+public class LiveScriptIStringStatementImpl extends ASTWrapperPsiElement implements LiveScriptIStringStatement {
 
-  public LiveScriptRegexExpressionImpl(ASTNode node) {
+  public LiveScriptIStringStatementImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof LiveScriptVisitor) ((LiveScriptVisitor)visitor).visitRegexExpression(this);
+    if (visitor instanceof LiveScriptVisitor) ((LiveScriptVisitor)visitor).visitIStringStatement(this);
     else super.accept(visitor);
+  }
+
+  @Override
+  @NotNull
+  public List<LiveScriptOperationOrValue> getOperationOrValueList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, LiveScriptOperationOrValue.class);
   }
 
 }

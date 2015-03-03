@@ -7,96 +7,40 @@ import com.intellij.psi.PsiElement;
 
 public class LiveScriptVisitor extends PsiElementVisitor {
 
-  public void visitAnySeparator(@NotNull LiveScriptAnySeparator o) {
+  public void visitAssignOperation(@NotNull LiveScriptAssignOperation o) {
     visitPsiElement(o);
   }
 
-  public void visitAssignOpExpression(@NotNull LiveScriptAssignOpExpression o) {
-    visitExpression(o);
-  }
-
-  public void visitCom(@NotNull LiveScriptCom o) {
+  public void visitComment(@NotNull LiveScriptComment o) {
     visitPsiElement(o);
   }
 
-  public void visitCurlObjDefExpression(@NotNull LiveScriptCurlObjDefExpression o) {
-    visitExpression(o);
-  }
-
-  public void visitExplicitPropDefExpression(@NotNull LiveScriptExplicitPropDefExpression o) {
-    visitExpression(o);
-  }
-
-  public void visitExpression(@NotNull LiveScriptExpression o) {
+  public void visitIStringStatement(@NotNull LiveScriptIStringStatement o) {
     visitPsiElement(o);
   }
 
-  public void visitImplicitListExpression(@NotNull LiveScriptImplicitListExpression o) {
-    visitExpression(o);
-  }
-
-  public void visitImplicitPropDefExpression(@NotNull LiveScriptImplicitPropDefExpression o) {
-    visitExpression(o);
-  }
-
-  public void visitInlineSeparator(@NotNull LiveScriptInlineSeparator o) {
+  public void visitLiteral(@NotNull LiveScriptLiteral o) {
     visitPsiElement(o);
   }
 
-  public void visitInterLines(@NotNull LiveScriptInterLines o) {
+  public void visitMathOperation(@NotNull LiveScriptMathOperation o) {
     visitPsiElement(o);
   }
 
-  public void visitInterStringExpression(@NotNull LiveScriptInterStringExpression o) {
-    visitExpression(o);
-  }
-
-  public void visitInterpolatedStringExpression(@NotNull LiveScriptInterpolatedStringExpression o) {
-    visitExpression(o);
-  }
-
-  public void visitListExpression(@NotNull LiveScriptListExpression o) {
-    visitExpression(o);
-  }
-
-  public void visitLiteralExpression(@NotNull LiveScriptLiteralExpression o) {
-    visitExpression(o);
-  }
-
-  public void visitMultilineSeparator(@NotNull LiveScriptMultilineSeparator o) {
+  public void visitOperation(@NotNull LiveScriptOperation o) {
     visitPsiElement(o);
   }
 
-  public void visitObjDefExpression(@NotNull LiveScriptObjDefExpression o) {
-    visitExpression(o);
-  }
-
-  public void visitOpExpression(@NotNull LiveScriptOpExpression o) {
-    visitExpression(o);
-  }
-
-  public void visitReferenceExpression(@NotNull LiveScriptReferenceExpression o) {
-    visitExpression(o);
-  }
-
-  public void visitRegexExpression(@NotNull LiveScriptRegexExpression o) {
-    visitExpression(o);
+  public void visitOperationOrValue(@NotNull LiveScriptOperationOrValue o) {
+    visitPsiElement(o);
   }
 
   public void visitStatement(@NotNull LiveScriptStatement o) {
     visitPsiElement(o);
   }
 
-  public void visitStringExpression(@NotNull LiveScriptStringExpression o) {
-    visitExpression(o);
-  }
-
-  public void visitTestExpression(@NotNull LiveScriptTestExpression o) {
-    visitExpression(o);
-  }
-
-  public void visitValueExpression(@NotNull LiveScriptValueExpression o) {
-    visitExpression(o);
+  public void visitValue(@NotNull LiveScriptValue o) {
+    visitPsiElement(o);
   }
 
   public void visitPsiElement(@NotNull PsiElement o) {

@@ -5,12 +5,12 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface LiveScriptCurlObjDefExpression extends LiveScriptExpression {
+public interface LiveScriptMathOperation extends PsiElement {
+
+  @Nullable
+  LiveScriptOperationOrValue getOperationOrValue();
 
   @NotNull
-  List<LiveScriptAnySeparator> getAnySeparatorList();
-
-  @NotNull
-  List<LiveScriptExpression> getExpressionList();
+  LiveScriptValue getValue();
 
 }

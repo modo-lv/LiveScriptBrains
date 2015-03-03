@@ -15,9 +15,53 @@
   parserUtilClass="com.simpleplugin.psi.LiveScriptParserUtil"
 
   extends(".*Expression$")=Expression
+
+  recoverWhile("Statement")="recover"
 }
 
-file ::= (Statement | Com | NEWLINE)* <<eof>>
+file ::= (Statement | Comment | NEWLINE)*
+private recover ::= !NEWLINE
+
+Comment ::= COMMENT_LINE
+
+Statement ::= IStringStatement | OperationOrValue
+
+IStringStatement ::= ISTRING (OperationOrValue ISTRING)+
+
+OperationOrValue ::= Operation | Value
+
+Operation ::= AssignOperation | MathOperation
+
+AssignOperation ::= IDENTIFIER ASSIGN (OperationOrValue) {pin=2 rightAssociative=true}
+
+MathOperation ::= Value MATH_OP OperationOrValue {pin=2}
+
+// ::= ASSIGN
+
+// ::= MATH_OP
+
+Value ::= Literal | IDENTIFIER
+
+Literal ::= BOOLEAN | NUMBER | EMPTY | STRING
+
+// ::= BOOLEAN
+
+// ::= STRING
+
+// ::= NUMBER
+
+// ::= EMPTY
+
+// ::= IDENTIFIER
+
+// ::= COMMENT_LINE
+
+// ::= NEWLINE
+
+
+
+/*
+oldFile ::= (Statement | Com | NEWLINE)* <<eof>>
 
 external objDef ::= objDef
 
@@ -98,4 +142,4 @@ Com ::= COMMENT_LINE | COMMENT_BLOCK
 InlineSeparator::= COMMA?
 MultilineSeparator ::= COMMA? NEWLINE+
 AnySeparator::= MultilineSeparator | InlineSeparator
-private string ::= STRING* (IDENTIFIER | STRING)*
+private string ::= STRING* (IDENTIFIER | STRING)* */

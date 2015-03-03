@@ -8,16 +8,17 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static com.simpleplugin.psi.LiveScriptTypes.*;
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.simpleplugin.psi.*;
 
-public class LiveScriptTestExpressionImpl extends LiveScriptExpressionImpl implements LiveScriptTestExpression {
+public class LiveScriptCommentImpl extends ASTWrapperPsiElement implements LiveScriptComment {
 
-  public LiveScriptTestExpressionImpl(ASTNode node) {
+  public LiveScriptCommentImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof LiveScriptVisitor) ((LiveScriptVisitor)visitor).visitTestExpression(this);
+    if (visitor instanceof LiveScriptVisitor) ((LiveScriptVisitor)visitor).visitComment(this);
     else super.accept(visitor);
   }
 

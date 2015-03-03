@@ -43,18 +43,14 @@ public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase {
 	public TextAttributesKey[] getTokenHighlights(IElementType tokenType) {
 		IElementType[] strings = {
 				LiveScriptTypes.STRING,
-				LiveScriptTypes.STRING_START,
-				LiveScriptTypes.STRING_END,
-				LiveScriptTypes.STRING_INTER_START,
-				LiveScriptTypes.STRING_INTER_END,
-				LiveScriptTypes.HEREDOC,
-				LiveScriptTypes.BACKSTRING,
+				LiveScriptTypes.ISTRING,
 		};
 
 		for (IElementType i : strings)
 			if (tokenType.equals(i))
 				return getKeySetFor(STRING);
 
+/*
 		Map<IElementType, TextAttributesKey> types = new HashMap<IElementType, TextAttributesKey>();
 		types.put(LiveScriptTypes.NUMBER, NUMBER);
 		types.put(LiveScriptTypes.COMMENT_LINE, COMMENT_LINE);
@@ -64,6 +60,7 @@ public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase {
 			if (tokenType.equals(e))
 				return getKeySetFor(types.get(e));
 
+*/
 
 		return new TextAttributesKey[0];
 	}

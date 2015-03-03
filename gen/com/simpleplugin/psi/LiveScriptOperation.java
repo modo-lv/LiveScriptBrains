@@ -5,6 +5,12 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface LiveScriptAnything extends PsiElement {
+public interface LiveScriptOperation extends PsiElement {
+
+  @Nullable
+  LiveScriptAssignOperation getAssignOperation();
+
+  @Nullable
+  LiveScriptMathOperation getMathOperation();
 
 }

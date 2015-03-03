@@ -11,15 +11,21 @@ import static com.simpleplugin.psi.LiveScriptTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.simpleplugin.psi.*;
 
-public class LiveScriptExpressionImpl extends ASTWrapperPsiElement implements LiveScriptExpression {
+public class LiveScriptValueImpl extends ASTWrapperPsiElement implements LiveScriptValue {
 
-  public LiveScriptExpressionImpl(ASTNode node) {
+  public LiveScriptValueImpl(ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof LiveScriptVisitor) ((LiveScriptVisitor)visitor).visitExpression(this);
+    if (visitor instanceof LiveScriptVisitor) ((LiveScriptVisitor)visitor).visitValue(this);
     else super.accept(visitor);
+  }
+
+  @Override
+  @Nullable
+  public LiveScriptLiteral getLiteral() {
+    return findChildByClass(LiveScriptLiteral.class);
   }
 
 }

@@ -52,6 +52,7 @@ import com.intellij.util.containers.Stack;
      */
 
     private IElementType _parseIndent(int count) {
+/*
         if (count > _currentIndent) {
             _indents.push(_currentIndent);
             _currentIndent += count;
@@ -67,6 +68,7 @@ import com.intellij.util.containers.Stack;
             }
             return _out(LiveScriptTypes.DEDENT);
         }
+*/
         return null;
     }
 
@@ -144,7 +146,7 @@ import com.intellij.util.containers.Stack;
 // Literals
 BASED_NUMBER = ([0-9]|[1-2][0-9]|3[0-2])\~[0-9a-zA-Z]+
 NUMBER = [0-9][0-9_]*\.?[0-9_]*[a-zA-Z]*
-NO_VALUE=null|void
+EMPTY=null|void
 BOOLEAN=true|false|yes|no|on|off
 
 // Specials
@@ -153,9 +155,14 @@ THIS_AT="@"
 
 // Strings
 BACKSTRING = \\[^,;\]\)\} \t\r\n]+
-HEREDOC = \'\'\'(.|[\r\n])*\'\'\'
+HEREDOC = \'\'\'~\'\'\'
 SSS = \' // Simple string start
 FSS = %\"|\" // Full string start
+SSTRING = \'(\\\'|[^\'])*\'
+DSTRING = \"(\\\"|[^\"#])*\"
+DSTRING_INT = \"(\\\"|[^\"#])*#\{   // Interrupted
+DSTRING_CON = \}(\\\"|[^\"#])*#\{   // Continued (resumed + interrupted again)
+DSTRING_RES = \}(\\\"|[^\"#])*\"    // Resumed [+interrupted]
 
 // Regex
 REGEX = \/[^\/] ~\/g?m?i?
@@ -163,8 +170,9 @@ REGEX_MULTI_START = "//"
 REGEX_MULTI_END = \/\/g?m?i?
 
 // Operators
-OPERATOR = [-+*/]
-EQ = "="
+MATH_OP = [-+*/]
+ASSIGN = "="
+
 COLON = ":"
 COMMA = ","
 CURL_L = "{"
@@ -190,7 +198,7 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
 
 
 %state INDENTED, BLOCK_STATEMENT
-%state SIMPLE_STRING_STARTED, FULL_STRING_STARTED, STRING_VARIABLE, STRING_SUSPENDED
+%state SIMPLE_STRING_STARTED, INTERSTRING, STRING_VARIABLE, STRING_SUSPENDED
 %state REGEX
 
 %{
@@ -199,7 +207,7 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
         "INDENTED",
         "BLOCK_STATEMENT",
         "SIMPLE_STRING_STARTED",
-        "FULL_STRING_STARTED",
+        "INTERSTRING",
         "STRING_VARIABLE",
         "STRING_SUSPENDED",
         "REGEX",
@@ -211,6 +219,52 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
 
 %%
 
+<YYINITIAL> {
+    {DSTRING_INT}           { _enterState(INTERSTRING); return _out(LiveScriptTypes.ISTRING); }
+}
+
+
+<YYINITIAL, INTERSTRING> {
+    // Literals
+    {EMPTY}                 { return _out(LiveScriptTypes.EMPTY); }
+
+    {BOOLEAN}               { return _out(LiveScriptTypes.BOOLEAN); }
+
+    {NUMBER}|{BASED_NUMBER} { return _out(LiveScriptTypes.NUMBER); }
+
+    // Strings
+    {HEREDOC}               { return _out(LiveScriptTypes.STRING); }
+    {BACKSTRING}            { return _out(LiveScriptTypes.STRING); }
+    {SSTRING}               { return _out(LiveScriptTypes.STRING); }
+    {DSTRING}               { return _out(LiveScriptTypes.STRING); }
+    {DSTRING_CON}           { return _out(LiveScriptTypes.ISTRING); }
+
+    // Operators & punctuation
+    {MATH_OP}               { return _out(LiveScriptTypes.MATH_OP); }
+
+    {ASSIGN}                { return _out(LiveScriptTypes.ASSIGN); }
+
+
+    // Identifiers
+    {IDENTIFIER}            { return _out(LiveScriptTypes.IDENTIFIER); }
+
+
+    // Non-code
+    {NEWLINE}               { return _out(LiveScriptTypes.NEWLINE); }
+
+    {COMMENT_LINE}          { return _out(LiveScriptTypes.COMMENT_LINE); }
+
+    {SPACE}+                { return _out(TokenType.WHITE_SPACE); }
+}
+
+<INTERSTRING> {
+    {DSTRING_RES}           { _exitState(); return _out(LiveScriptTypes.ISTRING); }
+}
+
+// Fall-through
+.                       { return _out(TokenType.BAD_CHARACTER); }
+
+/*
 <YYINITIAL, INDENTED> {
     // Literals
     {NO_VALUE}              { return _out(LiveScriptTypes.RESERVED_LITERAL); }
@@ -218,7 +272,7 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
     {BOOLEAN}               { return _out(LiveScriptTypes.RESERVED_LITERAL); }
 
     {NUMBER}|{BASED_NUMBER} { return _out(LiveScriptTypes.NUMBER); }
-    
+
     // Strings
 
     {BACKSTRING}            { return _out(LiveScriptTypes.BACKSTRING); }
@@ -361,6 +415,4 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
     // so if it's not closing (handled above), it must be opening.
     .               { _rewindBy(1); _enterState(YYINITIAL); }
 }
-
-
-.           { return TokenType.BAD_CHARACTER; }
+*/
