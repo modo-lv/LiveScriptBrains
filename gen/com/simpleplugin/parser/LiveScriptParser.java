@@ -60,6 +60,19 @@ public class LiveScriptParser implements PsiParser {
   }
 
   /* ********************************************************** */
+  // STRING | ISTRING
+  static boolean AnyString(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "AnyString")) return false;
+    if (!nextTokenIs(b, "", ISTRING, STRING)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, STRING);
+    if (!r) r = consumeToken(b, ISTRING);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  /* ********************************************************** */
   // IDENTIFIER ASSIGN (OperationOrValue)
   public static boolean AssignOperation(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "AssignOperation")) return false;
@@ -96,19 +109,20 @@ public class LiveScriptParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // ISTRING (OperationOrValue ISTRING)+
+  // STRING (STRING? (IDENTIFIER|ISTRING OperationOrValue ISTRING))+ STRING
   public static boolean IStringStatement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "IStringStatement")) return false;
-    if (!nextTokenIs(b, ISTRING)) return false;
+    if (!nextTokenIs(b, STRING)) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeToken(b, ISTRING);
+    r = consumeToken(b, STRING);
     r = r && IStringStatement_1(b, l + 1);
+    r = r && consumeToken(b, STRING);
     exit_section_(b, m, I_STRING_STATEMENT, r);
     return r;
   }
 
-  // (OperationOrValue ISTRING)+
+  // (STRING? (IDENTIFIER|ISTRING OperationOrValue ISTRING))+
   private static boolean IStringStatement_1(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "IStringStatement_1")) return false;
     boolean r;
@@ -124,12 +138,42 @@ public class LiveScriptParser implements PsiParser {
     return r;
   }
 
-  // OperationOrValue ISTRING
+  // STRING? (IDENTIFIER|ISTRING OperationOrValue ISTRING)
   private static boolean IStringStatement_1_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "IStringStatement_1_0")) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = OperationOrValue(b, l + 1);
+    r = IStringStatement_1_0_0(b, l + 1);
+    r = r && IStringStatement_1_0_1(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // STRING?
+  private static boolean IStringStatement_1_0_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "IStringStatement_1_0_0")) return false;
+    consumeToken(b, STRING);
+    return true;
+  }
+
+  // IDENTIFIER|ISTRING OperationOrValue ISTRING
+  private static boolean IStringStatement_1_0_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "IStringStatement_1_0_1")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, IDENTIFIER);
+    if (!r) r = IStringStatement_1_0_1_1(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // ISTRING OperationOrValue ISTRING
+  private static boolean IStringStatement_1_0_1_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "IStringStatement_1_0_1_1")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, ISTRING);
+    r = r && OperationOrValue(b, l + 1);
     r = r && consumeToken(b, ISTRING);
     exit_section_(b, m, null, r);
     return r;

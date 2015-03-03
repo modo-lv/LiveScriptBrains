@@ -74,7 +74,7 @@ import com.intellij.util.containers.Stack;
 
     private void _switchToState(int state) {
         System.out.println("Switching to state " + _stateName(state) + ".");
-        yybegin(INDENTED);
+        yybegin(state);
     }
 
     /**
@@ -159,10 +159,12 @@ HEREDOC = \'\'\'~\'\'\'
 SSS = \' // Simple string start
 FSS = %\"|\" // Full string start
 SSTRING = \'(\\\'|[^\'])*\'
-DSTRING = \"(\\\"|[^\"#])*\"
-DSTRING_INT = \"(\\\"|[^\"#])*#\{   // Interrupted
-DSTRING_CON = \}(\\\"|[^\"#])*#\{   // Continued (resumed + interrupted again)
-DSTRING_RES = \}(\\\"|[^\"#])*\"    // Resumed [+interrupted]
+ISTRING = (\\\"|[^\"#])
+
+DSTRING = %?\"{ISTRING}*\"
+DSTRING_START = %?\"{ISTRING}*
+ISTRING_START = "#{"
+
 
 // Regex
 REGEX = \/[^\/] ~\/g?m?i?
@@ -198,7 +200,7 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
 
 
 %state INDENTED, BLOCK_STATEMENT
-%state SIMPLE_STRING_STARTED, INTERSTRING, STRING_VARIABLE, STRING_SUSPENDED
+%state DSTRING, ISTRING, VSTRING, STRING_SUSPENDED
 %state REGEX
 
 %{
@@ -206,9 +208,9 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
         "YYINITIAL",
         "INDENTED",
         "BLOCK_STATEMENT",
-        "SIMPLE_STRING_STARTED",
-        "INTERSTRING",
-        "STRING_VARIABLE",
+        "DSTRING",
+        "ISTRING",
+        "VSTRING",
         "STRING_SUSPENDED",
         "REGEX",
     };
@@ -219,12 +221,23 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
 
 %%
 
-<YYINITIAL> {
-    {DSTRING_INT}           { _enterState(INTERSTRING); return _out(LiveScriptTypes.ISTRING); }
+// Inside a double-quoted string
+<DSTRING> {
+    {ISTRING_START}         { _enterState(ISTRING); return _out(LiveScriptTypes.ISTRING); }
+
+    #{IDENTIFIER}           { return _out(LiveScriptTypes.IDENTIFIER); }
+
+    // Everything else is just regular string.
+    ({ISTRING}|#\{\})*\"    { _exitState(); return _out(LiveScriptTypes.STRING); }
+
+    ({ISTRING}|#\{\})*      { return _out(LiveScriptTypes.STRING); }
 }
 
+<ISTRING> {
+    {CURL_R}                { _exitState(); return _out(LiveScriptTypes.ISTRING); }
+}
 
-<YYINITIAL, INTERSTRING> {
+<YYINITIAL, ISTRING> {
     // Literals
     {EMPTY}                 { return _out(LiveScriptTypes.EMPTY); }
 
@@ -237,17 +250,14 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
     {BACKSTRING}            { return _out(LiveScriptTypes.STRING); }
     {SSTRING}               { return _out(LiveScriptTypes.STRING); }
     {DSTRING}               { return _out(LiveScriptTypes.STRING); }
-    {DSTRING_CON}           { return _out(LiveScriptTypes.ISTRING); }
+    {DSTRING_START}         { _enterState(DSTRING); return _out(LiveScriptTypes.STRING); }
+
+    {IDENTIFIER}            { return _out(LiveScriptTypes.IDENTIFIER); }
 
     // Operators & punctuation
     {MATH_OP}               { return _out(LiveScriptTypes.MATH_OP); }
 
     {ASSIGN}                { return _out(LiveScriptTypes.ASSIGN); }
-
-
-    // Identifiers
-    {IDENTIFIER}            { return _out(LiveScriptTypes.IDENTIFIER); }
-
 
     // Non-code
     {NEWLINE}               { return _out(LiveScriptTypes.NEWLINE); }
@@ -257,12 +267,8 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
     {SPACE}+                { return _out(TokenType.WHITE_SPACE); }
 }
 
-<INTERSTRING> {
-    {DSTRING_RES}           { _exitState(); return _out(LiveScriptTypes.ISTRING); }
-}
-
 // Fall-through
-.                       { return _out(TokenType.BAD_CHARACTER); }
+.                       { System.out.println("State is " + _stateName(yystate())); return _out(TokenType.BAD_CHARACTER); }
 
 /*
 <YYINITIAL, INDENTED> {
@@ -408,10 +414,10 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
 
 // Intermediary state between FULL_STRING_STARTED and YYINITIAL, to properly handle entry/exit
 <STRING_SUSPENDED> {
-    // Once the interpolation is closed, leave the "Suspended" state and resume normal string.
+    // Once the ISTRING is closed, leave the "Suspended" state and resume normal string.
     "}"             { _exitState(); return LiveScriptTypes.STRING_INTER_END; }
 
-    // This state can only be reached by opening or closing a string interpolation,
+    // This state can only be reached by opening or closing a string ISTRING,
     // so if it's not closing (handled above), it must be opening.
     .               { _rewindBy(1); _enterState(YYINITIAL); }
 }

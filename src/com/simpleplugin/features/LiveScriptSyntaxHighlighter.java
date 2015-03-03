@@ -50,15 +50,16 @@ public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase {
 			if (tokenType.equals(i))
 				return getKeySetFor(STRING);
 
-/*
 		Map<IElementType, TextAttributesKey> types = new HashMap<IElementType, TextAttributesKey>();
-		types.put(LiveScriptTypes.NUMBER, NUMBER);
 		types.put(LiveScriptTypes.COMMENT_LINE, COMMENT_LINE);
-		types.put(LiveScriptTypes.COMMENT_BLOCK, COMMENT_BLOCK);
+		types.put(LiveScriptTypes.NUMBER, NUMBER);
 
 		for (IElementType e : types.keySet())
 			if (tokenType.equals(e))
 				return getKeySetFor(types.get(e));
+/*
+		types.put(LiveScriptTypes.COMMENT_BLOCK, COMMENT_BLOCK);
+
 
 */
 

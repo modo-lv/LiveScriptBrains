@@ -26,7 +26,7 @@ Comment ::= COMMENT_LINE
 
 Statement ::= IStringStatement | OperationOrValue
 
-IStringStatement ::= ISTRING (OperationOrValue ISTRING)+
+IStringStatement ::= STRING (STRING? (IDENTIFIER|ISTRING OperationOrValue ISTRING))+ STRING
 
 OperationOrValue ::= Operation | Value
 
@@ -45,6 +45,10 @@ Value ::= Literal | IDENTIFIER
 Literal ::= BOOLEAN | NUMBER | EMPTY | STRING
 
 // ::= BOOLEAN
+
+private AnyString ::= STRING | ISTRING
+
+// ::= ISTRING
 
 // ::= STRING
 
