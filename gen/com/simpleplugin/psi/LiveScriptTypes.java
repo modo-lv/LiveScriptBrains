@@ -28,6 +28,7 @@ public interface LiveScriptTypes {
   IElementType NEWLINE = new LiveScriptTokenType("NEWLINE");
   IElementType NUMBER = new LiveScriptTokenType("NUMBER");
   IElementType STRING = new LiveScriptTokenType("STRING");
+  IElementType UNKNOWN = new LiveScriptTokenType("UNKNOWN");
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {

@@ -1,5 +1,6 @@
 package com.simpleplugin.psi;
 
+import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.Language;
 import com.intellij.lang.ParserDefinition;
@@ -23,13 +24,18 @@ import java.io.Reader;
 public class LiveScriptParserDefinition implements ParserDefinition{
     public static final TokenSet WHITE_SPACES = TokenSet.create(TokenType.WHITE_SPACE);
     public static final TokenSet COMMENTS = TokenSet.create(LiveScriptTypes.COMMENT_LINE);//, LiveScriptTypes.COMMENT_BLOCK);
+	public static LiveScriptParserDefinition INSTANCE;
 
     public static final IFileElementType FILE = new IFileElementType(Language.<LiveScriptLanguage>findInstance(LiveScriptLanguage.class));
 
-    @NotNull
+	public LiveScriptParserDefinition() {
+		INSTANCE = this;
+	}
+
+	@NotNull
     @Override
     public Lexer createLexer(Project project) {
-        return new FlexAdapter(new LiveScriptLexer((Reader) null));
+		return new FlexAdapter(new LiveScriptLexer((Reader) null));
     }
 
     @NotNull
@@ -49,7 +55,7 @@ public class LiveScriptParserDefinition implements ParserDefinition{
 
     @NotNull
     public PsiParser createParser(final Project project) {
-        return new LiveScriptParser();
+        return new CustomParser();
     }
 
     @Override
@@ -67,6 +73,7 @@ public class LiveScriptParserDefinition implements ParserDefinition{
 
     @NotNull
     public PsiElement createElement(ASTNode node) {
-        return LiveScriptTypes.Factory.createElement(node);
+		return new ASTWrapperPsiElement(node);
+//		return LiveScriptTypes.Factory.createElement(node);
     }
 }

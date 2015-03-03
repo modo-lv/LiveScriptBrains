@@ -22,7 +22,7 @@
 file ::= (Statement | Comment | NEWLINE)*
 private recover ::= !NEWLINE
 
-Comment ::= COMMENT_LINE
+Comment ::= COMMENT_LINE | NEWLINE | UNKNOWN
 
 Statement ::= IStringStatement | OperationOrValue
 

@@ -97,14 +97,15 @@ public class LiveScriptParser implements PsiParser {
   }
 
   /* ********************************************************** */
-  // COMMENT_LINE
+  // COMMENT_LINE | NEWLINE | UNKNOWN
   public static boolean Comment(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Comment")) return false;
-    if (!nextTokenIs(b, COMMENT_LINE)) return false;
     boolean r;
-    Marker m = enter_section_(b);
+    Marker m = enter_section_(b, l, _NONE_, "<comment>");
     r = consumeToken(b, COMMENT_LINE);
-    exit_section_(b, m, COMMENT, r);
+    if (!r) r = consumeToken(b, NEWLINE);
+    if (!r) r = consumeToken(b, UNKNOWN);
+    exit_section_(b, l, m, COMMENT, r, false, null);
     return r;
   }
 

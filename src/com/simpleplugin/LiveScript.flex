@@ -137,7 +137,7 @@ import com.intellij.util.containers.Stack;
     }
 
     private IElementType _out(IElementType input) {
-        System.out.println("Matched [" + yytext() + "] as " + input);
+        //System.out.println("Matched [" + yytext() + "] as " + input);
         return input;
     }
 %}
@@ -197,6 +197,7 @@ NEWLINE = \r\n|{CRLF}
 SPACE = [\f\t ]
 
 TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
+UNKNOWN=[\{\},:().]
 
 
 %state INDENTED, BLOCK_STATEMENT
@@ -265,6 +266,8 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
     {COMMENT_LINE}          { return _out(LiveScriptTypes.COMMENT_LINE); }
 
     {SPACE}+                { return _out(TokenType.WHITE_SPACE); }
+
+    {UNKNOWN}               { return _out(LiveScriptTypes.UNKNOWN); }
 }
 
 // Fall-through
