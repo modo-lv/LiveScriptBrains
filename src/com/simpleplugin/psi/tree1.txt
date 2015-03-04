@@ -1,0 +1,17 @@
+assign|\n|objDef|
+
+x| |=| |objDef|\n|objDef|
+
+x| |=| |propDef(2)| |propDef(2)|\n|propDef|
+
+x| |=| |indent(2)|propDef| |indent(2)|propDef|\n|propDef|
+
+x| |=| |indent(2)|sum|:| |"test"| |indent(2)|x|:| |sum|
+
+x| |=| |indent(2)|(|sum|)|:| |"test"| |indent(2)|x|:| |sum|
+
+x| |=| |indent(2)|(|3| |+| |2|)|:| |"test"| |indent(2)|x|:| |a| |+| |4|
+
+x| |=| |\n| | |(|3| |+| |2|)|:| |"test"| |\n| | |x|:| |a| |+| |4|
+
+x = \n  (3 + 2): "test" \n  x: a + 4\na:"c"

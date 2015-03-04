@@ -1,0 +1,32 @@
+# propDef()|objDef() => propDef() is merged into objDef()
+# \n|propDef => \n is discarded as whitespace (after parsing possible indents)
+
+
+objDef()
+
+propDef()|objDef()
+
+a| |:|objDef(2)|objDef()
+
+a| |:|propDef(2)|objDef(2)|objDef()
+
+a| |:|indent(2)|propDef|objDef(2)|objDef()
+
+a| |:|indent(2)|b| |:| |objDef(4)|objDef(2)|objDef()
+
+a| |:|indent(2)|b| |:| |propDef(4)|propDef(4)|propDef(4)|propDef(2)|propDef(2)|propDef()
+
+a| |:|indent(2)|b| |:| |propDef(4)|propDef(4)|propDef(4)|propDef(2)|propDef(2)|\n|propDef()
+
+a| |:|indent(2)|b| |:| |indent(4)|c| |:| |d|indent(4)|e| |:| |f|indent(4)|g| |:| |h|indent(2)|i| |:| |j|indent(2)|k| |:| |l|\n|m| |:| |n
+
+a| |:|\n| | |b| |:| |\n| | | | |c| |:| |d|\n| | | | |e| |:| |f|\n| | | | |g| |:| |h|\n| | |i| |:| |j|\n| | |k| |:| |l|\n|m| |:| |n
+
+a :
+  b : 
+    c : d
+    e : f
+    g : h
+  i : j
+  k : l
+m : n
