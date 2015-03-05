@@ -34,15 +34,21 @@ public class LiveScriptParserRules extends ArrayList<LiveScriptParserRules.Rule>
 	}
 
 	public LiveScriptParserRules() {
-		Rule rule;
+		this.add(new Rule(LiveScriptTypes.VALUE, new IElementType[] {LiveScriptTypes.NUMBER}));
 
-		rule = new Rule(LiveScriptTypes.MATH_OPERATION, new IElementType[]{
-			LiveScriptTypes.NUMBER,
+		this.add(new Rule(LiveScriptTypes.MATH_OPERATION, new IElementType[]{
+			LiveScriptTypes.VALUE,
 			LiveScriptTypes.MATH_OP,
-			LiveScriptTypes.NUMBER,
-		});
+			LiveScriptTypes.VALUE,
+		}));
 
-		this.add(rule);
+		this.add(new Rule(LiveScriptTypes.EXPRESSION, new IElementType[] {LiveScriptTypes.MATH_OPERATION}));
+
+		this.add(new Rule(LiveScriptTypes.ASSIGN_OPERATION, new IElementType[] {
+			LiveScriptTypes.IDENTIFIER,
+			LiveScriptTypes.ASSIGN,
+			LiveScriptTypes.EXPRESSION
+		}));
 	}
 
 

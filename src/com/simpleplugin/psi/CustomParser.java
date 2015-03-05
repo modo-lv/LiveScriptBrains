@@ -99,7 +99,7 @@ public class CustomParser implements PsiParser {
 		public boolean RuleParsed(LiveScriptParserRules.Rule rule) {
 			Queue<TreeToken> queue = new LinkedList<TreeToken>();
 			for (TreeToken token : InputList) {
-				if (token.Type == rule.TokenTypes.get(queue.size()) || token.Type == rule.Result) {
+				if (token.Type == rule.TokenTypes.get(queue.size()) || (token.Type == rule.Result && rule.TokenTypes.size() > 1)) {
 					queue.add(token);
 
 					// do we have a full match?
@@ -120,9 +120,14 @@ public class CustomParser implements PsiParser {
 						while (queue.size() > 1) {
 							InputList.remove(queue.remove());
 						}
-						TreeToken last = queue.remove();
-						t.EndPosition = last.EndPosition;
-						InputList.remove(last);
+
+						if (queue.size() > 0) {
+							TreeToken last = queue.remove();
+							t.EndPosition = last.EndPosition;
+							InputList.remove(last);
+						}
+						else
+							t.EndPosition = first.EndPosition;
 
 						this.add(t);
 						return true;
