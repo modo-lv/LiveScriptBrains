@@ -42,9 +42,28 @@ public class CustomParser implements PsiParser {
 		 */
 		public String Error;
 
+		public TreeToken() {
+		}
+
+		public TreeToken(IElementType type) {
+			Type = type;
+		}
+
 		@Override
 		public String toString() {
 			return Type.toString();
+		}
+
+		/**
+		 * Check if the type of this token is the same ase one of the given types.
+		 * @param types Types to check against.
+		 * @return <tt>true</tt> if a match was found, <tt>false</tt> otherwise.
+		 */
+		public boolean TypeIsOneOf(IElementType... types) {
+			for (IElementType type : types)
+				if (type == this.Type)
+					return true;
+			return false;
 		}
 	}
 
@@ -103,7 +122,10 @@ public class CustomParser implements PsiParser {
 			LiveScriptParserState state = new LiveScriptParserState(this, LiveScriptParserState.StateTypes.Default);
 
 			for (ParseTokenIndex = 0; ParseTokenIndex < InputList.size(); ParseTokenIndex++) {
-				TreeToken nextToken = ParseTokenIndex + 1 < InputList.size() ? InputList.get(ParseTokenIndex + 1) : null;
+				TreeToken nextToken = ParseTokenIndex + 1 < InputList.size()
+					? InputList.get(ParseTokenIndex + 1)
+					: new TreeToken(LiveScriptTypes.EOF);
+
 				TreeToken newToken = state.ParseToken(InputList.get(ParseTokenIndex), nextToken);
 
 				if (state.NewState != null) {

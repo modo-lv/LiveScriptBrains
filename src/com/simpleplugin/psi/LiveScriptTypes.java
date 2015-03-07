@@ -3,6 +3,8 @@ package com.simpleplugin.psi;
 import com.intellij.psi.tree.IElementType;
 
 public class LiveScriptTypes {
+	public static IElementType EOF = new LiveScriptElementType("EOF");
+
 	public static IElementType ASSIGN_OPERATION = new LiveScriptElementType("ASSIGN_OPERATION");
 	public static IElementType COMMENT = new LiveScriptElementType("COMMENT");
 	public static IElementType I_STRING_STATEMENT = new LiveScriptElementType("I_STRING_STATEMENT");

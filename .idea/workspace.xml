@@ -35,27 +35,29 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="CustomParser.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="CustomParser.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/psi/CustomParser.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.26490065" vertical-offset="1760" max-vertical-offset="3840">
-              <caret line="106" column="0" selection-start-line="106" selection-start-column="0" selection-end-line="106" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="2168" max-vertical-offset="4280">
+              <caret line="137" column="0" selection-start-line="137" selection-start-column="0" selection-end-line="137" selection-end-column="0" />
               <folding>
-                <element signature="e#4570#4581#0" expanded="true" />
+                <element signature="e#995#996#0" expanded="true" />
+                <element signature="e#1015#1016#0" expanded="true" />
+                <element signature="e#5062#5073#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="LiveScriptParserState.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="LiveScriptParserState.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptParserState.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="1160" max-vertical-offset="2620">
-              <caret line="100" column="8" selection-start-line="100" selection-start-column="8" selection-end-line="100" selection-end-column="8" />
+            <state vertical-scroll-proportion="0.49407783" vertical-offset="1988" max-vertical-offset="3240">
+              <caret line="114" column="9" selection-start-line="114" selection-start-column="9" selection-end-line="114" selection-end-column="9" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#2986#2987#0" expanded="true" />
-                <element signature="e#3015#3016#0" expanded="true" />
+                <element signature="e#4561#4562#0" expanded="true" />
+                <element signature="e#4590#4591#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -106,12 +108,13 @@
         <option value="$PROJECT_DIR$/src/com/simpleplugin/LiveScript.bnf" />
         <option value="$PROJECT_DIR$/META-INF/plugin.xml" />
         <option value="$PROJECT_DIR$/src/com/simpleplugin/LiveScript.flex" />
-        <option value="$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptTypes.java" />
         <option value="$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptParserRules.java" />
         <option value="$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptParserDefinition.java" />
         <option value="$PROJECT_DIR$/src/com/simpleplugin/psi/parserstates/AssignParserState.java" />
-        <option value="$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptParserState.java" />
+        <option value="$PROJECT_DIR$/src/com/simpleplugin/psi/ParseError.java" />
+        <option value="$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptTypes.java" />
         <option value="$PROJECT_DIR$/src/com/simpleplugin/psi/CustomParser.java" />
+        <option value="$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptParserState.java" />
       </list>
     </option>
   </component>
@@ -504,7 +507,7 @@
       <window_info id="PsiViewer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3298109" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32622603" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32622603" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32942432" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.19799778" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -550,19 +553,13 @@
           <option name="timeStamp" value="33" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptParserState.java</url>
-          <line>63</line>
-          <properties />
-          <option name="timeStamp" value="97" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/com/simpleplugin/psi/CustomParser.java</url>
-          <line>135</line>
+          <line>121</line>
           <properties />
-          <option name="timeStamp" value="100" />
+          <option name="timeStamp" value="108" />
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="101" />
+      <option name="time" value="109" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="#org.jetbrains.idea.devkit.run.PluginConfigurationType">
@@ -575,32 +572,14 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptParserState.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="2002" max-vertical-offset="2580">
-          <caret line="119" column="30" selection-start-line="119" selection-start-column="30" selection-end-line="119" selection-end-column="30" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#2986#2987#0" expanded="true" />
-            <element signature="e#3015#3016#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/LiveScript.flex">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="4400" max-vertical-offset="8640">
-          <caret line="220" column="2" selection-start-line="220" selection-start-column="2" selection-end-line="220" selection-end-column="2" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/psi/CustomParser.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="1219" max-vertical-offset="4620">
           <caret line="89" column="0" selection-start-line="89" selection-start-column="0" selection-end-line="89" selection-end-column="0" />
           <folding>
-            <element signature="e#4570#4581#0" expanded="true" />
+            <element signature="e#995#996#0" expanded="true" />
+            <element signature="e#1015#1016#0" expanded="true" />
+            <element signature="e#5062#5073#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -611,8 +590,8 @@
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#2986#2987#0" expanded="true" />
-            <element signature="e#3015#3016#0" expanded="true" />
+            <element signature="e#4561#4562#0" expanded="true" />
+            <element signature="e#4590#4591#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -630,7 +609,9 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="4000">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#4570#4581#0" expanded="true" />
+            <element signature="e#995#996#0" expanded="true" />
+            <element signature="e#1015#1016#0" expanded="true" />
+            <element signature="e#5062#5073#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -931,6 +912,24 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/psi/ParseError.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.09933775" vertical-offset="0" max-vertical-offset="604">
+          <caret line="3" column="39" selection-start-line="3" selection-start-column="39" selection-end-line="3" selection-end-column="39" />
+          <folding>
+            <element signature="e#127#128#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptTypes.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.16556291" vertical-offset="0" max-vertical-offset="760">
+          <caret line="5" column="70" selection-start-line="5" selection-start-column="70" selection-end-line="5" selection-end-column="70" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/LiveScript.flex">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="4796" max-vertical-offset="8440">
@@ -939,24 +938,26 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptParserState.java">
+    <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/psi/CustomParser.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="1760" max-vertical-offset="2620">
-          <caret line="100" column="8" selection-start-line="100" selection-start-column="8" selection-end-line="100" selection-end-column="8" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="2168" max-vertical-offset="4280">
+          <caret line="137" column="0" selection-start-line="137" selection-start-column="0" selection-end-line="137" selection-end-column="0" />
           <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#2986#2987#0" expanded="true" />
-            <element signature="e#3015#3016#0" expanded="true" />
+            <element signature="e#995#996#0" expanded="true" />
+            <element signature="e#1015#1016#0" expanded="true" />
+            <element signature="e#5062#5073#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/psi/CustomParser.java">
+    <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptParserState.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.26490065" vertical-offset="1760" max-vertical-offset="3840">
-          <caret line="106" column="0" selection-start-line="106" selection-start-column="0" selection-end-line="106" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.49407783" vertical-offset="1988" max-vertical-offset="3240">
+          <caret line="114" column="9" selection-start-line="114" selection-start-column="9" selection-end-line="114" selection-end-column="9" />
           <folding>
-            <element signature="e#4570#4581#0" expanded="true" />
+            <element signature="imports" expanded="true" />
+            <element signature="e#4561#4562#0" expanded="true" />
+            <element signature="e#4590#4591#0" expanded="true" />
           </folding>
         </state>
       </provider>
