@@ -14,6 +14,9 @@ public class LiveScriptParserState {
 
 		Literal,
 		Sum,
+
+		ArgList,
+
 		AssignOp,
 	}
 
@@ -124,6 +127,11 @@ public class LiveScriptParserState {
 		if (this.Type == StateTypes.Error)
 			return false;
 
+		// Bad char
+		if (token.TypeIsOneOf(TokenType.BAD_CHARACTER)) {
+			return StartBadCharState(token);
+		}
+
 		// Literals
 		if (token.TypeIsOneOf(LiveScriptTypes.STRING, LiveScriptTypes.NUMBER, LiveScriptTypes.BOOLEAN, LiveScriptTypes.EMPTY)) {
 			return StartState(StateTypes.Literal, token, LiveScriptTypes.LITERAL);
@@ -139,6 +147,14 @@ public class LiveScriptParserState {
 			&& nextToken.TypeIsOneOf(LiveScriptTypes.PLUS))
 		{
 			return StartState(StateTypes.Sum, token, LiveScriptTypes.SUM);
+		}
+
+		// Argument list
+		if (this.Type != StateTypes.ArgList
+			&& token.Type == LiveScriptTypes.VALUE
+			&& nextToken.TypeIsOneOf(LiveScriptTypes.COMMA))
+		{
+			return StartState(StateTypes.ArgList, token, LiveScriptTypes.ARGUMENT_LIST);
 		}
 
 		// Assignment
@@ -220,6 +236,12 @@ public class LiveScriptParserState {
 				if (token.TypeIsOneOf(LiveScriptTypes.VALUE, LiveScriptTypes.SUM))
 					return true;
 				throw new ParseError("Invalid sum expression.");
+			case ArgList:
+				if (token.TypeIsOneOf(LiveScriptTypes.COMMA, LiveScriptTypes.VALUE))
+					return false;
+				else if (!this.TokenStack.empty())
+					 return true;
+				throw new ParseError("Invalid argument list.");
 			case AssignOp:
 				if (this.TokenStack.size() == 1 && token.Type == LiveScriptTypes.ASSIGN)
 					return false;
@@ -245,10 +267,10 @@ public class LiveScriptParserState {
 
 	/**
 	 * Start a new state.
-	 * @param type
-	 * @param token
-	 * @param result
-	 * @return
+	 * @param type State type.
+	 * @param token Token that the new state starts with.
+	 * @param result New state's result token type.
+	 * @return <tt>true</tt>
 	 */
 	public boolean StartState(StateTypes type, TreeToken token, IElementType result) {
 		ParserTree.StateStack.push(this);
@@ -258,6 +280,14 @@ public class LiveScriptParserState {
 
 		return true;
 	}
+
+	public boolean StartBadCharState(TreeToken token) {
+		ParserTree.StateStack.push(this);
+		NewState = new LiveScriptParserState(ParserTree, StateTypes.Error, token.StartPosition, TokenType.ERROR_ELEMENT);
+		NewState.IsSingleTokenState = true;
+		NewState.ErrorMessage = "Unrecognized character.";
+		return true;
+	};
 
 
 	@Override
