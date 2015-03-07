@@ -14,7 +14,10 @@ public class LiveScriptTypes {
 	public static IElementType OPERATION = new LiveScriptElementType("OPERATION");
 	public static IElementType OPERATION_OR_VALUE = new LiveScriptElementType("OPERATION_OR_VALUE");
 	public static IElementType STATEMENT = new LiveScriptElementType("STATEMENT");
+	
+	// Fake values (used in parsing but not in PSI or lexer
 	public static IElementType VALUE = new LiveScriptElementType("VALUE");
+
 
 	public static IElementType PLUS = new LiveScriptElementType("PLUS");
 	public static IElementType ASSIGN = new LiveScriptElementType("ASSIGN");
@@ -32,6 +35,7 @@ public class LiveScriptTypes {
 	public static IElementType OBJ_END = new LiveScriptElementType("OBJ_END");
 	public static IElementType INDENT = new LiveScriptElementType("INDENT");
 	public static IElementType SEMICOLON = new LiveScriptElementType("SEMICOLON");
+	public static IElementType COMMA = new LiveScriptElementType("COMMA");
 
 
 	public static IElementType EXPRESSION = new LiveScriptElementType("Expression");

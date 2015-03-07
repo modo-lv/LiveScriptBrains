@@ -133,10 +133,18 @@ public class LiveScriptParserState {
 		if (this.IsSingleTokenState)
 			return false;
 
-		// Assignment
-		if (token.Type == LiveScriptTypes.IDENTIFIER && nextToken.TypeIsOneOf(LiveScriptTypes.ASSIGN)) {
-			return StartState(StateTypes.AssignOp, token, LiveScriptTypes.ASSIGN_OPERATION);
+		// Sum
+		if (this.Type != StateTypes.Sum
+			&& token.TypeIsOneOf(LiveScriptTypes.VALUE, LiveScriptTypes.SUM)
+			&& nextToken.TypeIsOneOf(LiveScriptTypes.PLUS))
+		{
+			return StartState(StateTypes.Sum, token, LiveScriptTypes.SUM);
 		}
+
+		// Assignment
+		if (token.Type == LiveScriptTypes.IDENTIFIER && nextToken.TypeIsOneOf(LiveScriptTypes.ASSIGN))
+			return StartState(StateTypes.AssignOp, token, LiveScriptTypes.ASSIGN_OPERATION);
+
 
 		return false;
 	}
@@ -205,32 +213,33 @@ public class LiveScriptParserState {
 	public boolean IsEndOfState(TreeToken token, TreeToken nextToken) {
 		switch (Type) {
 			case Error:
-				if ((token.Type == LiveScriptTypes.NEWLINE && nextToken.Type != LiveScriptTypes.INDENT)
-					|| token.TypeIsOneOf(LiveScriptTypes.EOF, LiveScriptTypes.SEMICOLON))
-				{
-					return true;
-				}
-				return false;
+				return IsEndOfStatement(token, nextToken);
 			case Sum:
-				if (nextToken.Type == LiveScriptTypes.EOF) {
-					// If the current token is a sum-able, everything's fine
-					if (token.TypeIsOneOf(LiveScriptTypes.NUMBER, LiveScriptTypes.STRING, LiveScriptTypes.SUM))
-						return true;
-					// If not, it means we're at the "+" sign and there is no more input to parse.
-					throw new ParseError("Incomplete math operation.");
-				}
-				return (!nextToken.TypeIsOneOf(LiveScriptTypes.NUMBER, LiveScriptTypes.STRING, LiveScriptTypes.SUM));
-			case AssignOp:
-				if (token.Type == LiveScriptTypes.ASSIGN)
+				if (token.TypeIsOneOf(LiveScriptTypes.PLUS))
 					return false;
-				if (token.TypeIsOneOf(LiveScriptTypes.LITERAL, LiveScriptTypes.MATH_OPERATION, LiveScriptTypes.ASSIGN_OPERATION)
-					&& nextToken.TypeIsOneOf(LiveScriptTypes.EOF, LiveScriptTypes.NEWLINE))
-				{
+				if (token.TypeIsOneOf(LiveScriptTypes.VALUE, LiveScriptTypes.SUM))
 					return true;
-				}
+				throw new ParseError("Invalid sum expression.");
+			case AssignOp:
+				if (this.TokenStack.size() == 1 && token.Type == LiveScriptTypes.ASSIGN)
+					return false;
+				if (token.TypeIsOneOf(LiveScriptTypes.SUM, LiveScriptTypes.VALUE))
+					return true;
 				throw new ParseError("Invalid assign expression.");
 			default: return false;
 		}
+	}
+
+
+	/**
+	 * Check if the current token is the last in a statement.
+	 * @param token Current token.
+	 * @param nextToken Next token (lookahead).
+	 * @return <tt>true</tt> if the current token is last in a statement, <tt>false</tt> otherwise.
+	 */
+	private boolean IsEndOfStatement(TreeToken token, TreeToken nextToken) {
+		return nextToken.TypeIsOneOf(LiveScriptTypes.SEMICOLON, LiveScriptTypes.EOF, LiveScriptTypes.NEWLINE);
+			//|| (token.TypeIsOneOf(LiveScriptTypes.NEWLINE) && !nextToken.TypeIsOneOf(LiveScriptTypes.INDENT)));
 	}
 
 

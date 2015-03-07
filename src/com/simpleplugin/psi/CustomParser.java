@@ -60,9 +60,15 @@ public class CustomParser implements PsiParser {
 		 * @return <tt>true</tt> if a match was found, <tt>false</tt> otherwise.
 		 */
 		public boolean TypeIsOneOf(IElementType... types) {
-			for (IElementType type : types)
+			for (IElementType type : types) {
+				if (type == LiveScriptTypes.VALUE
+					&& this.TypeIsOneOf(LiveScriptTypes.IDENTIFIER, LiveScriptTypes.LITERAL))
+				{
+					return true;
+				}
 				if (type == this.Type)
 					return true;
+			}
 			return false;
 		}
 	}
@@ -206,7 +212,7 @@ public class CustomParser implements PsiParser {
 
 		tree.ParseAndBuild().SetMarkersOn(builder);
 
-		rootMarker.done(LiveScriptTypes.UNKNOWN);
+		rootMarker.done(LiveScriptParserDefinition.FILE);
 
 		return builder.getTreeBuilt();
 	}

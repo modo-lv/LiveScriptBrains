@@ -265,6 +265,8 @@ UNKNOWN=[:().]
     {CURL_L}				{ return _out(LiveScriptTypes.OBJ_START); }
     {CURL_R}				{ return _out(LiveScriptTypes.OBJ_END); }
 
+    {COMMA}					{ return _out(LiveScriptTypes.COMMA); }
+
     // Non-code
     {NEWLINE}               { return _out(LiveScriptTypes.NEWLINE); }
 
