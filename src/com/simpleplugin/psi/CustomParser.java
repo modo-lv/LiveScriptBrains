@@ -109,10 +109,6 @@ public class CustomParser implements PsiParser {
 			return super.add(token);
 		}
 
-		public void EnterState(LiveScriptParserState state) {
-
-		}
-
 		/**
 		 * Parse input token list and build a token tree.
 		 * @return Self for method chaining.
@@ -137,8 +133,6 @@ public class CustomParser implements PsiParser {
 
 				if (newToken != null) {
 					this.add(newToken);
-					if (newToken.Type == TokenType.ERROR_ELEMENT)
-						return this;
 				}
 			}
 

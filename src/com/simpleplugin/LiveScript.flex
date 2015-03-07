@@ -172,7 +172,8 @@ REGEX_MULTI_START = "//"
 REGEX_MULTI_END = \/\/g?m?i?
 
 // Operators
-MATH_OP = [-+*/]
+MATH_OP = [-*/]
+PLUS = "+"
 ASSIGN = "="
 
 COLON = ":"
@@ -197,7 +198,7 @@ NEWLINE = \r\n|{CRLF}
 SPACE = [\f\t ]
 
 TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
-UNKNOWN=[\{\},:().]
+UNKNOWN=[:().]
 
 
 %state INDENTED, BLOCK_STATEMENT
@@ -257,8 +258,12 @@ UNKNOWN=[\{\},:().]
 
     // Operators & punctuation
     {MATH_OP}               { return _out(LiveScriptTypes.MATH_OP); }
+    {PLUS}					{ return _out(LiveScriptTypes.PLUS); }
 
     {ASSIGN}                { return _out(LiveScriptTypes.ASSIGN); }
+
+    {CURL_L}				{ return _out(LiveScriptTypes.OBJ_START); }
+    {CURL_R}				{ return _out(LiveScriptTypes.OBJ_END); }
 
     // Non-code
     {NEWLINE}               { return _out(LiveScriptTypes.NEWLINE); }
@@ -268,160 +273,9 @@ UNKNOWN=[\{\},:().]
     {SPACE}+                { return _out(TokenType.WHITE_SPACE); }
 
     {UNKNOWN}               { return _out(LiveScriptTypes.UNKNOWN); }
+
+
 }
 
 // Fall-through
 .                       { System.out.println("State is " + _stateName(yystate())); return _out(TokenType.BAD_CHARACTER); }
-
-/*
-<YYINITIAL, INDENTED> {
-    // Literals
-    {NO_VALUE}              { return _out(LiveScriptTypes.RESERVED_LITERAL); }
-
-    {BOOLEAN}               { return _out(LiveScriptTypes.RESERVED_LITERAL); }
-
-    {NUMBER}|{BASED_NUMBER} { return _out(LiveScriptTypes.NUMBER); }
-
-    // Strings
-
-    {BACKSTRING}            { return _out(LiveScriptTypes.BACKSTRING); }
-
-    {HEREDOC}               { return _out(LiveScriptTypes.HEREDOC); }
-
-    {SSS}                   { _enterState(SIMPLE_STRING_STARTED); return _out(LiveScriptTypes.STRING_START); }
-
-    {FSS}                   { _enterState(FULL_STRING_STARTED); return _out(LiveScriptTypes.STRING_START); }
-
-
-    // Regex
-    {REGEX}                 { return _out(LiveScriptTypes.REGEX); }
-
-    {REGEX_MULTI_START}     { _enterState(REGEX); return _out(LiveScriptTypes.REGEX); }
-    
-
-    // Identifiers
-    {THIS}                  { return LiveScriptTypes.THIS; }
-
-    {THIS_AT}               { return LiveScriptTypes.THIS_AT; }
-
-    {IDENTIFIER}            { return _out(LiveScriptTypes.IDENTIFIER); }
-    
-
-    // Operators
-
-    {OPERATOR}              { return _out(LiveScriptTypes.OPERATOR); }
-
-    {EQ}{SPACE}*{NEWLINE}   { _enterState(BLOCK_STATEMENT); return _out(LiveScriptTypes.EQ); }
-
-    {EQ}                    { return _out(LiveScriptTypes.EQ); }
-
-    {COLON}                 { return _out(LiveScriptTypes.COLON); }
-
-    {COMMA}{SPACE}*         { return _out(LiveScriptTypes.COMMA); }
-
-    {PAREN_L}               { return _out(LiveScriptTypes.PAREN_L); }
-
-    {PAREN_R}               { return _out(LiveScriptTypes.PAREN_R); }
-
-    {CURL_L}                { return _out(LiveScriptTypes.CURL_L); }
-
-    // Only rewind if we're actually moving up the state stack,
-    // if we rewind with the stack empty we'll just get stuck
-    // in an infinite loop.
-    {CURL_R}                { if (_exitState()) _rewindBy(1); else return LiveScriptTypes.CURL_R; }
-
-    {BRACK_L}               { return LiveScriptTypes.BRACK_L; }
-
-    {BRACK_R}               { return LiveScriptTypes.BRACK_R; }
-
-    {DOT}                   { return LiveScriptTypes.DOT; }
-
-
-    // Non-code
-    {SPACE}+                { return _out(TokenType.WHITE_SPACE); }
-
-    {NEWLINE}               { return _out(LiveScriptTypes.NEWLINE); }
-
-    {COMMENT_LINE}          { return _out(LiveScriptTypes.COMMENT_LINE); }
-
-    {COMMENT_BLOCK}         { return LiveScriptTypes.COMMENT_BLOCK; }
-
-
-    {TEST}                  { return LiveScriptTypes.TEST; }
-}
-
-<INDENTED, BLOCK_STATEMENT> {
-    ^{SPACE}+[^\r\n\t ] {
-        System.out.println("State is " + yystate() + ", text is [" + yytext() + "]");
-        _rewindBy(1);
-        IElementType result = _parseIndent(yylength());
-        if (result != null) return result;
-    }
-}
-
-<INDENTED> {
-    ^{SPACE}+{COMMENT_LINE} { _rewindTo("#"); return TokenType.WHITE_SPACE; }
-
-    ^[^\r\n\t ].* {
-        System.out.println("I> state is " + yystate() + " text is [" + yytext() + "], dedenting");
-        _rewind();
-        return _parseIndent(0);
-    }
-}
-
-<REGEX> {
-
-    {COMMENT_LINE}                  { return _out(LiveScriptTypes.COMMENT_LINE);}
-
-    {REGEX_MULTI_END}               { _exitState(); return _out(LiveScriptTypes.REGEX); }
-
-    ~(#|"//") {
-        char c = yycharat(yylength() - 1);
-        if (c == '#')
-            _rewindBy(1);
-        else if (c == '/')
-            _rewindBy(2);
-        else
-            throw new Error("Unexpected character: [" + c + "] at the end of regex line.");
-        return _out(LiveScriptTypes.REGEX);
-    }
-}
-
-
-<SIMPLE_STRING_STARTED> {
-
-    (\\{SSS}|[^\'])+       { return _out(LiveScriptTypes.STRING); }
-
-    {SSS}                  { _exitState(); return _out(LiveScriptTypes.STRING_END); }
-}
-
-
-<FULL_STRING_STARTED> {
-    (\\{FSS}|[^\"#]|\\#)+  { return _out(LiveScriptTypes.STRING); }
-
-    {FSS}                   { _exitState(); return _out(LiveScriptTypes.STRING_END); }
-
-    "#{"                    { _enterState(STRING_SUSPENDED); return LiveScriptTypes.STRING_INTER_START; }
-
-    "#"{IDENTIFIER}         { _rewind(); _rewindBy(-1); _enterState(STRING_VARIABLE); return LiveScriptTypes.STRING; }
-
-    "#"                     { return LiveScriptTypes.STRING; }
-}
-
-
-<STRING_VARIABLE> {
-    // Return simple variables.
-    {IDENTIFIER}    { _exitState(); return LiveScriptTypes.IDENTIFIER; }
-}
-
-
-// Intermediary state between FULL_STRING_STARTED and YYINITIAL, to properly handle entry/exit
-<STRING_SUSPENDED> {
-    // Once the ISTRING is closed, leave the "Suspended" state and resume normal string.
-    "}"             { _exitState(); return LiveScriptTypes.STRING_INTER_END; }
-
-    // This state can only be reached by opening or closing a string ISTRING,
-    // so if it's not closing (handled above), it must be opening.
-    .               { _rewindBy(1); _enterState(YYINITIAL); }
-}
-*/

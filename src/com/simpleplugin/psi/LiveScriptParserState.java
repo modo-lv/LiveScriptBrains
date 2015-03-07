@@ -2,20 +2,27 @@ package com.simpleplugin.psi;
 
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
-import java.util.Stack;
+import com.simpleplugin.psi.CustomParser.TokenTree;
+import com.simpleplugin.psi.CustomParser.TreeToken;
 
-import com.intellij.ui.GroupedElementsRenderer;
-import com.simpleplugin.psi.CustomParser.*;
-import com.sun.javafx.fxml.expression.Expression;
-import com.sun.org.apache.bcel.internal.generic.LSTORE;
-import org.apache.velocity.runtime.directive.Parse;
+import java.util.Stack;
 
 public class LiveScriptParserState {
 	public enum StateTypes {
 		Default,
-		MathOp,
-		AssignOp
+		Error,
+
+		Literal,
+		Sum,
+		AssignOp,
 	}
+
+	/**
+	 * Parse states who's end condition does not look at the next token.
+	 */
+	public static StateTypes[] SingleTokenStates = new StateTypes[] {
+		StateTypes.Literal,
+	};
 
 	/**
 	 * Type of this state.
@@ -45,19 +52,41 @@ public class LiveScriptParserState {
 	public TokenTree ParserTree;
 
 	/**
+	 * A state that <tt>IsSingleTokenState</tt> is a state that ends with the same
+	 * token that it starts with.
+	 * For example: "Literals" state, which "wraps" a single number, string or
+	 * reserved value token.
+	 */
+	public boolean IsSingleTokenState = false;
+
+	/**
+	 * Error message, if any.
+	 */
+	public String ErrorMessage;
+
+	/**
 	 * Constructor.
 	 */
 	public LiveScriptParserState(TokenTree tokenTree, StateTypes type) {
 		ParserTree = tokenTree;
 		Type = type;
+		for (StateTypes t : SingleTokenStates) {
+			if (t == Type) {
+				IsSingleTokenState = true;
+				break;
+			}
+		}
+
 		TokenStack = new Stack<TreeToken>();
 	}
+
 
 	public LiveScriptParserState(TokenTree tokenTree, StateTypes type, int position, IElementType result) {
 		this(tokenTree, type);
 		Position = position;
 		Result = result;
 	}
+
 
 	/**
 	 * Parse a token and return the token that should replace it, or <tt>null</tt> if it should not be replaced.
@@ -66,14 +95,68 @@ public class LiveScriptParserState {
 	 * @return Replacement token or <tt>null</tt>.
 	 */
 	public TreeToken ParseToken(TreeToken token, TreeToken nextToken) {
+		boolean hasNewState = !this.IsSingleTokenState && StartStateIfNeeded(token, nextToken);
+
+		if (hasNewState && NewState.IsSingleTokenState)
+			ParserTree.ParseTokenIndex--;
+
+		if (!hasNewState) {
+			TreeToken endState = EndStateIfNeeded(token, nextToken);
+
+			if (endState == null) {
+				TokenStack.push(token);
+			}
+
+			return endState;
+		}
+
+		return null;
+	}
+
+
+	/**
+	 * Start a new state if necessary.
+	 * @param token Current token.
+	 * @param nextToken Next token (lookahead).
+	 * @return <tt>true</tt> if a new state was started, <tt>false</tt> otherwise.
+	 */
+	private boolean StartStateIfNeeded(TreeToken token, TreeToken nextToken) {
+		if (this.Type == StateTypes.Error)
+			return false;
+
+		// Literals
+		if (token.TypeIsOneOf(LiveScriptTypes.STRING, LiveScriptTypes.NUMBER, LiveScriptTypes.BOOLEAN, LiveScriptTypes.EMPTY)) {
+			return StartState(StateTypes.Literal, token, LiveScriptTypes.LITERAL);
+		}
+
+		// All the single-token states have been checked
+		if (this.IsSingleTokenState)
+			return false;
+
+		// Assignment
+		if (token.Type == LiveScriptTypes.IDENTIFIER && nextToken.TypeIsOneOf(LiveScriptTypes.ASSIGN)) {
+			return StartState(StateTypes.AssignOp, token, LiveScriptTypes.ASSIGN_OPERATION);
+		}
+
+		return false;
+	}
+
+
+	/**
+	 * Ends the current state and creates a "parent" token if necessary.
+	 * @param token Current token.
+	 * @param nextToken Next token.
+	 * @return New "parent" token if state ended, <tt>null</tt> otherwise.
+	 */
+	private TreeToken EndStateIfNeeded(TreeToken token, TreeToken nextToken) {
 		boolean end = false;
 		ParseError error = null;
 		try {
-			end = EndOfState(token, nextToken);
-		}
-		catch (ParseError e) {
-			end = true;
-			error = e;
+			end = this.IsSingleTokenState || IsEndOfState(token, nextToken);
+		} catch (ParseError e) {
+			this.Type = StateTypes.Error;
+			this.Result = TokenType.ERROR_ELEMENT;
+			this.ErrorMessage = e.getMessage();
 		}
 
 		if (end) {
@@ -89,9 +172,9 @@ public class LiveScriptParserState {
 			// If there was an error, the parent token must be of ErrorElement type.
 			TreeToken parent = new TreeToken();
 			parent.EndPosition = token.EndPosition;
-			parent.Type = error == null ? Result : TokenType.ERROR_ELEMENT;
-			if (error != null)
-				parent.Error = error.getMessage();
+			parent.Type = Result;
+			if (parent.Type == TokenType.ERROR_ELEMENT)
+				parent.Error = this.ErrorMessage;
 
 			// 4) Replace the encompassed tokens in the input stream with the "parent" token
 			// (skip the last one because we need it for determining parent start pos.)
@@ -109,45 +192,64 @@ public class LiveScriptParserState {
 
 			return parent;
 		}
-
-		if (token.TypeIsOneOf(LiveScriptTypes.NUMBER, LiveScriptTypes.MATH_OPERATION) && nextToken.Type == LiveScriptTypes.MATH_OP) {
-			EnterState(StateTypes.MathOp, token, LiveScriptTypes.MATH_OPERATION);
-		}
-		else if (token.Type == LiveScriptTypes.IDENTIFIER && nextToken.TypeIsOneOf(LiveScriptTypes.ASSIGN)) {
-			EnterState(StateTypes.AssignOp, token, LiveScriptTypes.ASSIGN_OPERATION);
-		}
-		else
-			TokenStack.push(token);
 		return null;
 	}
 
-	public boolean EndOfState(TreeToken token, TreeToken nextToken) {
+
+	/**
+	 * Check if an end of state is in order for a given token.
+	 * @param token Current token.
+	 * @param nextToken Next token.
+	 * @return <tt>true</tt> if the state should be ended, <tt>false</tt> otherwise.
+	 */
+	public boolean IsEndOfState(TreeToken token, TreeToken nextToken) {
 		switch (Type) {
-			case MathOp:
+			case Error:
+				if ((token.Type == LiveScriptTypes.NEWLINE && nextToken.Type != LiveScriptTypes.INDENT)
+					|| token.TypeIsOneOf(LiveScriptTypes.EOF, LiveScriptTypes.SEMICOLON))
+				{
+					return true;
+				}
+				return false;
+			case Sum:
 				if (nextToken.Type == LiveScriptTypes.EOF) {
-					// If the current token is a number, everything's fine
-					if (token.Type == LiveScriptTypes.NUMBER)
+					// If the current token is a sum-able, everything's fine
+					if (token.TypeIsOneOf(LiveScriptTypes.NUMBER, LiveScriptTypes.STRING, LiveScriptTypes.SUM))
 						return true;
 					// If not, it means we're at the "+" sign and there is no more input to parse.
 					throw new ParseError("Incomplete math operation.");
 				}
-				return (nextToken.Type != LiveScriptTypes.NUMBER);
+				return (!nextToken.TypeIsOneOf(LiveScriptTypes.NUMBER, LiveScriptTypes.STRING, LiveScriptTypes.SUM));
 			case AssignOp:
-				if (nextToken.Type == LiveScriptTypes.EOF) {
-					if (token.TypeIsOneOf(LiveScriptTypes.MATH_OPERATION, LiveScriptTypes.ASSIGN_OPERATION))
-						return true;
-					throw new ParseError("Incomplete assign operation.");
+				if (token.Type == LiveScriptTypes.ASSIGN)
+					return false;
+				if (token.TypeIsOneOf(LiveScriptTypes.LITERAL, LiveScriptTypes.MATH_OPERATION, LiveScriptTypes.ASSIGN_OPERATION)
+					&& nextToken.TypeIsOneOf(LiveScriptTypes.EOF, LiveScriptTypes.NEWLINE))
+				{
+					return true;
 				}
-				return (nextToken.Type == LiveScriptTypes.NEWLINE);
+				throw new ParseError("Invalid assign expression.");
 			default: return false;
 		}
 	}
 
-	public void EnterState(StateTypes type, TreeToken token, IElementType result) {
+
+	/**
+	 * Start a new state.
+	 * @param type
+	 * @param token
+	 * @param result
+	 * @return
+	 */
+	public boolean StartState(StateTypes type, TreeToken token, IElementType result) {
 		ParserTree.StateStack.push(this);
 		NewState = new LiveScriptParserState(ParserTree, type, token.StartPosition, result);
-		NewState.TokenStack.push(token);
+		if (!NewState.IsSingleTokenState)
+			NewState.TokenStack.push(token);
+
+		return true;
 	}
+
 
 	@Override
 	public String toString() {
