@@ -2,8 +2,8 @@ package com.simpleplugin.psi;
 
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
-import com.simpleplugin.psi.CustomParser.TokenTree;
-import com.simpleplugin.psi.CustomParser.TreeToken;
+import com.simpleplugin.psi.LiveScriptParser.TokenTree;
+import com.simpleplugin.psi.LiveScriptParser.TreeToken;
 
 import java.util.Stack;
 

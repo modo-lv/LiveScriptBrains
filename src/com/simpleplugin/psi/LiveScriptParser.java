@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class CustomParser implements PsiParser {
+public class LiveScriptParser implements PsiParser {
 
 	/**
 	 * A token in the token tree.

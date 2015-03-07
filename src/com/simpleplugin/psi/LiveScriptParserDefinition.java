@@ -54,7 +54,7 @@ public class LiveScriptParserDefinition implements ParserDefinition{
 
     @NotNull
     public PsiParser createParser(final Project project) {
-        return new CustomParser();
+        return new LiveScriptParser();
     }
 
     @Override
