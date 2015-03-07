@@ -26,4 +26,5 @@ public class LiveScriptTypes {
 	public static IElementType UNKNOWN = new LiveScriptElementType("UNKNOWN");
 
 	public static IElementType EXPRESSION = new LiveScriptElementType("Expression");
+	public static IElementType EXPRESSION_OR_VALUE = new LiveScriptElementType("ExpressionOrValue");
 }

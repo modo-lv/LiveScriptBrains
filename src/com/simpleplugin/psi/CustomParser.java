@@ -3,22 +3,19 @@ package com.simpleplugin.psi;
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiParser;
-import com.intellij.lang.WhitespacesAndCommentsBinder;
-import com.intellij.lexer.Lexer;
-import com.intellij.lexer.LexerPosition;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
-import com.intellij.ui.GroupedElementsRenderer;
 import jdk.internal.util.xml.impl.Input;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
 public class CustomParser implements PsiParser {
+
 	/**
 	 * A token in the token tree.
 	 */
-	public class TreeToken {
+	public static class TreeToken {
 		/**
 		 * Token index of this token in the Lexer token stream.
 		 */
@@ -39,15 +36,32 @@ public class CustomParser implements PsiParser {
 		 * Marker for this particular token when in the token tree.
 		 */
 		public PsiBuilder.Marker Marker;
+
+		/**
+		 * Error text in case of error.
+		 */
+		public String Error;
+
+		@Override
+		public String toString() {
+			return Type.toString();
+		}
 	}
 
 	/**
 	 * A tree of tokens and sub-tokens parsed from the lexer input.
 	 */
 	public class TokenTree extends ArrayList<TreeToken> {
+		public Stack<LiveScriptParserState> StateStack = new Stack<LiveScriptParserState>();
+
 		public Map<Integer, List<TreeToken>> ByStartIndex = new HashMap<Integer, List<TreeToken>>();
 		public Map<Integer, List<TreeToken>> ByEndIndex = new HashMap<Integer, List<TreeToken>>();
 		public List<TreeToken> InputList;
+
+		/**
+		 * Which token we're currently parsing.
+		 */
+		public int ParseTokenIndex;
 
 		/**
 		 * Constructor
@@ -76,70 +90,37 @@ public class CustomParser implements PsiParser {
 			return super.add(token);
 		}
 
+		public void EnterState(LiveScriptParserState state) {
+
+		}
+
 		/**
 		 * Parse input token list and build a token tree.
 		 * @return Self for method chaining.
 		 */
 		public TokenTree ParseAndBuild() {
-			LiveScriptParserRules rules = new LiveScriptParserRules();
+			// Create a default state
+			LiveScriptParserState state = new LiveScriptParserState(this, LiveScriptParserState.StateTypes.Default);
 
-			List<TreeToken> parsed = new ArrayList<TreeToken>();
-			for (LiveScriptParserRules.Rule rule : rules) {
-				while (RuleParsed(rule));
+			for (ParseTokenIndex = 0; ParseTokenIndex < InputList.size(); ParseTokenIndex++) {
+				TreeToken nextToken = ParseTokenIndex + 1 < InputList.size() ? InputList.get(ParseTokenIndex + 1) : null;
+				TreeToken newToken = state.ParseToken(InputList.get(ParseTokenIndex), nextToken);
+
+				if (state.NewState != null) {
+					state = state.NewState;
+
+					// Clear out the previous NewState value on the state we just entered.
+					state.NewState = null;
+				}
+
+				if (newToken != null) {
+					this.add(newToken);
+					if (newToken.Type == TokenType.ERROR_ELEMENT)
+						return this;
+				}
 			}
 
 			return this;
-		}
-
-		/**
-		 * Parse a specific rule and update this tree accordingly.
-		 * @param rule Rule to parse.
-		 * @return true if at least one match was found and parsed, false otherwise.
-		 */
-		public boolean RuleParsed(LiveScriptParserRules.Rule rule) {
-			Queue<TreeToken> queue = new LinkedList<TreeToken>();
-			for (TreeToken token : InputList) {
-				if (token.Type == rule.TokenTypes.get(queue.size()) || (token.Type == rule.Result && rule.TokenTypes.size() > 1)) {
-					queue.add(token);
-
-					// do we have a full match?
-					if (queue.size() == rule.TokenTypes.size()) {
-						// Create a new token that encompasses the matched chain
-						// and remove the individual tokens from the input (replace
-						// by the "parent" token.
-
-						TreeToken t = new TreeToken();
-						t.Type = rule.Result;
-
-						TreeToken first = queue.remove();
-
-						InputList.add(InputList.indexOf(first), t);
-
-						t.StartPosition = first.StartPosition;
-						InputList.remove(first);
-						while (queue.size() > 1) {
-							InputList.remove(queue.remove());
-						}
-
-						if (queue.size() > 0) {
-							TreeToken last = queue.remove();
-							t.EndPosition = last.EndPosition;
-							InputList.remove(last);
-						}
-						else
-							t.EndPosition = first.EndPosition;
-
-						this.add(t);
-						return true;
-					}
-				}
-				else {
-					// If even a single token does not match, it breaks the
-					// match chain — discard the chain and start over.
-					queue.clear();
-				}
-			}
-			return false;
 		}
 
 		/**
@@ -160,15 +141,18 @@ public class CustomParser implements PsiParser {
 					}
 				}
 
-				tokens = this.ByEndIndex.get(builder.getCurrentOffset());
-
 				// marker.done() ends the *previous* token so we must advance lexer here, after starting new
 				// markers and before closing the old ones.
 				builder.advanceLexer();
 
+				tokens = this.ByEndIndex.get(builder.getCurrentOffset());
+
 				if (tokens != null) {
 					for (TreeToken token : tokens) {
-						token.Marker.done(token.Type);
+						if (token.Type == TokenType.ERROR_ELEMENT)
+							token.Marker.error(token.Error);
+						else
+							token.Marker.done(token.Type);
 					}
 				}
 			}
@@ -190,10 +174,11 @@ public class CustomParser implements PsiParser {
 		while (!builder.eof()) {
 			TreeToken tt = new TreeToken();
 			tt.StartPosition = builder.getCurrentOffset();
-			tt.EndPosition = tt.StartPosition;
 			tt.Type = builder.getTokenType();
 			tokens.add(tt);
 			builder.advanceLexer();
+
+			tt.EndPosition = builder.getCurrentOffset();
 		}
 
 		// Have to roll back because we've already gone through the builder

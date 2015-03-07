@@ -16,7 +16,6 @@ import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
 import com.simpleplugin.LiveScriptLanguage;
 import com.simpleplugin.LiveScriptLexer;
-import com.simpleplugin.parser.LiveScriptParser;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Reader;
