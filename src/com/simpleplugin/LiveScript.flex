@@ -266,6 +266,9 @@ UNKNOWN=[:().]
     {CURL_L}				{ return _out(LiveScriptTypes.OBJ_START); }
     {CURL_R}				{ return _out(LiveScriptTypes.OBJ_END); }
 
+    {PAREN_L}				{ return _out(LiveScriptTypes.PAREN_L); }
+    {PAREN_R}				{ return _out(LiveScriptTypes.PAREN_R); }
+
     {COMMA}					{ return _out(LiveScriptTypes.COMMA); }
 
     {SEMICOLON}				{ return _out(LiveScriptTypes.SEMICOLON); }

@@ -8,13 +8,14 @@ import com.simpleplugin.psi.LiveScriptParser.TreeToken;
 import java.util.Stack;
 
 public class LiveScriptParserState {
-	public enum StateTypes {
+	public enum Types {
 		Default,
 		Error,
 
 		Literal,
 		Sum,
 
+		CallArg,
 		ArgList,
 
 		AssignOp,
@@ -23,14 +24,14 @@ public class LiveScriptParserState {
 	/**
 	 * Parse states who's end condition does not look at the next token.
 	 */
-	public static StateTypes[] SingleTokenStates = new StateTypes[] {
-		StateTypes.Literal,
+	public static Types[] SingleTokenStates = new Types[] {
+		Types.Literal,
 	};
 
 	/**
 	 * Type of this state.
 	 */
-	public StateTypes Type;
+	public Types Type;
 
 	/**
 	 * The state to switch to after this one has parsed a token.
@@ -70,10 +71,10 @@ public class LiveScriptParserState {
 	/**
 	 * Constructor.
 	 */
-	public LiveScriptParserState(TokenTree tokenTree, StateTypes type) {
+	public LiveScriptParserState(TokenTree tokenTree, Types type) {
 		ParserTree = tokenTree;
 		Type = type;
-		for (StateTypes t : SingleTokenStates) {
+		for (Types t : SingleTokenStates) {
 			if (t == Type) {
 				IsSingleTokenState = true;
 				break;
@@ -84,7 +85,7 @@ public class LiveScriptParserState {
 	}
 
 
-	public LiveScriptParserState(TokenTree tokenTree, StateTypes type, int position, IElementType result) {
+	public LiveScriptParserState(TokenTree tokenTree, Types type, int position, IElementType result) {
 		this(tokenTree, type);
 		Position = position;
 		Result = result;
@@ -98,12 +99,14 @@ public class LiveScriptParserState {
 	 * @return Replacement token or <tt>null</tt>.
 	 */
 	public TreeToken ParseToken(TreeToken token, TreeToken nextToken) {
-		boolean hasNewState = !this.IsSingleTokenState && StartStateIfNeeded(token, nextToken);
+		LiveScriptParserState newState = this.IsSingleTokenState
+			? null
+			: StartStateIfNeeded(token, nextToken);
 
-		if (hasNewState && NewState.IsSingleTokenState)
+		if (newState != null && NewState.IsSingleTokenState)
 			ParserTree.ParseTokenIndex--;
 
-		if (!hasNewState) {
+		if (newState == null) {
 			TreeToken endState = EndStateIfNeeded(token, nextToken);
 
 			if (endState == null) {
@@ -123,9 +126,9 @@ public class LiveScriptParserState {
 	 * @param nextToken Next token (lookahead).
 	 * @return <tt>true</tt> if a new state was started, <tt>false</tt> otherwise.
 	 */
-	private boolean StartStateIfNeeded(TreeToken token, TreeToken nextToken) {
-		if (this.Type == StateTypes.Error)
-			return false;
+	private LiveScriptParserState StartStateIfNeeded(TreeToken token, TreeToken nextToken) {
+		if (this.Type == Types.Error)
+			return null;
 
 		// Bad char
 		if (token.TypeIsOneOf(TokenType.BAD_CHARACTER)) {
@@ -134,30 +137,33 @@ public class LiveScriptParserState {
 
 		// All the single-token states have been checked
 		if (this.IsSingleTokenState)
-			return false;
+			return null;
 
 		// Sum
-		if (this.Type != StateTypes.Sum
+		if (this.Type != Types.Sum
 			&& token.TypeIsOneOf(LiveScriptTypes.VALUE, LiveScriptTypes.SUM)
 			&& nextToken.TypeIsOneOf(LiveScriptTypes.PLUS))
 		{
-			return StartState(StateTypes.Sum, token, LiveScriptTypes.SUM);
-		}
-
-		// Argument list
-		if (this.Type != StateTypes.ArgList
-			&& token.TypeIsOneOf(LiveScriptTypes.VALUE)
-			&& nextToken.TypeIsOneOf(LiveScriptTypes.COMMA))
-		{
-			return StartState(StateTypes.ArgList, token, LiveScriptTypes.ARGUMENT_LIST);
+			return StartState(Types.Sum, token, LiveScriptTypes.SUM);
 		}
 
 		// Assignment
 		if (token.Type == LiveScriptTypes.IDENTIFIER && nextToken.TypeIsOneOf(LiveScriptTypes.ASSIGN))
-			return StartState(StateTypes.AssignOp, token, LiveScriptTypes.ASSIGN_OPERATION);
+			return StartState(Types.AssignOp, token, LiveScriptTypes.ASSIGN_OPERATION);
 
 
-		return false;
+		// Function call (with arguments, without parenthesis)
+		if (token.TypeIsOneOf(LiveScriptTypes.IDENTIFIER)
+			&& !nextToken.TypeIsOneOf(LiveScriptTypes.OPERATOR)
+			&& !IsEndOfStatement(token, nextToken))
+		{
+			// This type of function call is always followed by arguments,
+			// so the argument list state starts at the same position as the function call state.
+			StartState(Types.CallArg, token, LiveScriptTypes.CALL_ARG);
+			return StartNextState(Types.ArgList, token, nextToken, LiveScriptTypes.ARGUMENT_LIST);
+		}
+
+		return null;
 	}
 
 
@@ -173,7 +179,7 @@ public class LiveScriptParserState {
 		try {
 			end = this.IsSingleTokenState || IsEndOfState(token, nextToken);
 		} catch (ParseError e) {
-			this.Type = StateTypes.Error;
+			this.Type = Types.Error;
 			this.Result = TokenType.ERROR_ELEMENT;
 			this.ErrorMessage = e.getMessage();
 		}
@@ -182,7 +188,11 @@ public class LiveScriptParserState {
 			// When a state has been completed, we must:
 
 			// 1) Add the current token to the stack
-			TokenStack.push(token);
+			if (this.IsSingleTokenState)
+				token = TokenStack.peek();
+			else
+				TokenStack.push(token);
+
 
 			// 2) Rewind the parse position to the start of the match.
 			ParserTree.ParseTokenIndex -= TokenStack.size();
@@ -234,9 +244,19 @@ public class LiveScriptParserState {
 			case ArgList:
 				if (nextToken.TypeIsOneOf(LiveScriptTypes.COMMA, LiveScriptTypes.VALUE))
 					return false;
-				else if (!this.TokenStack.empty())
-					 return true;
+				else if (!this.TokenStack.empty()) {
+					if (this.TokenStack.size() == 1)
+						this.IsSingleTokenState = true;
+					return true;
+				}
 				throw new ParseError("Invalid argument list.");
+			case CallArg:
+				if (token.TypeIsOneOf(LiveScriptTypes.ARGUMENT_LIST)
+					&& IsEndOfStatement(token, nextToken))
+				{
+					return true;
+				}
+				throw new ParseError("Invalid function call.");
 			case AssignOp:
 				if (this.TokenStack.size() == 1 && token.Type == LiveScriptTypes.ASSIGN)
 					return false;
@@ -255,8 +275,12 @@ public class LiveScriptParserState {
 	 * @return <tt>true</tt> if the current token is last in a statement, <tt>false</tt> otherwise.
 	 */
 	private boolean IsEndOfStatement(TreeToken token, TreeToken nextToken) {
-		return nextToken.TypeIsOneOf(LiveScriptTypes.SEMICOLON, LiveScriptTypes.EOF, LiveScriptTypes.NEWLINE);
-			//|| (token.TypeIsOneOf(LiveScriptTypes.NEWLINE) && !nextToken.TypeIsOneOf(LiveScriptTypes.INDENT)));
+		return nextToken.TypeIsOneOf(
+			LiveScriptTypes.SEMICOLON,
+			LiveScriptTypes.EOF,
+			LiveScriptTypes.NEWLINE,
+			LiveScriptTypes.PAREN_R
+		);
 	}
 
 
@@ -265,24 +289,39 @@ public class LiveScriptParserState {
 	 * @param type State type.
 	 * @param token Token that the new state starts with.
 	 * @param result New state's result token type.
-	 * @return <tt>true</tt>
+	 * @return The newly entered state.
 	 */
-	public boolean StartState(StateTypes type, TreeToken token, IElementType result) {
+	public LiveScriptParserState StartState(Types type, TreeToken token, IElementType result) {
 		ParserTree.StateStack.push(this);
 		NewState = new LiveScriptParserState(ParserTree, type, token.StartPosition, result);
-		if (!NewState.IsSingleTokenState)
-			NewState.TokenStack.push(token);
+		NewState.TokenStack.push(token);
 
-		return true;
+		return NewState;
 	}
 
-	public boolean StartBadCharState(TreeToken token) {
-		ParserTree.StateStack.push(this);
-		NewState = new LiveScriptParserState(ParserTree, StateTypes.Error, token.StartPosition, TokenType.ERROR_ELEMENT);
+	/**
+	 * Start a new state immediately after one has already been started, at the same token position.
+	 * Will use the new state (instead of <tt>this</tt>) as the "current" state to push to stack and
+	 * push the next token (instead of current) to the new state's token stack.
+	 * @param type State type.
+	 * @param token Current token.
+	 * @param nextToken Next token.
+	 * @param result Resulting staet's token type.
+	 * @return The newly entered state.
+	 */
+	public LiveScriptParserState StartNextState(Types type, TreeToken token, TreeToken nextToken, IElementType result) {
+		ParserTree.StateStack.push(NewState);
+		NewState = new LiveScriptParserState(ParserTree, type, token.StartPosition, result);
+		NewState.TokenStack.push(nextToken);
+		return NewState;
+	}
+
+	public LiveScriptParserState StartBadCharState(TreeToken token) {
+		StartState(Types.Error, token, TokenType.ERROR_ELEMENT);
 		NewState.IsSingleTokenState = true;
 		NewState.ErrorMessage = "Unrecognized character.";
-		return true;
-	};
+		return NewState;
+	}
 
 
 	@Override

@@ -5,7 +5,6 @@ import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiParser;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
-import jdk.internal.util.xml.impl.Input;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -65,6 +64,8 @@ public class LiveScriptParser implements PsiParser {
 					return this.TypeIsOneOf(LiveScriptTypes.IDENTIFIER, LiveScriptTypes.LITERAL);
 				if (type == LiveScriptTypes.LITERAL)
 					return this.TypeIsOneOf(LiveScriptTypes.STRING, LiveScriptTypes.BOOLEAN, LiveScriptTypes.NUMBER, LiveScriptTypes.EMPTY);
+				if (type == LiveScriptTypes.OPERATOR)
+					return this.TypeIsOneOf(LiveScriptTypes.PLUS, LiveScriptTypes.ASSIGN, LiveScriptTypes.MATH_OP);
 				if (type == this.Type)
 					return true;
 			}
@@ -120,7 +121,7 @@ public class LiveScriptParser implements PsiParser {
 		 */
 		public TokenTree ParseAndBuild() {
 			// Create a default state
-			LiveScriptParserState state = new LiveScriptParserState(this, LiveScriptParserState.StateTypes.Default);
+			LiveScriptParserState state = new LiveScriptParserState(this, LiveScriptParserState.Types.Default);
 
 			for (ParseTokenIndex = 0; ParseTokenIndex < InputList.size(); ParseTokenIndex++) {
 				TreeToken nextToken = ParseTokenIndex + 1 < InputList.size()
