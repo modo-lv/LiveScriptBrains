@@ -61,11 +61,10 @@ public class LiveScriptParser implements PsiParser {
 		 */
 		public boolean TypeIsOneOf(IElementType... types) {
 			for (IElementType type : types) {
-				if (type == LiveScriptTypes.VALUE
-					&& this.TypeIsOneOf(LiveScriptTypes.IDENTIFIER, LiveScriptTypes.LITERAL))
-				{
-					return true;
-				}
+				if (type == LiveScriptTypes.VALUE)
+					return this.TypeIsOneOf(LiveScriptTypes.IDENTIFIER, LiveScriptTypes.LITERAL);
+				if (type == LiveScriptTypes.LITERAL)
+					return this.TypeIsOneOf(LiveScriptTypes.STRING, LiveScriptTypes.BOOLEAN, LiveScriptTypes.NUMBER, LiveScriptTypes.EMPTY);
 				if (type == this.Type)
 					return true;
 			}

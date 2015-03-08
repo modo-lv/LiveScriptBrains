@@ -132,11 +132,6 @@ public class LiveScriptParserState {
 			return StartBadCharState(token);
 		}
 
-		// Literals
-		if (token.TypeIsOneOf(LiveScriptTypes.STRING, LiveScriptTypes.NUMBER, LiveScriptTypes.BOOLEAN, LiveScriptTypes.EMPTY)) {
-			return StartState(StateTypes.Literal, token, LiveScriptTypes.LITERAL);
-		}
-
 		// All the single-token states have been checked
 		if (this.IsSingleTokenState)
 			return false;
@@ -151,7 +146,7 @@ public class LiveScriptParserState {
 
 		// Argument list
 		if (this.Type != StateTypes.ArgList
-			&& token.Type == LiveScriptTypes.VALUE
+			&& token.TypeIsOneOf(LiveScriptTypes.VALUE)
 			&& nextToken.TypeIsOneOf(LiveScriptTypes.COMMA))
 		{
 			return StartState(StateTypes.ArgList, token, LiveScriptTypes.ARGUMENT_LIST);
@@ -237,7 +232,7 @@ public class LiveScriptParserState {
 					return true;
 				throw new ParseError("Invalid sum expression.");
 			case ArgList:
-				if (token.TypeIsOneOf(LiveScriptTypes.COMMA, LiveScriptTypes.VALUE))
+				if (nextToken.TypeIsOneOf(LiveScriptTypes.COMMA, LiveScriptTypes.VALUE))
 					return false;
 				else if (!this.TokenStack.empty())
 					 return true;

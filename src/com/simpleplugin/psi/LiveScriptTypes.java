@@ -9,15 +9,15 @@ public class LiveScriptTypes {
 	public static IElementType ASSIGN_OPERATION = new LiveScriptElementType("ASSIGN_OPERATION");
 	public static IElementType COMMENT = new LiveScriptElementType("COMMENT");
 	public static IElementType I_STRING_STATEMENT = new LiveScriptElementType("I_STRING_STATEMENT");
-	public static IElementType LITERAL = new LiveScriptElementType("LITERAL");
 	public static IElementType MATH_OPERATION = new LiveScriptElementType("MATH_OPERATION");
 	public static IElementType SUM = new LiveScriptElementType("SUM");
 	public static IElementType OPERATION = new LiveScriptElementType("OPERATION");
 	public static IElementType OPERATION_OR_VALUE = new LiveScriptElementType("OPERATION_OR_VALUE");
 	public static IElementType STATEMENT = new LiveScriptElementType("STATEMENT");
 	public static IElementType ARGUMENT_LIST = new LiveScriptElementType("ARGUMENT_LIST");
-	
+
 	// Fake values (used in parsing but not in PSI or lexer
+	public static IElementType LITERAL = new LiveScriptElementType("LITERAL");
 	public static IElementType VALUE = new LiveScriptElementType("VALUE");
 
 

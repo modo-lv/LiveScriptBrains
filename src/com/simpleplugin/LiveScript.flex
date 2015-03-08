@@ -185,6 +185,7 @@ PAREN_R = ")"
 BRACK_L = "["
 BRACK_R = "]"
 DOT = "."
+SEMICOLON = ";"
 
 IDENTIFIER = [$_a-zA-Z][-$_a-zA-Z0-9]*
 
@@ -266,6 +267,8 @@ UNKNOWN=[:().]
     {CURL_R}				{ return _out(LiveScriptTypes.OBJ_END); }
 
     {COMMA}					{ return _out(LiveScriptTypes.COMMA); }
+
+    {SEMICOLON}				{ return _out(LiveScriptTypes.SEMICOLON); }
 
     // Non-code
     {NEWLINE}               { return _out(LiveScriptTypes.NEWLINE); }
