@@ -2,130 +2,273 @@ package com.simpleplugin.psi;
 
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
-import com.simpleplugin.psi.LiveScriptParser.TokenTree;
 import com.simpleplugin.psi.LiveScriptParser.TreeToken;
+import com.sun.javafx.fxml.expression.Expression;
 
-import java.util.Stack;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LiveScriptParserState {
-	public enum Types {
-		Default,
-		Error,
+	/**
+	 * What type is this state.
+	 */
+	protected IElementType Type;
 
-		Literal,
-		Sum,
+	/**
+	 * List of tokens to parse.
+	 */
+	protected List<TreeToken> InputStream;
 
-		CallArg,
-		ArgList,
+	/**
+	 * Token index in the {@link #InputStream} at which the state wast started.
+	 */
+	protected int StartTokenIndex = 0;
 
-		AssignOp,
+	/**
+	 * Token index in the {@link #InputStream} that we're currently parsing.
+	 */
+	protected int TokenIndex = 0;
+
+	/**
+	 * Currently parsing token.
+	 */
+	protected TreeToken ThisToken = null;
+
+	/**
+	 * Next token in the input stream.
+	 */
+	protected TreeToken NextToken = null;
+
+	/**
+	 * Additional tokens created during parsing.
+	 */
+	protected List<TreeToken> AddedTokens = new ArrayList<TreeToken>();
+
+
+	/**
+	 * @param type        {@link #Type}
+	 * @param inputStream {@link #InputStream}
+	 */
+	public LiveScriptParserState(IElementType type, List<TreeToken> inputStream) {
+		this(type, inputStream, 0);
 	}
 
 	/**
-	 * Parse states who's end condition does not look at the next token.
+	 * @param type          {@link #Type}
+	 * @param inputStream   {@link #InputStream}
+	 * @param startTokenIndex {@link #StartTokenIndex}
 	 */
-	public static Types[] SingleTokenStates = new Types[] {
-		Types.Literal,
-	};
+	public LiveScriptParserState(IElementType type, List<TreeToken> inputStream, int startTokenIndex) {
+		this.Type = type;
+		this.InputStream = inputStream;
+		this.StartTokenIndex = startTokenIndex;
+		this.TokenIndex = startTokenIndex;
+		this.MoveToToken(this.TokenIndex);
+	}
+
 
 	/**
-	 * Type of this state.
+	 * Give additional tokens created during parsing.
+	 *
+	 * @return List of additional tokens.
 	 */
-	public Types Type;
+	public List<TreeToken> GiveAddedTokens() {
+		return AddedTokens;
+	}
+
 
 	/**
-	 * The state to switch to after this one has parsed a token.
+	 * Parse from the current input token until the state is finished.
+	 *
+	 * @return Self for method chaining.
 	 */
-	public LiveScriptParserState NewState;
+	public LiveScriptParserState ParseInput() {
+		boolean end = false;
+		String errorMessage = null;
+		do {
+			this.ParseToken();
 
-	/**
-	 * Position where the state started at.
-	 */
-	public int Position;
+			end = this.AtLastToken();
 
-	public Stack<TreeToken> TokenStack;
-
-	/**
-	 * The resulting element type
-	 */
-	public IElementType Result;
-
-	/**
-	 * ParserTree that this state is for.
-	 */
-	public TokenTree ParserTree;
-
-	/**
-	 * A state that <tt>IsSingleTokenState</tt> is a state that ends with the same
-	 * token that it starts with.
-	 * For example: "Literals" state, which "wraps" a single number, string or
-	 * reserved value token.
-	 */
-	public boolean IsSingleTokenState = false;
-
-	/**
-	 * Error message, if any.
-	 */
-	public String ErrorMessage;
-
-	/**
-	 * Constructor.
-	 */
-	public LiveScriptParserState(TokenTree tokenTree, Types type) {
-		ParserTree = tokenTree;
-		Type = type;
-		for (Types t : SingleTokenStates) {
-			if (t == Type) {
-				IsSingleTokenState = true;
-				break;
+			try
+			{
+				end = this.EndReached();
 			}
-		}
-
-		TokenStack = new Stack<TreeToken>();
-	}
-
-
-	public LiveScriptParserState(TokenTree tokenTree, Types type, int position, IElementType result) {
-		this(tokenTree, type);
-		Position = position;
-		Result = result;
-	}
-
-
-	/**
-	 * Parse a token and return the token that should replace it, or <tt>null</tt> if it should not be replaced.
-	 * @param token Token to parse.
-	 * @param nextToken Next token that will be parsed (look-ahead).
-	 * @return Replacement token or <tt>null</tt>.
-	 */
-	public TreeToken ParseToken(TreeToken token, TreeToken nextToken) {
-		LiveScriptParserState newState = this.IsSingleTokenState
-			? null
-			: StartStateIfNeeded(token, nextToken);
-
-		if (newState != null && NewState.IsSingleTokenState)
-			ParserTree.ParseTokenIndex--;
-
-		if (newState == null) {
-			TreeToken endState = EndStateIfNeeded(token, nextToken);
-
-			if (endState == null) {
-				TokenStack.push(token);
+			catch (ParseError err) {
+				errorMessage = err.getMessage();
+				this.Type = TokenType.ERROR_ELEMENT;
 			}
 
-			return endState;
+			if (this.AtLastToken() && !end) {
+				end = true;
+			}
+			else if (end) {
+				if (!this.AtEndOfStatement())
+				{
+					errorMessage = "Unexpected extra characters after the end of " + this.Type + " statement.";
+					this.Type = TokenType.ERROR_ELEMENT;
+					this.MoveToNextToken();
+				}
+				// When a state has been completed, we must:
+
+				// *) Create the "parent" token that wil encompass all tokens in the state
+				// If there was an error, the parent token must be of ErrorElement type.
+				TreeToken parent = new TreeToken();
+				parent.Type = this.Type;
+				if (parent.Type == TokenType.ERROR_ELEMENT)
+					parent.Error = errorMessage;
+
+				// *) Determine the parent element's boundaries
+				parent.StartPosition = this.InputStream.get(this.StartTokenIndex).StartPosition;
+				parent.EndPosition = ThisToken.EndPosition;
+
+				// *) Replace the encompassed tokens in the input stream with the parent token
+				for (int a = this.TokenIndex; a >= this.StartTokenIndex; a--)
+					this.InputStream.remove(a);
+				this.InputStream.add(this.StartTokenIndex, parent);
+				this.AddedTokens.add(parent);
+			}
+			else
+			{
+				this.MoveToNextToken();
+			}
+		} while (!end);
+
+		return this;
+	}
+
+	/**
+	 * Parse the token at the current position.
+	 *
+	 * @return Self for method chaining.
+	 */
+	protected LiveScriptParserState ParseToken() {
+		LiveScriptParserState newState = null;
+
+		// Sum
+		if (this.Type != LiveScriptTypes.SumOp
+			&& ThisToken.TypeIsOneOf(LiveScriptTypes.Value, LiveScriptTypes.SumOp)
+			&& NextToken.TypeIsOneOf(LiveScriptTypes.PLUS))
+		{
+			newState = this.NewState(LiveScriptTypes.SumOp);
 		}
 
-		return null;
+		if (newState != null) {
+			// Run the new state's parse
+			this.AddedTokens.addAll(newState.ParseInput().GiveAddedTokens());
+		}
+
+		return this;
+	}
+
+	/**
+	 * Have we reached the end of this state?
+	 * @return <tt>true</tt> if an end-of-state condition is met, <tt>false</tt> otherwise.
+	 */
+	protected boolean EndReached() {
+		if (this.Type == LiveScriptTypes.SumOp)
+		{
+			if (ThisToken.TypeIsOneOf(LiveScriptTypes.PLUS))
+				return false;
+			if (ThisToken.TypeIsOneOf(LiveScriptTypes.Value, LiveScriptTypes.SumOp))
+			{
+				return true;
+			}
+			throw new ParseError("Invalid sum expression.");
+		}
+		return false;
+
+/*
+		switch (Type) {
+			case Error:
+				return IsEndOfStatement(token, nextToken);
+			case ArgList:
+				if (nextToken.TypeIsOneOf(LiveScriptTypes.COMMA, LiveScriptTypes.Value))
+					return false;
+				else if (!this.TokenStack.empty()) {
+					if (this.TokenStack.size() == 1)
+						this.IsSingleTokenState = true;
+					return true;
+				}
+				throw new ParseError("Invalid argument list.");
+			case CallArg:
+				if (token.TypeIsOneOf(LiveScriptTypes.ARGUMENT_LIST)
+					&& IsEndOfStatement(token, nextToken))
+				{
+					return true;
+				}
+				throw new ParseError("Invalid function call.");
+			case AssignOp:
+				if (this.TokenStack.size() == 1 && token.Type == LiveScriptTypes.ASSIGN)
+					return false;
+				if (token.TypeIsOneOf(LiveScriptTypes.SumOp, LiveScriptTypes.Value))
+					return true;
+				throw new ParseError("Invalid assign expression.");
+			default: return false;
+		}
+*/
+	}
+
+	/**
+	 * Start a new state at the current token.
+	 * @param type {@link #Type}
+	 * @return The newly created state.
+	 */
+	protected LiveScriptParserState NewState(IElementType type) {
+		return new LiveScriptParserState(type, this.InputStream, this.TokenIndex).MoveToNextToken();
 	}
 
 
 	/**
-	 * Start a new state if necessary.
-	 * @param token Current token.
-	 * @param nextToken Next token (lookahead).
-	 * @return <tt>true</tt> if a new state was started, <tt>false</tt> otherwise.
+	 * Move on to the next token in the input stream.
+	 *
+	 * @return Self for method chaining.
 	 */
+	protected LiveScriptParserState MoveToNextToken() {
+		return this.MoveToToken(this.TokenIndex + 1);
+	}
+
+	/**
+	 * Move to a specific token in the input stream.
+	 * @param index Index of the token to move to.
+	 * @return Self for method chaining.
+	 */
+	protected LiveScriptParserState MoveToToken(int index) {
+		this.TokenIndex = index;
+		this.ThisToken = this.InputStream.get(this.TokenIndex);
+		this.NextToken = this.InputStream.size() - this.TokenIndex > 1
+			? this.InputStream.get(this.TokenIndex + 1)
+			: new TreeToken(LiveScriptTypes.EOF);
+
+		return this;
+	}
+
+	/**
+	 * Check if {@link #ThisToken} is the last token in the input stream.
+	 * @return <tt>true</tt> if at the last token of input stream, <tt>false</tt> otherwise.
+	 */
+	protected boolean AtLastToken() {
+		return this.NextToken.TypeIsOneOf(LiveScriptTypes.EOF);
+	}
+
+
+	/**
+	 * Check if {@link #ThisToken} is the last in a statement.
+	 * @return <tt>true</tt> if it is, <tt>false</tt> otherwise.
+	 */
+	protected boolean AtEndOfStatement() {
+		return this.NextToken.TypeIsOneOf(
+			LiveScriptTypes.SEMICOLON,
+			LiveScriptTypes.EOF,
+			LiveScriptTypes.NEWLINE,
+			LiveScriptTypes.PAREN_R
+		);
+	}
+
+
+
+	/*
+
 	private LiveScriptParserState StartStateIfNeeded(TreeToken token, TreeToken nextToken) {
 		if (this.Type == Types.Error)
 			return null;
@@ -141,10 +284,10 @@ public class LiveScriptParserState {
 
 		// Sum
 		if (this.Type != Types.Sum
-			&& token.TypeIsOneOf(LiveScriptTypes.VALUE, LiveScriptTypes.SUM)
+			&& token.TypeIsOneOf(LiveScriptTypes.Value, LiveScriptTypes.SumOp)
 			&& nextToken.TypeIsOneOf(LiveScriptTypes.PLUS))
 		{
-			return StartState(Types.Sum, token, LiveScriptTypes.SUM);
+			return StartState(Types.Sum, token, LiveScriptTypes.SumOp);
 		}
 
 		// Assignment
@@ -167,130 +310,39 @@ public class LiveScriptParserState {
 	}
 
 
-	/**
-	 * Ends the current state and creates a "parent" token if necessary.
-	 * @param token Current token.
-	 * @param nextToken Next token.
-	 * @return New "parent" token if state ended, <tt>null</tt> otherwise.
-	 */
+	*/
+/**
+ * Ends the current state and creates a "parent" token if necessary.
+ * @param token Current token.
+ * @param nextToken Next token.
+ * @return New "parent" token if state ended, <tt>null</tt> otherwise.
+ *//*
+
 	private TreeToken EndStateIfNeeded(TreeToken token, TreeToken nextToken) {
-		boolean end = false;
-		ParseError error = null;
-		try {
-			end = this.IsSingleTokenState || IsEndOfState(token, nextToken);
-		} catch (ParseError e) {
-			this.Type = Types.Error;
-			this.Result = TokenType.ERROR_ELEMENT;
-			this.ErrorMessage = e.getMessage();
-		}
-
-		if (end) {
-			// When a state has been completed, we must:
-
-			// 1) Add the current token to the stack
-			if (this.IsSingleTokenState)
-				token = TokenStack.peek();
-			else
-				TokenStack.push(token);
-
-
-			// 2) Rewind the parse position to the start of the match.
-			ParserTree.ParseTokenIndex -= TokenStack.size();
-
-			// 3) Create the "parent" token that wil encompass all tokens in the state
-			// If there was an error, the parent token must be of ErrorElement type.
-			TreeToken parent = new TreeToken();
-			parent.EndPosition = token.EndPosition;
-			parent.Type = Result;
-			if (parent.Type == TokenType.ERROR_ELEMENT)
-				parent.Error = this.ErrorMessage;
-
-			// 4) Replace the encompassed tokens in the input stream with the "parent" token
-			// (skip the last one because we need it for determining parent start pos.)
-			while (TokenStack.size() > 1)
-				ParserTree.InputList.remove(TokenStack.pop());
-			ParserTree.InputList.add(ParserTree.ParseTokenIndex + 1, parent);
-
-			// 5) Determine parent start position
-			TreeToken lastToken = TokenStack.pop();
-			parent.StartPosition = lastToken.StartPosition;
-			ParserTree.InputList.remove(lastToken);
-
-			// 6) Exit the state and let the parser know to go back to previous one
-			NewState = ParserTree.StateStack.pop();
-
-			return parent;
-		}
 		return null;
 	}
 
 
-	/**
-	 * Check if an end of state is in order for a given token.
-	 * @param token Current token.
-	 * @param nextToken Next token.
-	 * @return <tt>true</tt> if the state should be ended, <tt>false</tt> otherwise.
-	 */
+	*/
+/**
+ * Check if an end of state is in order for a given token.
+ * @param token Current token.
+ * @param nextToken Next token.
+ * @return <tt>true</tt> if the state should be ended, <tt>false</tt> otherwise.
+ *//*
+
 	public boolean IsEndOfState(TreeToken token, TreeToken nextToken) {
-		switch (Type) {
-			case Error:
-				return IsEndOfStatement(token, nextToken);
-			case Sum:
-				if (token.TypeIsOneOf(LiveScriptTypes.PLUS))
-					return false;
-				if (token.TypeIsOneOf(LiveScriptTypes.VALUE, LiveScriptTypes.SUM))
-					return true;
-				throw new ParseError("Invalid sum expression.");
-			case ArgList:
-				if (nextToken.TypeIsOneOf(LiveScriptTypes.COMMA, LiveScriptTypes.VALUE))
-					return false;
-				else if (!this.TokenStack.empty()) {
-					if (this.TokenStack.size() == 1)
-						this.IsSingleTokenState = true;
-					return true;
-				}
-				throw new ParseError("Invalid argument list.");
-			case CallArg:
-				if (token.TypeIsOneOf(LiveScriptTypes.ARGUMENT_LIST)
-					&& IsEndOfStatement(token, nextToken))
-				{
-					return true;
-				}
-				throw new ParseError("Invalid function call.");
-			case AssignOp:
-				if (this.TokenStack.size() == 1 && token.Type == LiveScriptTypes.ASSIGN)
-					return false;
-				if (token.TypeIsOneOf(LiveScriptTypes.SUM, LiveScriptTypes.VALUE))
-					return true;
-				throw new ParseError("Invalid assign expression.");
-			default: return false;
-		}
 	}
 
+	*/
+/**
+ * Start a new state.
+ * @param type State type.
+ * @param token Token that the new state starts with.
+ * @param result New state's result token type.
+ * @return The newly entered state.
+ *//*
 
-	/**
-	 * Check if the current token is the last in a statement.
-	 * @param token Current token.
-	 * @param nextToken Next token (lookahead).
-	 * @return <tt>true</tt> if the current token is last in a statement, <tt>false</tt> otherwise.
-	 */
-	private boolean IsEndOfStatement(TreeToken token, TreeToken nextToken) {
-		return nextToken.TypeIsOneOf(
-			LiveScriptTypes.SEMICOLON,
-			LiveScriptTypes.EOF,
-			LiveScriptTypes.NEWLINE,
-			LiveScriptTypes.PAREN_R
-		);
-	}
-
-
-	/**
-	 * Start a new state.
-	 * @param type State type.
-	 * @param token Token that the new state starts with.
-	 * @param result New state's result token type.
-	 * @return The newly entered state.
-	 */
 	public LiveScriptParserState StartState(Types type, TreeToken token, IElementType result) {
 		ParserTree.StateStack.push(this);
 		NewState = new LiveScriptParserState(ParserTree, type, token.StartPosition, result);
@@ -299,16 +351,18 @@ public class LiveScriptParserState {
 		return NewState;
 	}
 
-	/**
-	 * Start a new state immediately after one has already been started, at the same token position.
-	 * Will use the new state (instead of <tt>this</tt>) as the "current" state to push to stack and
-	 * push the next token (instead of current) to the new state's token stack.
-	 * @param type State type.
-	 * @param token Current token.
-	 * @param nextToken Next token.
-	 * @param result Resulting staet's token type.
-	 * @return The newly entered state.
-	 */
+	*/
+/**
+ * Start a new state immediately after one has already been started, at the same token position.
+ * Will use the new state (instead of <tt>this</tt>) as the "current" state to push to stack and
+ * push the next token (instead of current) to the new state's token stack.
+ * @param type State type.
+ * @param token Current token.
+ * @param nextToken Next token.
+ * @param result Resulting staet's token type.
+ * @return The newly entered state.
+ *//*
+
 	public LiveScriptParserState StartNextState(Types type, TreeToken token, TreeToken nextToken, IElementType result) {
 		ParserTree.StateStack.push(NewState);
 		NewState = new LiveScriptParserState(ParserTree, type, token.StartPosition, result);
@@ -328,4 +382,5 @@ public class LiveScriptParserState {
 	public String toString() {
 		return Type.toString();
 	}
+*/
 }

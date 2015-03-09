@@ -60,7 +60,7 @@ public class LiveScriptParser implements PsiParser {
 		 */
 		public boolean TypeIsOneOf(IElementType... types) {
 			for (IElementType type : types) {
-				if (type == LiveScriptTypes.VALUE)
+				if (type == LiveScriptTypes.Value)
 					return this.TypeIsOneOf(LiveScriptTypes.IDENTIFIER, LiveScriptTypes.LITERAL);
 				if (type == LiveScriptTypes.LITERAL)
 					return this.TypeIsOneOf(LiveScriptTypes.STRING, LiveScriptTypes.BOOLEAN, LiveScriptTypes.NUMBER, LiveScriptTypes.EMPTY);
@@ -115,32 +115,28 @@ public class LiveScriptParser implements PsiParser {
 			return super.add(token);
 		}
 
+		@Override
+		public boolean addAll(Collection<? extends TreeToken> c) {
+			boolean result = true;
+			for (TreeToken t : c) {
+				result = result && this.add(t);
+			}
+			return result;
+		}
+
+
 		/**
 		 * Parse input token list and build a token tree.
 		 * @return Self for method chaining.
 		 */
 		public TokenTree ParseAndBuild() {
 			// Create a default state
-			LiveScriptParserState state = new LiveScriptParserState(this, LiveScriptParserState.Types.Default);
+			LiveScriptParserState state = new LiveScriptParserState(LiveScriptTypes.UNKNOWN, this.InputList);
 
-			for (ParseTokenIndex = 0; ParseTokenIndex < InputList.size(); ParseTokenIndex++) {
-				TreeToken nextToken = ParseTokenIndex + 1 < InputList.size()
-					? InputList.get(ParseTokenIndex + 1)
-					: new TreeToken(LiveScriptTypes.EOF);
 
-				TreeToken newToken = state.ParseToken(InputList.get(ParseTokenIndex), nextToken);
+			List<TreeToken> newTokens = state.ParseInput().GiveAddedTokens();
 
-				if (state.NewState != null) {
-					state = state.NewState;
-
-					// Clear out the previous NewState value on the state we just entered.
-					state.NewState = null;
-				}
-
-				if (newToken != null) {
-					this.add(newToken);
-				}
-			}
+			this.addAll(newTokens);
 
 			return this;
 		}

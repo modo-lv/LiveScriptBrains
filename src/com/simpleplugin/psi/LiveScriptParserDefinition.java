@@ -12,6 +12,9 @@ import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.TokenType;
+import com.intellij.psi.impl.source.CharTableImpl;
+import com.intellij.psi.impl.source.PsiTypeElementImpl;
+import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
 import com.simpleplugin.LiveScriptLanguage;
@@ -72,7 +75,7 @@ public class LiveScriptParserDefinition implements ParserDefinition{
 
     @NotNull
     public PsiElement createElement(ASTNode node) {
-		return new ASTWrapperPsiElement(node);
-//		return LiveScriptTypes.Factory.createElement(node);
+		PsiElement el = new ASTWrapperPsiElement(node);
+		return el;
     }
 }
