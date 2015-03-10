@@ -145,7 +145,7 @@ import com.intellij.util.containers.Stack;
 
 // Literals
 BASED_NUMBER = ([0-9]|[1-2][0-9]|3[0-2])\~[0-9a-zA-Z]+
-NUMBER = [0-9][0-9_]*\.?[0-9_]*[a-zA-Z]*
+NUMBER = [0-9][0-9_]*\.?[0-9_]*[a-zA-Z0-9]*
 EMPTY=null|void
 BOOLEAN=true|false|yes|no|on|off
 
@@ -279,9 +279,6 @@ UNKNOWN=[:().]
     {COMMENT_LINE}          { return _out(LiveScriptTypes.COMMENT_LINE); }
 
     {SPACE}+                { return _out(TokenType.WHITE_SPACE); }
-
-    {UNKNOWN}               { return _out(LiveScriptTypes.UNKNOWN); }
-
 
 }
 

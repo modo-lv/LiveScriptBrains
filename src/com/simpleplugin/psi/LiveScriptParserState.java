@@ -44,6 +44,12 @@ public class LiveScriptParserState {
 	 */
 	protected List<TreeToken> AddedTokens = new ArrayList<TreeToken>();
 
+	/**
+	 * Used on {@link LiveScriptTypes#None} to check for leftover tokens on a statement line
+	 * after the last of the states have been parsed.
+	 */
+	protected boolean StatementFinished = false;
+
 
 	/**
 	 * @param type        {@link #Type}
@@ -54,8 +60,8 @@ public class LiveScriptParserState {
 	}
 
 	/**
-	 * @param type          {@link #Type}
-	 * @param inputStream   {@link #InputStream}
+	 * @param type            {@link #Type}
+	 * @param inputStream     {@link #InputStream}
 	 * @param startTokenIndex {@link #StartTokenIndex}
 	 */
 	public LiveScriptParserState(IElementType type, List<TreeToken> inputStream, int startTokenIndex) {
@@ -84,39 +90,55 @@ public class LiveScriptParserState {
 	 */
 	public LiveScriptParserState ParseInput() {
 		boolean end = false;
-		String errorMessage = null;
 		do {
+			TreeToken errorToken = new TreeToken(TokenType.ERROR_ELEMENT);
+
 			this.ParseToken();
 
-			end = this.AtLastToken();
+			// Refresh current/next token references, in case parser has changed the tokens
+			this.MoveToToken(this.TokenIndex);
 
-			try
-			{
+			// *) Check for normal state finishers.
+			try {
 				end = this.EndReached();
 			}
 			catch (ParseError err) {
-				errorMessage = err.getMessage();
-				this.Type = TokenType.ERROR_ELEMENT;
+				errorToken.ErrorMessage = err.getMessage();
 			}
 
-			if (this.AtLastToken() && !end) {
+
+			// Error: A statement has been parsed and finished, but there are more tokens after it.
+			if (this.Type == LiveScriptTypes.None
+				&& this.StatementFinished
+				&& !end
+				&& !this.IsEndOfStatement())
+			{
+				errorToken.ErrorMessage = "Stray token after a statement.";
+				this.StartTokenIndex = this.TokenIndex;
 				end = true;
 			}
-			else if (end) {
-				if (!this.AtEndOfStatement())
-				{
-					errorMessage = "Unexpected extra characters after the end of " + this.Type + " statement.";
-					this.Type = TokenType.ERROR_ELEMENT;
-					this.MoveToNextToken();
-				}
+
+
+			// Error: Parser state is not done, but we've reached the end of the input tokens for the statement
+			if (this.Type != LiveScriptTypes.None && this.Type != TokenType.ERROR_ELEMENT && this.AtEndOfStatement() && !end) {
+				this.StartTokenIndex = this.TokenIndex;
+				errorToken.ErrorMessage = "Unexpected end to " + this.Type + " statement";
+				end = true;
+			}
+
+
+			if (end) {
 				// When a state has been completed, we must:
 
 				// *) Create the "parent" token that wil encompass all tokens in the state
 				// If there was an error, the parent token must be of ErrorElement type.
 				TreeToken parent = new TreeToken();
-				parent.Type = this.Type;
-				if (parent.Type == TokenType.ERROR_ELEMENT)
-					parent.Error = errorMessage;
+
+				if (errorToken.ErrorMessage != null) {
+					parent = errorToken;
+				} else {
+					parent.Type = this.Type;
+				}
 
 				// *) Determine the parent element's boundaries
 				parent.StartPosition = this.InputStream.get(this.StartTokenIndex).StartPosition;
@@ -128,10 +150,21 @@ public class LiveScriptParserState {
 				this.InputStream.add(this.StartTokenIndex, parent);
 				this.AddedTokens.add(parent);
 			}
-			else
-			{
+
+
+			// Set the end-of-statement marker so that any following tokens are recognized as strays,
+			// and clear it on newlines.
+			if (this.Type == LiveScriptTypes.None)
+				this.StatementFinished = !(this.AtEndOfStatement() || this.IsEndOfStatement());
+
+
+			// *) No matter what happens, we must end the parsing if we've reached the end of the input stream.
+			end = this.AtLastToken() || (end && this.Type != LiveScriptTypes.None);
+
+			if (!end) {
 				this.MoveToNextToken();
 			}
+
 		} while (!end);
 
 		return this;
@@ -145,6 +178,8 @@ public class LiveScriptParserState {
 	protected LiveScriptParserState ParseToken() {
 		LiveScriptParserState newState = null;
 
+		// End of state
+
 		// Sum
 		if (this.Type != LiveScriptTypes.SumOp
 			&& ThisToken.TypeIsOneOf(LiveScriptTypes.Value, LiveScriptTypes.SumOp)
@@ -152,6 +187,11 @@ public class LiveScriptParserState {
 		{
 			newState = this.NewState(LiveScriptTypes.SumOp);
 		}
+
+		// Assignment
+		if (ThisToken.TypeIsOneOf(LiveScriptTypes.IDENTIFIER) && NextToken.TypeIsOneOf(LiveScriptTypes.ASSIGN))
+			newState = this.NewState(LiveScriptTypes.ASSIGN_OPERATION);
+
 
 		if (newState != null) {
 			// Run the new state's parse
@@ -163,18 +203,24 @@ public class LiveScriptParserState {
 
 	/**
 	 * Have we reached the end of this state?
+	 *
 	 * @return <tt>true</tt> if an end-of-state condition is met, <tt>false</tt> otherwise.
 	 */
 	protected boolean EndReached() {
-		if (this.Type == LiveScriptTypes.SumOp)
-		{
-			if (ThisToken.TypeIsOneOf(LiveScriptTypes.PLUS))
+		if (this.Type == LiveScriptTypes.SumOp) {
+			if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.PLUS))
 				return false;
-			if (ThisToken.TypeIsOneOf(LiveScriptTypes.Value, LiveScriptTypes.SumOp))
-			{
+			if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.Value, LiveScriptTypes.SumOp)) {
 				return true;
 			}
 			throw new ParseError("Invalid sum expression.");
+		}
+		if (this.Type == LiveScriptTypes.ASSIGN_OPERATION) {
+			if (this.ThisToken.Type == LiveScriptTypes.ASSIGN)
+				return false;
+			if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.SumOp, LiveScriptTypes.Value))
+				return true;
+			throw new ParseError("Invalid assign expression.");
 		}
 		return false;
 
@@ -198,12 +244,6 @@ public class LiveScriptParserState {
 					return true;
 				}
 				throw new ParseError("Invalid function call.");
-			case AssignOp:
-				if (this.TokenStack.size() == 1 && token.Type == LiveScriptTypes.ASSIGN)
-					return false;
-				if (token.TypeIsOneOf(LiveScriptTypes.SumOp, LiveScriptTypes.Value))
-					return true;
-				throw new ParseError("Invalid assign expression.");
 			default: return false;
 		}
 */
@@ -211,6 +251,7 @@ public class LiveScriptParserState {
 
 	/**
 	 * Start a new state at the current token.
+	 *
 	 * @param type {@link #Type}
 	 * @return The newly created state.
 	 */
@@ -230,6 +271,7 @@ public class LiveScriptParserState {
 
 	/**
 	 * Move to a specific token in the input stream.
+	 *
 	 * @param index Index of the token to move to.
 	 * @return Self for method chaining.
 	 */
@@ -245,6 +287,7 @@ public class LiveScriptParserState {
 
 	/**
 	 * Check if {@link #ThisToken} is the last token in the input stream.
+	 *
 	 * @return <tt>true</tt> if at the last token of input stream, <tt>false</tt> otherwise.
 	 */
 	protected boolean AtLastToken() {
@@ -253,16 +296,30 @@ public class LiveScriptParserState {
 
 
 	/**
-	 * Check if {@link #ThisToken} is the last in a statement.
+	 * Check if {@link #ThisToken} is the last token in a statement.
+	 *
 	 * @return <tt>true</tt> if it is, <tt>false</tt> otherwise.
 	 */
 	protected boolean AtEndOfStatement() {
-		return this.NextToken.TypeIsOneOf(
+		return this.IsEndOfStatement(this.NextToken);
+	}
+
+	/**
+	 * Check if <em>token</em> is an end-of-statement token.
+	 *
+	 * @param token Token to check.
+	 * @return
+	 */
+	protected boolean IsEndOfStatement(TreeToken token) {
+		return token.TypeIsOneOf(
 			LiveScriptTypes.SEMICOLON,
 			LiveScriptTypes.EOF,
 			LiveScriptTypes.NEWLINE,
 			LiveScriptTypes.PAREN_R
 		);
+	}
+	protected boolean IsEndOfStatement() {
+		return this.IsEndOfStatement(this.ThisToken);
 	}
 
 

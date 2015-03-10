@@ -2,6 +2,9 @@ package com.simpleplugin.psi;
 
 import com.intellij.psi.tree.IElementType;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class LiveScriptTypes {
 	/**
 	 * Parser types
@@ -25,6 +28,7 @@ public class LiveScriptTypes {
 	public static IElementType Value = new LiveScriptElementType("Value");
 	public static IElementType OPERATOR = new LiveScriptElementType("OPERATOR");
 	public static IElementType END_OF_STATEMENT = new LiveScriptElementType("END_OF_STATEMENT");
+	public static IElementType Operation = new LiveScriptElementType("Operation");
 
 
 	/**
@@ -48,9 +52,20 @@ public class LiveScriptTypes {
 	public static IElementType PLUS = new LiveScriptElementType("PLUS");
 	public static IElementType SEMICOLON = new LiveScriptElementType("SEMICOLON");
 	public static IElementType STRING = new LiveScriptElementType("STRING");
-	public static IElementType UNKNOWN = new LiveScriptElementType("UNKNOWN");
+	public static IElementType None = new LiveScriptElementType("None");
 
 
 	public static IElementType EXPRESSION = new LiveScriptElementType("Expression");
 	public static IElementType EXPRESSION_OR_VALUE = new LiveScriptElementType("ExpressionOrValue");
+
+	/**
+	 * All operation (expression) elements.
+	 */
+	public static IElementType[] OpElements = new IElementType[] {
+		ASSIGN_OPERATION,
+		SumOp,
+		IDENTIFIER,
+		NUMBER,
+		STRING,
+	};
 }

@@ -39,7 +39,7 @@ public class LiveScriptParser implements PsiParser {
 		/**
 		 * Error text in case of error.
 		 */
-		public String Error;
+		public String ErrorMessage;
 
 		public TreeToken() {
 		}
@@ -66,6 +66,8 @@ public class LiveScriptParser implements PsiParser {
 					return this.TypeIsOneOf(LiveScriptTypes.STRING, LiveScriptTypes.BOOLEAN, LiveScriptTypes.NUMBER, LiveScriptTypes.EMPTY);
 				if (type == LiveScriptTypes.OPERATOR)
 					return this.TypeIsOneOf(LiveScriptTypes.PLUS, LiveScriptTypes.ASSIGN, LiveScriptTypes.MATH_OP);
+				if (type == LiveScriptTypes.Operation)
+					return Arrays.asList(LiveScriptTypes.OpElements).contains(this.Type);
 				if (type == this.Type)
 					return true;
 			}
@@ -131,7 +133,7 @@ public class LiveScriptParser implements PsiParser {
 		 */
 		public TokenTree ParseAndBuild() {
 			// Create a default state
-			LiveScriptParserState state = new LiveScriptParserState(LiveScriptTypes.UNKNOWN, this.InputList);
+			LiveScriptParserState state = new LiveScriptParserState(LiveScriptTypes.None, this.InputList);
 
 
 			List<TreeToken> newTokens = state.ParseInput().GiveAddedTokens();
@@ -168,7 +170,7 @@ public class LiveScriptParser implements PsiParser {
 				if (tokens != null) {
 					for (TreeToken token : tokens) {
 						if (token.Type == TokenType.ERROR_ELEMENT)
-							token.Marker.error(token.Error);
+							token.Marker.error(token.ErrorMessage);
 						else
 							token.Marker.done(token.Type);
 					}
