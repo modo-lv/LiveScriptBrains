@@ -106,11 +106,19 @@ public class LiveScriptParserState {
 				errorToken.ErrorMessage = err.getMessage();
 			}
 
+			// Error: Bad character
+			if (this.Type == TokenType.ERROR_ELEMENT
+				&& this.ThisToken.TypeIsOneOf(TokenType.BAD_CHARACTER))
+			{
+				errorToken.ErrorMessage = "Unrecognized character.";
+				end = true;
+			}
 
 			// Error: A statement has been parsed and finished, but there are more tokens after it.
 			if (this.Type == LiveScriptTypes.None
 				&& this.StatementFinished
 				&& !end
+				&& !this.ThisToken.TypeIsOneOf(TokenType.ERROR_ELEMENT)
 				&& !this.IsEndOfStatement())
 			{
 				errorToken.ErrorMessage = "Stray token after a statement.";
@@ -154,8 +162,8 @@ public class LiveScriptParserState {
 
 			// Set the end-of-statement marker so that any following tokens are recognized as strays,
 			// and clear it on newlines.
-			if (this.Type == LiveScriptTypes.None)
-				this.StatementFinished = !(this.AtEndOfStatement() || this.IsEndOfStatement());
+			if (this.Type == LiveScriptTypes.None && !this.ThisToken.TypeIsOneOf(TokenType.ERROR_ELEMENT))
+				this.StatementFinished = !this.IsEndOfStatement();
 
 
 			// *) No matter what happens, we must end the parsing if we've reached the end of the input stream.
@@ -178,7 +186,15 @@ public class LiveScriptParserState {
 	protected LiveScriptParserState ParseToken() {
 		LiveScriptParserState newState = null;
 
-		// End of state
+		// Bad char
+		// For some reason, unless it's wrapped in an error element, a BAD_CHARACTER
+		// will eliminate all following markers, effectively stopping the parsed results from displaying
+		if (this.ThisToken.TypeIsOneOf(TokenType.BAD_CHARACTER)) {
+			newState = this.NewState(TokenType.ERROR_ELEMENT);
+			// this.NewState moves the input token marker forward, but in case of bad char we want to keep it
+			// at the same position so that it can end on the same token it starts.
+			newState.TokenIndex = this.TokenIndex;
+		}
 
 		// Sum
 		if (this.Type != LiveScriptTypes.SumOp
@@ -314,15 +330,13 @@ public class LiveScriptParserState {
 		return token.TypeIsOneOf(
 			LiveScriptTypes.SEMICOLON,
 			LiveScriptTypes.EOF,
-			LiveScriptTypes.NEWLINE,
-			LiveScriptTypes.PAREN_R
+			LiveScriptTypes.NEWLINE
 		);
 	}
+
 	protected boolean IsEndOfStatement() {
 		return this.IsEndOfStatement(this.ThisToken);
 	}
-
-
 
 	/*
 

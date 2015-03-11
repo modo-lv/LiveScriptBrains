@@ -135,7 +135,6 @@ public class LiveScriptParser implements PsiParser {
 			// Create a default state
 			LiveScriptParserState state = new LiveScriptParserState(LiveScriptTypes.None, this.InputList);
 
-
 			List<TreeToken> newTokens = state.ParseInput().GiveAddedTokens();
 
 			this.addAll(newTokens);
