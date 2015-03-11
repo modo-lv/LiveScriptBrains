@@ -3,7 +3,7 @@ package com.simpleplugin.psi;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
 import com.simpleplugin.psi.LiveScriptParser.TreeToken;
-import com.sun.javafx.fxml.expression.Expression;
+import org.apache.velocity.runtime.directive.Parse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -128,7 +128,11 @@ public class LiveScriptParserState {
 
 
 			// Error: Parser state is not done, but we've reached the end of the input tokens for the statement
-			if (this.Type != LiveScriptTypes.None && this.Type != TokenType.ERROR_ELEMENT && this.AtEndOfStatement() && !end) {
+			if (this.Type != LiveScriptTypes.None
+				&& this.Type != TokenType.ERROR_ELEMENT
+				&& this.AtEndOfStatement()
+				&& !end)
+			{
 				this.StartTokenIndex = this.TokenIndex;
 				errorToken.ErrorMessage = "Unexpected end to " + this.Type + " statement";
 				end = true;
@@ -190,10 +194,9 @@ public class LiveScriptParserState {
 		// For some reason, unless it's wrapped in an error element, a BAD_CHARACTER
 		// will eliminate all following markers, effectively stopping the parsed results from displaying
 		if (this.ThisToken.TypeIsOneOf(TokenType.BAD_CHARACTER)) {
-			newState = this.NewState(TokenType.ERROR_ELEMENT);
 			// this.NewState moves the input token marker forward, but in case of bad char we want to keep it
 			// at the same position so that it can end on the same token it starts.
-			newState.TokenIndex = this.TokenIndex;
+			newState = this.NewState(TokenType.ERROR_ELEMENT, false);
 		}
 
 		// Sum
@@ -208,6 +211,21 @@ public class LiveScriptParserState {
 		if (ThisToken.TypeIsOneOf(LiveScriptTypes.IDENTIFIER) && NextToken.TypeIsOneOf(LiveScriptTypes.ASSIGN))
 			newState = this.NewState(LiveScriptTypes.ASSIGN_OPERATION);
 
+
+		// Argument list
+		if (this.Type == LiveScriptTypes.List
+			&& !this.ThisToken.TypeIsOneOf(LiveScriptTypes.LIST_END))
+		{
+			newState = this.NewState(LiveScriptTypes.ARGUMENT_LIST, false);
+		}
+		else {
+
+			// Array
+			if (ThisToken.TypeIsOneOf(LiveScriptTypes.LIST_START)) {
+				newState = this.NewState(LiveScriptTypes.List);
+			}
+
+		}
 
 		if (newState != null) {
 			// Run the new state's parse
@@ -238,6 +256,24 @@ public class LiveScriptParserState {
 				return true;
 			throw new ParseError("Invalid assign expression.");
 		}
+
+		if (this.Type == LiveScriptTypes.List) {
+			if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.LIST_END))
+				return true;
+			if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.ARGUMENT_LIST))
+				return false;
+			throw new ParseError("Invalid list expression");
+		}
+
+		if (this.Type == LiveScriptTypes.ARGUMENT_LIST) {
+			if (this.NextToken.TypeIsOneOf(LiveScriptTypes.LIST_END))
+				return true;
+			if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.Value, LiveScriptTypes.COMMA, LiveScriptTypes.NEWLINE))
+				return false;
+			throw new ParseError("Invalid argument/element list.");
+		}
+
+
 		return false;
 
 /*
@@ -269,10 +305,18 @@ public class LiveScriptParserState {
 	 * Start a new state at the current token.
 	 *
 	 * @param type {@link #Type}
+	 * @param moveToNextToken After creating the new state, should its token index be moved forward once?
 	 * @return The newly created state.
 	 */
+	protected LiveScriptParserState NewState(IElementType type, boolean moveToNextToken) {
+		LiveScriptParserState ns = new LiveScriptParserState(type, this.InputStream, this.TokenIndex);
+		if (moveToNextToken)
+			ns.MoveToNextToken();
+		return ns;
+	}
+
 	protected LiveScriptParserState NewState(IElementType type) {
-		return new LiveScriptParserState(type, this.InputStream, this.TokenIndex).MoveToNextToken();
+		return this.NewState(type, true);
 	}
 
 
@@ -327,11 +371,15 @@ public class LiveScriptParserState {
 	 * @return
 	 */
 	protected boolean IsEndOfStatement(TreeToken token) {
-		return token.TypeIsOneOf(
+		boolean result = token.TypeIsOneOf(
 			LiveScriptTypes.SEMICOLON,
-			LiveScriptTypes.EOF,
-			LiveScriptTypes.NEWLINE
+			LiveScriptTypes.EOF
 		);
+
+		if (this.Type != LiveScriptTypes.ARGUMENT_LIST)
+			result = result || token.TypeIsOneOf(LiveScriptTypes.NEWLINE);
+
+		return result;
 	}
 
 	protected boolean IsEndOfStatement() {

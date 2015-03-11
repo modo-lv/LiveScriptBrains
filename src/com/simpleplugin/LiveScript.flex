@@ -262,7 +262,10 @@ UNKNOWN=[:().]
     {PLUS}					{ return _out(LiveScriptTypes.PLUS); }
 
     {ASSIGN}                { return _out(LiveScriptTypes.ASSIGN); }
-
+    
+    {BRACK_L}				{ return _out(LiveScriptTypes.LIST_START); }
+    {BRACK_R}				{ return _out(LiveScriptTypes.LIST_END); }
+    
     {CURL_L}				{ return _out(LiveScriptTypes.OBJ_START); }
     {CURL_R}				{ return _out(LiveScriptTypes.OBJ_END); }
 
@@ -270,6 +273,8 @@ UNKNOWN=[:().]
     {PAREN_R}				{ return _out(LiveScriptTypes.PAREN_R); }
 
     {COMMA}					{ return _out(LiveScriptTypes.COMMA); }
+
+    {COLON}					{ return _out(LiveScriptTypes.COLON); }
 
     {SEMICOLON}				{ return _out(LiveScriptTypes.SEMICOLON); }
 

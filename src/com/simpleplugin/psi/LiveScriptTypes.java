@@ -20,6 +20,7 @@ public class LiveScriptTypes {
 	public static IElementType ARGUMENT_LIST = new LiveScriptElementType("ARGUMENT_LIST");
 	public static IElementType CALL_ARG = new LiveScriptElementType("CALL_ARG");
 	public static IElementType EOF = new LiveScriptElementType("EOF");
+	public static IElementType List = new LiveScriptElementType("List");
 
 	/**
 	 * Fake values (used in parsing but not in PSI or lexer)
@@ -42,6 +43,8 @@ public class LiveScriptTypes {
 	public static IElementType IDENTIFIER = new LiveScriptElementType("IDENTIFIER");
 	public static IElementType INDENT = new LiveScriptElementType("INDENT");
 	public static IElementType ISTRING = new LiveScriptElementType("ISTRING");
+	public static IElementType LIST_START = new LiveScriptElementType("LIST_START");
+	public static IElementType LIST_END = new LiveScriptElementType("LIST_END");
 	public static IElementType MATH_OP = new LiveScriptElementType("MATH_OP");
 	public static IElementType NEWLINE = new LiveScriptElementType("NEWLINE");
 	public static IElementType NUMBER = new LiveScriptElementType("NUMBER");
@@ -51,6 +54,7 @@ public class LiveScriptTypes {
 	public static IElementType PAREN_L = new LiveScriptElementType("PAREN_L");
 	public static IElementType PLUS = new LiveScriptElementType("PLUS");
 	public static IElementType SEMICOLON = new LiveScriptElementType("SEMICOLON");
+	public static IElementType COLON = new LiveScriptElementType("COLON");
 	public static IElementType STRING = new LiveScriptElementType("STRING");
 	public static IElementType None = new LiveScriptElementType("None");
 
