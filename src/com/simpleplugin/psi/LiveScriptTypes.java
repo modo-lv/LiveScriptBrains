@@ -9,6 +9,8 @@ public class LiveScriptTypes {
 	/**
 	 * Parser types
 	 */
+	public static IElementType None = new LiveScriptElementType("None");
+	
 	public static IElementType ASSIGN_OPERATION = new LiveScriptElementType("ASSIGN_OPERATION");
 	public static IElementType COMMENT = new LiveScriptElementType("COMMENT");
 	public static IElementType I_STRING_STATEMENT = new LiveScriptElementType("I_STRING_STATEMENT");
@@ -21,6 +23,9 @@ public class LiveScriptTypes {
 	public static IElementType CALL_ARG = new LiveScriptElementType("CALL_ARG");
 	public static IElementType EOF = new LiveScriptElementType("EOF");
 	public static IElementType List = new LiveScriptElementType("List");
+	public static IElementType FuncCall = new LiveScriptElementType("FuncCall");
+	public static IElementType FuncCallArgs = new LiveScriptElementType("FuncCallArgs");
+
 
 	/**
 	 * Fake values (used in parsing but not in PSI or lexer)
@@ -30,12 +35,14 @@ public class LiveScriptTypes {
 	public static IElementType OPERATOR = new LiveScriptElementType("OPERATOR");
 	public static IElementType END_OF_STATEMENT = new LiveScriptElementType("END_OF_STATEMENT");
 	public static IElementType Operation = new LiveScriptElementType("Operation");
+	public static IElementType Separator = new LiveScriptElementType("Separator");
 
 
 	/**
 	 * Lexer types
 	 */
 	public static IElementType ASSIGN = new LiveScriptElementType("ASSIGN");
+	public static IElementType BANG = new LiveScriptElementType("BANG");
 	public static IElementType BOOLEAN = new LiveScriptElementType("BOOLEAN");
 	public static IElementType COMMA = new LiveScriptElementType("COMMA");
 	public static IElementType COMMENT_LINE = new LiveScriptElementType("COMMENT_LINE");
@@ -56,7 +63,6 @@ public class LiveScriptTypes {
 	public static IElementType SEMICOLON = new LiveScriptElementType("SEMICOLON");
 	public static IElementType COLON = new LiveScriptElementType("COLON");
 	public static IElementType STRING = new LiveScriptElementType("STRING");
-	public static IElementType None = new LiveScriptElementType("None");
 
 
 	public static IElementType EXPRESSION = new LiveScriptElementType("Expression");

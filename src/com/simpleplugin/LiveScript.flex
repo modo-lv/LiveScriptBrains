@@ -186,6 +186,7 @@ BRACK_L = "["
 BRACK_R = "]"
 DOT = "."
 SEMICOLON = ";"
+BANG = "!"
 
 IDENTIFIER = [$_a-zA-Z][-$_a-zA-Z0-9]*
 
@@ -273,6 +274,7 @@ UNKNOWN=[:().]
     {PAREN_R}				{ return _out(LiveScriptTypes.PAREN_R); }
 
     {COMMA}					{ return _out(LiveScriptTypes.COMMA); }
+    {BANG}					{ return _out(LiveScriptTypes.BANG); }
 
     {COLON}					{ return _out(LiveScriptTypes.COLON); }
 

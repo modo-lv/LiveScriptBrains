@@ -59,16 +59,22 @@ public class LiveScriptParser implements PsiParser {
 		 * @return <tt>true</tt> if a match was found, <tt>false</tt> otherwise.
 		 */
 		public boolean TypeIsOneOf(IElementType... types) {
+			boolean result = false;
 			for (IElementType type : types) {
-				if (type == LiveScriptTypes.Value)
-					return this.TypeIsOneOf(LiveScriptTypes.IDENTIFIER, LiveScriptTypes.LITERAL);
-				if (type == LiveScriptTypes.LITERAL)
-					return this.TypeIsOneOf(LiveScriptTypes.STRING, LiveScriptTypes.BOOLEAN, LiveScriptTypes.NUMBER, LiveScriptTypes.EMPTY);
-				if (type == LiveScriptTypes.OPERATOR)
-					return this.TypeIsOneOf(LiveScriptTypes.PLUS, LiveScriptTypes.ASSIGN, LiveScriptTypes.MATH_OP);
-				if (type == LiveScriptTypes.Operation)
-					return Arrays.asList(LiveScriptTypes.OpElements).contains(this.Type);
-				if (type == this.Type)
+				if (!result && type == LiveScriptTypes.Separator)
+					result = this.TypeIsOneOf(LiveScriptTypes.COMMA, LiveScriptTypes.NEWLINE);
+				if (!result && type == LiveScriptTypes.Value)
+					result = this.TypeIsOneOf(LiveScriptTypes.IDENTIFIER, LiveScriptTypes.NUMBER, LiveScriptTypes.STRING, LiveScriptTypes.BOOLEAN, LiveScriptTypes.EMPTY);
+				if (!result && type == LiveScriptTypes.LITERAL)
+					result = this.TypeIsOneOf(LiveScriptTypes.STRING, LiveScriptTypes.BOOLEAN, LiveScriptTypes.NUMBER, LiveScriptTypes.EMPTY);
+				if (!result && type == LiveScriptTypes.OPERATOR)
+					result = this.TypeIsOneOf(LiveScriptTypes.PLUS, LiveScriptTypes.ASSIGN, LiveScriptTypes.MATH_OP);
+				if (!result && type == LiveScriptTypes.Operation)
+					result = Arrays.asList(LiveScriptTypes.OpElements).contains(this.Type);
+				if (!result && type == this.Type)
+					result = true;
+
+				if (result)
 					return true;
 			}
 			return false;
