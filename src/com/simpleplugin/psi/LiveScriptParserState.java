@@ -200,12 +200,22 @@ public class LiveScriptParserState {
 			newState = this.NewState(TokenType.ERROR_ELEMENT, false);
 		}
 
+		else
+
+		// Parenthesis
+		if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.PAREN_L)) {
+			newState = this.NewState(LiveScriptTypes.ParenOp);
+		}
+
+		else
+
 		// Parameter-less function call means — don't check for anything else
 		if (this.Type == LiveScriptTypes.FuncCall
 			&& this.ThisToken.TypeIsOneOf(LiveScriptTypes.BANG))
 		{
 			return this;
 		}
+
 
 		// Sum
 		if (this.Type != LiveScriptTypes.SumOp
@@ -214,10 +224,13 @@ public class LiveScriptParserState {
 		{
 			newState = this.NewState(LiveScriptTypes.SumOp);
 		}
+		else
 
 		// Assignment
 		if (ThisToken.TypeIsOneOf(LiveScriptTypes.IDENTIFIER) && NextToken.TypeIsOneOf(LiveScriptTypes.ASSIGN))
 			newState = this.NewState(LiveScriptTypes.ASSIGN_OPERATION);
+
+		else
 
 		// Argument list
 		if ((this.Type == LiveScriptTypes.List || this.Type == LiveScriptTypes.FuncCall)
@@ -225,6 +238,7 @@ public class LiveScriptParserState {
 		{
 			newState = this.NewState(LiveScriptTypes.ARGUMENT_LIST, false);
 		}
+
 		else {
 			// Array
 			if (ThisToken.TypeIsOneOf(LiveScriptTypes.LIST_START)) {
@@ -255,6 +269,11 @@ public class LiveScriptParserState {
 	 * @return <tt>true</tt> if an end-of-state condition is met, <tt>false</tt> otherwise.
 	 */
 	protected boolean EndReached() {
+		// Expression with parenthesis
+		if (this.Type == LiveScriptTypes.ParenOp) {
+			return this.ThisToken.TypeIsOneOf(LiveScriptTypes.PAREN_R);
+		}
+
 		// Sum expression
 		if (this.Type == LiveScriptTypes.SumOp) {
 			if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.PLUS))
@@ -384,6 +403,9 @@ public class LiveScriptParserState {
 			LiveScriptTypes.SEMICOLON,
 			LiveScriptTypes.EOF
 		);
+
+		if (this.Type != LiveScriptTypes.ParenOp)
+			result = result || token.TypeIsOneOf(LiveScriptTypes.PAREN_R);
 
 		if (this.Type != LiveScriptTypes.ARGUMENT_LIST)
 			result = result || token.TypeIsOneOf(LiveScriptTypes.NEWLINE);

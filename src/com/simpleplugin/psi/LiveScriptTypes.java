@@ -25,7 +25,8 @@ public class LiveScriptTypes {
 	public static IElementType List = new LiveScriptElementType("List");
 	public static IElementType FuncCall = new LiveScriptElementType("FuncCall");
 	public static IElementType FuncCallArgs = new LiveScriptElementType("FuncCallArgs");
-
+	public static IElementType ParenOp = new LiveScriptElementType("ParenOp");
+	
 
 	/**
 	 * Fake values (used in parsing but not in PSI or lexer)
