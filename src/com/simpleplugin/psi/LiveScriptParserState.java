@@ -234,9 +234,8 @@ public class LiveScriptParserState {
 		else
 
 		// Sum
-		if (NextToken.TypeIsOneOf(LiveScriptTypes.PLUS)
-			&& this.Type != LiveScriptTypes.SumOp
-			&& ThisToken.TypeIsOneOf(LiveScriptTypes.Value, LiveScriptTypes.SumOp))
+		if (ThisToken.TypeIsOneOf(LiveScriptTypes.Value, LiveScriptTypes.SumOp)
+			&& NextToken.TypeIsOneOf(LiveScriptTypes.PLUS))
 		{
 			newState = this.NewState(LiveScriptTypes.SumOp);
 		}

@@ -205,7 +205,7 @@ UNKNOWN=[:().]
 
 %state INDENTED, BLOCK_STATEMENT
 %state DSTRING, ISTRING, VSTRING, STRING_SUSPENDED
-%state REGEX
+%state REGEX, SPLIT_OP
 
 %{
     private String[] _stateNames = new String[] {
@@ -217,6 +217,7 @@ UNKNOWN=[:().]
         "VSTRING",
         "STRING_SUSPENDED",
         "REGEX",
+        "SPLIT_OP"
     };
     private String _stateName(int state) {
         return _stateNames[state / 2];
@@ -241,6 +242,14 @@ UNKNOWN=[:().]
     {CURL_R}                { _exitState(); return _out(LiveScriptTypes.ISTRING); }
 }
 
+// An operation that allows continuation on the next line even without a backslash
+<SPLIT_OP> {
+	// Treat all white space as white space, including newlines and what would otherwise be indents.
+	{NEWLINE}{SPACE}*		{ return _out(TokenType.WHITE_SPACE); }
+
+	.						{ _rewindBy(1); _exitState(); }
+}
+
 <YYINITIAL, ISTRING> {
     // Literals
     {EMPTY}                 { return _out(LiveScriptTypes.EMPTY); }
@@ -259,8 +268,8 @@ UNKNOWN=[:().]
     {IDENTIFIER}            { return _out(LiveScriptTypes.IDENTIFIER); }
 
     // Operators & punctuation
-    {MATH_OP}               { return _out(LiveScriptTypes.MATH_OP); }
-    {PLUS}					{ return _out(LiveScriptTypes.PLUS); }
+    {MATH_OP}               { _enterState(SPLIT_OP); return _out(LiveScriptTypes.MATH_OP); }
+    {PLUS}					{ _enterState(SPLIT_OP); return _out(LiveScriptTypes.PLUS); }
 
     {ASSIGN}                { return _out(LiveScriptTypes.ASSIGN); }
     
