@@ -281,6 +281,8 @@ UNKNOWN=[:().]
     {SEMICOLON}				{ return _out(LiveScriptTypes.SEMICOLON); }
 
     // Non-code
+    \\{SPACE}*{NEWLINE}		{ return _out(TokenType.WHITE_SPACE); }
+
     {NEWLINE}               { return _out(LiveScriptTypes.NEWLINE); }
 
     {COMMENT_LINE}          { return _out(LiveScriptTypes.COMMENT_LINE); }
