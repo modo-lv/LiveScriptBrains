@@ -12,21 +12,15 @@ public class LiveScriptTypes {
 	public static IElementType None = new LiveScriptElementType("None");
 	
 	public static IElementType ASSIGN_OPERATION = new LiveScriptElementType("ASSIGN_OPERATION");
-	public static IElementType COMMENT = new LiveScriptElementType("COMMENT");
-	public static IElementType I_STRING_STATEMENT = new LiveScriptElementType("I_STRING_STATEMENT");
-	public static IElementType MATH_OPERATION = new LiveScriptElementType("MATH_OPERATION");
-	public static IElementType SumOp = new LiveScriptElementType("SumOp");
-	public static IElementType OPERATION = new LiveScriptElementType("OPERATION");
-	public static IElementType OPERATION_OR_VALUE = new LiveScriptElementType("OPERATION_OR_VALUE");
-	public static IElementType STATEMENT = new LiveScriptElementType("STATEMENT");
+	public static IElementType Block = new LiveScriptElementType("Block");
+	public static IElementType FuncArgList = new LiveScriptElementType("FuncArgList");
+	public static IElementType FuncCall = new LiveScriptElementType("FuncCall");
 	public static IElementType ARGUMENT_LIST = new LiveScriptElementType("ARGUMENT_LIST");
-	public static IElementType CALL_ARG = new LiveScriptElementType("CALL_ARG");
 	public static IElementType EOF = new LiveScriptElementType("EOF");
 	public static IElementType List = new LiveScriptElementType("List");
-	public static IElementType FuncCall = new LiveScriptElementType("FuncCall");
-	public static IElementType FuncCallArgs = new LiveScriptElementType("FuncCallArgs");
 	public static IElementType ParenOp = new LiveScriptElementType("ParenOp");
-	
+	public static IElementType SumOp = new LiveScriptElementType("SumOp");
+
 
 	/**
 	 * Fake values (used in parsing but not in PSI or lexer)
@@ -34,7 +28,6 @@ public class LiveScriptTypes {
 	public static IElementType LITERAL = new LiveScriptElementType("LITERAL");
 	public static IElementType Value = new LiveScriptElementType("Value");
 	public static IElementType OPERATOR = new LiveScriptElementType("OPERATOR");
-	public static IElementType END_OF_STATEMENT = new LiveScriptElementType("END_OF_STATEMENT");
 	public static IElementType Operation = new LiveScriptElementType("Operation");
 	public static IElementType Separator = new LiveScriptElementType("Separator");
 

@@ -50,6 +50,11 @@ public class LiveScriptParserState {
 	 */
 	protected boolean StatementFinished = false;
 
+	/**
+	 * How many spaces/tabs this state wast started at.
+	 */
+	private int IndentSize;
+
 
 	/**
 	 * @param type        {@link #Type}
@@ -202,6 +207,16 @@ public class LiveScriptParserState {
 
 		else
 
+		// Block
+		if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.INDENT)
+			&& this.ThisToken.Text.length() > this.IndentSize)
+		{
+			newState = this.NewState(LiveScriptTypes.Block);
+			newState.IndentSize = this.ThisToken.Text.length();
+		}
+
+		else
+
 		// Parenthesis
 		if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.PAREN_L)) {
 			newState = this.NewState(LiveScriptTypes.ParenOp);
@@ -216,14 +231,16 @@ public class LiveScriptParserState {
 			return this;
 		}
 
+		else
 
 		// Sum
-		if (this.Type != LiveScriptTypes.SumOp
-			&& ThisToken.TypeIsOneOf(LiveScriptTypes.Value, LiveScriptTypes.SumOp)
-			&& NextToken.TypeIsOneOf(LiveScriptTypes.PLUS))
+		if (NextToken.TypeIsOneOf(LiveScriptTypes.PLUS)
+			&& this.Type != LiveScriptTypes.SumOp
+			&& ThisToken.TypeIsOneOf(LiveScriptTypes.Value, LiveScriptTypes.SumOp))
 		{
 			newState = this.NewState(LiveScriptTypes.SumOp);
 		}
+
 		else
 
 		// Assignment
@@ -232,27 +249,23 @@ public class LiveScriptParserState {
 
 		else
 
-		// Argument list
-		if ((this.Type == LiveScriptTypes.List || this.Type == LiveScriptTypes.FuncCall)
-			&& !this.ThisToken.TypeIsOneOf(LiveScriptTypes.LIST_END))
+		// Function argument list
+		if (this.Type == LiveScriptTypes.FuncCall) {
+			newState = this.NewState(LiveScriptTypes.FuncArgList, false);
+		}
+
+		else
+
+		// Function call with arguments
+		if (this.Type != LiveScriptTypes.FuncCall
+			&& this.ThisToken.TypeIsOneOf(LiveScriptTypes.IDENTIFIER)
+			&& !this.AtEndOfStatement()
+			&& !this.NextToken.TypeIsOneOf(LiveScriptTypes.COMMA))
 		{
-			newState = this.NewState(LiveScriptTypes.ARGUMENT_LIST, false);
+			newState = this.NewState(LiveScriptTypes.FuncCall);
 		}
 
-		else {
-			// Array
-			if (ThisToken.TypeIsOneOf(LiveScriptTypes.LIST_START)) {
-				newState = this.NewState(LiveScriptTypes.List);
-			}
 
-			// Function call
-			// By default, any identifier not followed by end-of-statement is a function call.
-			else if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.IDENTIFIER)
-				&& !this.AtEndOfStatement())
-			{
-				newState = this.NewState(LiveScriptTypes.FuncCall);
-			}
-		}
 
 		if (newState != null) {
 			// Run the new state's parse
@@ -303,26 +316,32 @@ public class LiveScriptParserState {
 		}
 
 		// Argument list
-		if (this.Type == LiveScriptTypes.ARGUMENT_LIST) {
-			if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.Value)
-				&& (this.NextToken.TypeIsOneOf(LiveScriptTypes.LIST_END) || this.AtEndOfStatement()))
-			{
-				return true;
-			}
-
-			if ((this.ThisToken.TypeIsOneOf(LiveScriptTypes.Value) && this.NextToken.TypeIsOneOf(LiveScriptTypes.Separator))
-				|| (this.ThisToken.TypeIsOneOf(LiveScriptTypes.Separator) && this.NextToken.TypeIsOneOf(LiveScriptTypes.Value))) {
+		if (this.Type == LiveScriptTypes.FuncArgList) {
+			if ((this.ThisToken.TypeIsOneOf(LiveScriptTypes.Value) && this.NextToken.TypeIsOneOf(LiveScriptTypes.COMMA))
+				|| (this.ThisToken.TypeIsOneOf(LiveScriptTypes.COMMA) && this.NextToken.TypeIsOneOf(LiveScriptTypes.Value, LiveScriptTypes.COMMA))) {
 				return false;
 			}
-
-			throw new ParseError("Invalid argument/element list.");
+			return true;
 		}
 
 		// Function call
 		if (this.Type == LiveScriptTypes.FuncCall) {
-			if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.BANG, LiveScriptTypes.ARGUMENT_LIST))
+			if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.BANG, LiveScriptTypes.FuncArgList))
 				return true;
 			throw new ParseError("Invalid function call");
+		}
+
+		else
+
+		// Block statement
+		if (this.Type == LiveScriptTypes.Block) {
+			if (!this.NextToken.TypeIsOneOf(LiveScriptTypes.INDENT)
+				|| this.NextToken.Text.length() < this.IndentSize
+				|| this.NextToken.TypeIsOneOf(LiveScriptTypes.EOF))
+			{
+				return true;
+			}
+			return false;
 		}
 
 

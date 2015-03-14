@@ -37,6 +37,11 @@ public class LiveScriptParser implements PsiParser {
 		public PsiBuilder.Marker Marker;
 
 		/**
+		 * Token text.
+		 */
+		public String Text;
+
+		/**
 		 * Error text in case of error.
 		 */
 		public String ErrorMessage;
@@ -138,12 +143,14 @@ public class LiveScriptParser implements PsiParser {
 		 * @return Self for method chaining.
 		 */
 		public TokenTree ParseAndBuild() {
-			// Create a default state
-			LiveScriptParserState state = new LiveScriptParserState(LiveScriptTypes.None, this.InputList);
+			if (this.InputList.size() > 0) {
+				// Create a default state
+				LiveScriptParserState state = new LiveScriptParserState(LiveScriptTypes.None, this.InputList);
 
-			List<TreeToken> newTokens = state.ParseInput().GiveAddedTokens();
+				List<TreeToken> newTokens = state.ParseInput().GiveAddedTokens();
 
-			this.addAll(newTokens);
+				this.addAll(newTokens);
+			}
 
 			return this;
 		}
@@ -200,6 +207,7 @@ public class LiveScriptParser implements PsiParser {
 			TreeToken tt = new TreeToken();
 			tt.StartPosition = builder.getCurrentOffset();
 			tt.Type = builder.getTokenType();
+			tt.Text = builder.getTokenText();
 			tokens.add(tt);
 			builder.advanceLexer();
 
