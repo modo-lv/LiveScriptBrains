@@ -15,11 +15,13 @@ public class LiveScriptTypes {
 	public static IElementType Block = new LiveScriptElementType("Block");
 	public static IElementType FuncArgList = new LiveScriptElementType("FuncArgList");
 	public static IElementType FuncCall = new LiveScriptElementType("FuncCall");
+	public static IElementType ImplicitList = new LiveScriptElementType("Implicit list");
 	public static IElementType ARGUMENT_LIST = new LiveScriptElementType("ARGUMENT_LIST");
 	public static IElementType EOF = new LiveScriptElementType("EOF");
 	public static IElementType List = new LiveScriptElementType("List");
 	public static IElementType ParenOp = new LiveScriptElementType("ParenOp");
-	public static IElementType SumOp = new LiveScriptElementType("SumOp");
+	public static IElementType SumOp = new LiveScriptElementType("Sum expression");
+	public static IElementType PropertyOp = new LiveScriptElementType("Property expression");
 
 
 	/**
@@ -38,6 +40,7 @@ public class LiveScriptTypes {
 	public static IElementType ASSIGN = new LiveScriptElementType("ASSIGN");
 	public static IElementType BANG = new LiveScriptElementType("BANG");
 	public static IElementType BOOLEAN = new LiveScriptElementType("BOOLEAN");
+	public static IElementType COLON = new LiveScriptElementType("COLON");
 	public static IElementType COMMA = new LiveScriptElementType("COMMA");
 	public static IElementType COMMENT_LINE = new LiveScriptElementType("COMMENT_LINE");
 	public static IElementType EMPTY = new LiveScriptElementType("EMPTY");
@@ -54,8 +57,8 @@ public class LiveScriptTypes {
 	public static IElementType PAREN_R = new LiveScriptElementType("PAREN_R");
 	public static IElementType PAREN_L = new LiveScriptElementType("PAREN_L");
 	public static IElementType PLUS = new LiveScriptElementType("PLUS");
+	public static IElementType PROPERTY = new LiveScriptElementType("PROPERTY");
 	public static IElementType SEMICOLON = new LiveScriptElementType("SEMICOLON");
-	public static IElementType COLON = new LiveScriptElementType("COLON");
 	public static IElementType STRING = new LiveScriptElementType("STRING");
 
 

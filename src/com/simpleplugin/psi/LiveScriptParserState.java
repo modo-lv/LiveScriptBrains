@@ -3,7 +3,6 @@ package com.simpleplugin.psi;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
 import com.simpleplugin.psi.LiveScriptParser.TreeToken;
-import org.apache.velocity.runtime.directive.Parse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -111,8 +110,8 @@ public class LiveScriptParserState {
 				errorToken.ErrorMessage = err.getMessage();
 			}
 
-			// Error: Indent outside of a block statement
-			if (this.Type != LiveScriptTypes.Block
+			// Error: Indent outside of a correct statement
+			if (this.Type != LiveScriptTypes.ImplicitList
 				&& this.ThisToken.TypeIsOneOf(LiveScriptTypes.INDENT))
 			{
 				errorToken.ErrorMessage = "Unexpected indent.";
@@ -143,6 +142,7 @@ public class LiveScriptParserState {
 			}
 
 
+/*
 			// Error: Parser state is not done, but we've reached the end of the input tokens for the statement
 			if (this.Type != LiveScriptTypes.None
 				&& this.Type != TokenType.ERROR_ELEMENT
@@ -153,6 +153,7 @@ public class LiveScriptParserState {
 				errorToken.ErrorMessage = "Unexpected end to " + this.Type + " statement";
 				end = true;
 			}
+*/
 
 
 			if (end) {
@@ -218,13 +219,14 @@ public class LiveScriptParserState {
 
 		else
 
-		// Block
+		// Implied list
 		if ((this.Type == LiveScriptTypes.ASSIGN_OPERATION || this.Type == LiveScriptTypes.List)
-			&& this.ThisToken.TypeIsOneOf(LiveScriptTypes.INDENT)
-			&& this.ThisToken.Text.length() > this.IndentSize)
+			&& this.AtIndent())
 		{
-			newState = this.NewState(LiveScriptTypes.Block);
+			newState = this.NewState(LiveScriptTypes.ImplicitList);
 			newState.IndentSize = this.ThisToken.Text.length();
+			// Skip over the starting indent
+			newState.StartTokenIndex = this.TokenIndex + 1;
 		}
 
 		else
@@ -232,6 +234,15 @@ public class LiveScriptParserState {
 		// Parenthesis
 		if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.PAREN_L)) {
 			newState = this.NewState(LiveScriptTypes.ParenOp);
+		}
+
+		else
+
+		// Property access
+		if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.Value)
+			&& this.NextToken.TypeIsOneOf(LiveScriptTypes.PROPERTY))
+		{
+			newState = this.NewState(LiveScriptTypes.PropertyOp);
 		}
 
 		else
@@ -256,8 +267,9 @@ public class LiveScriptParserState {
 		else
 
 		// Assignment
-		if (ThisToken.TypeIsOneOf(LiveScriptTypes.IDENTIFIER) && NextToken.TypeIsOneOf(LiveScriptTypes.ASSIGN))
+		if (ThisToken.TypeIsOneOf(LiveScriptTypes.IDENTIFIER) && NextToken.TypeIsOneOf(LiveScriptTypes.ASSIGN)) {
 			newState = this.NewState(LiveScriptTypes.ASSIGN_OPERATION);
+		}
 
 		else
 
@@ -278,7 +290,6 @@ public class LiveScriptParserState {
 		}
 
 
-
 		if (newState != null) {
 			// Run the new state's parse
 			this.AddedTokens.addAll(newState.ParseInput().GiveAddedTokens());
@@ -286,7 +297,6 @@ public class LiveScriptParserState {
 
 		return this;
 	}
-
 
 	/**
 	 * Check if we are at and end of a parser state and should close it.
@@ -297,6 +307,14 @@ public class LiveScriptParserState {
 		// Expression with parenthesis
 		if (this.Type == LiveScriptTypes.ParenOp) {
 			return this.ThisToken.TypeIsOneOf(LiveScriptTypes.PAREN_R);
+		}
+
+		// Property expression
+		if (this.Type == LiveScriptTypes.PropertyOp) {
+			// Property state only starts when there is a property accessor,
+			// and ends at the same, so it always ends by the time this check
+			// is performed.
+			return true;
 		}
 
 		// Sum expression
@@ -313,7 +331,7 @@ public class LiveScriptParserState {
 		if (this.Type == LiveScriptTypes.ASSIGN_OPERATION) {
 			if (this.ThisToken.Type == LiveScriptTypes.ASSIGN)
 				return false;
-			if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.SumOp, LiveScriptTypes.Value))
+			if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.SumOp, LiveScriptTypes.Value, LiveScriptTypes.ImplicitList))
 				return true;
 			throw new ParseError("Invalid assign expression.");
 		}
@@ -325,6 +343,11 @@ public class LiveScriptParserState {
 			if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.ARGUMENT_LIST))
 				return false;
 			throw new ParseError("Invalid list expression");
+		}
+
+		// Implied list expression
+		if (this.Type == LiveScriptTypes.ImplicitList) {
+			return this.AtDedent();
 		}
 
 		// Argument list
@@ -400,6 +423,28 @@ public class LiveScriptParserState {
 	}
 
 	/**
+	 * Check if the current parsing token index is at a position where the next token
+	 * will start a new indentation level.
+	 * @return
+	 */
+	private boolean AtIndent() {
+		return (this.ThisToken.Type == LiveScriptTypes.NEWLINE &&
+			(this.NextToken.Type == LiveScriptTypes.INDENT && this.NextToken.Text.length() > this.IndentSize));
+	}
+
+	/**
+	 * Check if the the next token will be dedented.
+	 * @return
+	 */
+	private boolean AtDedent() {
+		if (this.ThisToken.Type == LiveScriptTypes.EOF)
+			return true;
+
+		return (this.ThisToken.Type == LiveScriptTypes.NEWLINE &&
+			(this.NextToken.Type != LiveScriptTypes.INDENT || this.NextToken.Text.length() < this.IndentSize));
+	}
+
+	/**
 	 * Check if {@link #ThisToken} is the last token in the input stream.
 	 *
 	 * @return <tt>true</tt> if at the last token of input stream, <tt>false</tt> otherwise.
@@ -433,9 +478,6 @@ public class LiveScriptParserState {
 
 		if (statementType != LiveScriptTypes.ParenOp)
 			result = result || token.TypeIsOneOf(LiveScriptTypes.PAREN_R);
-
-		if (statementType != LiveScriptTypes.Block)
-			result = result || token.TypeIsOneOf(LiveScriptTypes.INDENT);
 
 		if (statementType == LiveScriptTypes.Block)
 			result = result || (!this.NextToken.TypeIsOneOf(LiveScriptTypes.INDENT) || this.NextToken.Text.length() < this.IndentSize);

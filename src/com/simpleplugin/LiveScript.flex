@@ -266,6 +266,7 @@ UNKNOWN=[:().]
     {DSTRING_START}         { _enterState(DSTRING); return _out(LiveScriptTypes.STRING); }
 
     {IDENTIFIER}            { return _out(LiveScriptTypes.IDENTIFIER); }
+    \.{IDENTIFIER}			{ return _out(LiveScriptTypes.PROPERTY); }
 
     // Operators & punctuation
     {MATH_OP}               { _enterState(SPLIT_OP); return _out(LiveScriptTypes.MATH_OP); }
@@ -290,8 +291,6 @@ UNKNOWN=[:().]
     {SEMICOLON}				{ return _out(LiveScriptTypes.SEMICOLON); }
 
 	^{SPACE}+				{ return _out(LiveScriptTypes.INDENT); }
-
-	{NEWLINE}{SPACE}+		{ return _out(LiveScriptTypes.INDENT); }
 
     // Non-code
     \\{SPACE}*{NEWLINE}{SPACE}*		{ return _out(TokenType.WHITE_SPACE); }

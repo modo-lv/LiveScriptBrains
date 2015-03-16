@@ -31,34 +31,14 @@
       <file leaf-file-name="LiveScriptParserState.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptParserState.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.13289036" vertical-offset="2080" max-vertical-offset="8860">
-              <caret line="118" column="55" selection-start-line="118" selection-start-column="55" selection-end-line="118" selection-end-column="55" />
+            <state vertical-scroll-proportion="0.43189368" vertical-offset="1800" max-vertical-offset="9720">
+              <caret line="112" column="50" selection-start-line="112" selection-start-column="50" selection-end-line="112" selection-end-column="50" />
               <folding>
-                <element signature="e#10533#10534#0" expanded="true" />
-                <element signature="e#10584#10585#0" expanded="true" />
-                <element signature="e#11506#11507#0" expanded="true" />
-                <element signature="e#11568#11569#0" expanded="true" />
+                <element signature="e#11118#11119#0" expanded="true" />
+                <element signature="e#11169#11170#0" expanded="true" />
+                <element signature="e#12769#12770#0" expanded="true" />
+                <element signature="e#12831#12832#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="LiveScript.flex" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/LiveScript.flex">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="5640" max-vertical-offset="6300">
-              <caret line="293" column="67" selection-start-line="293" selection-start-column="67" selection-end-line="293" selection-end-column="67" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="LiveScriptTypes.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptTypes.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="958" max-vertical-offset="1560">
-              <caret line="17" column="0" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
-              <folding />
             </state>
           </provider>
         </entry>
@@ -87,8 +67,8 @@
         <option value="$PROJECT_DIR$/src/com/simpleplugin/psi/CustomParser.java" />
         <option value="$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptParserRules.java" />
         <option value="$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptParser.java" />
-        <option value="$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptTypes.java" />
         <option value="$PROJECT_DIR$/src/com/simpleplugin/LiveScript.flex" />
+        <option value="$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptTypes.java" />
         <option value="$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptParserState.java" />
       </list>
     </option>
@@ -452,12 +432,12 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptParserState.java</url>
-          <line>100</line>
+          <line>294</line>
           <properties />
-          <option name="timeStamp" value="12" />
+          <option name="timeStamp" value="13" />
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="13" />
+      <option name="time" value="14" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -471,10 +451,10 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="8540">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#10533#10534#0" expanded="true" />
-            <element signature="e#10584#10585#0" expanded="true" />
-            <element signature="e#11506#11507#0" expanded="true" />
-            <element signature="e#11568#11569#0" expanded="true" />
+            <element signature="e#11118#11119#0" expanded="true" />
+            <element signature="e#11169#11170#0" expanded="true" />
+            <element signature="e#12769#12770#0" expanded="true" />
+            <element signature="e#12831#12832#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -492,10 +472,10 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="8700">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#10533#10534#0" expanded="true" />
-            <element signature="e#10584#10585#0" expanded="true" />
-            <element signature="e#11506#11507#0" expanded="true" />
-            <element signature="e#11568#11569#0" expanded="true" />
+            <element signature="e#11118#11119#0" expanded="true" />
+            <element signature="e#11169#11170#0" expanded="true" />
+            <element signature="e#12769#12770#0" expanded="true" />
+            <element signature="e#12831#12832#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -513,10 +493,10 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="5207" max-vertical-offset="8060">
           <caret line="404" column="10" selection-start-line="404" selection-start-column="10" selection-end-line="404" selection-end-column="10" />
           <folding>
-            <element signature="e#10533#10534#0" expanded="true" />
-            <element signature="e#10584#10585#0" expanded="true" />
-            <element signature="e#11506#11507#0" expanded="true" />
-            <element signature="e#11568#11569#0" expanded="true" />
+            <element signature="e#11118#11119#0" expanded="true" />
+            <element signature="e#11169#11170#0" expanded="true" />
+            <element signature="e#12769#12770#0" expanded="true" />
+            <element signature="e#12831#12832#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -555,10 +535,10 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="8060">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#10533#10534#0" expanded="true" />
-            <element signature="e#10584#10585#0" expanded="true" />
-            <element signature="e#11506#11507#0" expanded="true" />
-            <element signature="e#11568#11569#0" expanded="true" />
+            <element signature="e#11118#11119#0" expanded="true" />
+            <element signature="e#11169#11170#0" expanded="true" />
+            <element signature="e#12769#12770#0" expanded="true" />
+            <element signature="e#12831#12832#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -590,10 +570,10 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="9440">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#10533#10534#0" expanded="true" />
-            <element signature="e#10584#10585#0" expanded="true" />
-            <element signature="e#11506#11507#0" expanded="true" />
-            <element signature="e#11568#11569#0" expanded="true" />
+            <element signature="e#11118#11119#0" expanded="true" />
+            <element signature="e#11169#11170#0" expanded="true" />
+            <element signature="e#12769#12770#0" expanded="true" />
+            <element signature="e#12831#12832#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -625,10 +605,10 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="7560">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#10533#10534#0" expanded="true" />
-            <element signature="e#10584#10585#0" expanded="true" />
-            <element signature="e#11506#11507#0" expanded="true" />
-            <element signature="e#11568#11569#0" expanded="true" />
+            <element signature="e#11118#11119#0" expanded="true" />
+            <element signature="e#11169#11170#0" expanded="true" />
+            <element signature="e#12769#12770#0" expanded="true" />
+            <element signature="e#12831#12832#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -660,10 +640,10 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="5200">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#10533#10534#0" expanded="true" />
-            <element signature="e#10584#10585#0" expanded="true" />
-            <element signature="e#11506#11507#0" expanded="true" />
-            <element signature="e#11568#11569#0" expanded="true" />
+            <element signature="e#11118#11119#0" expanded="true" />
+            <element signature="e#11169#11170#0" expanded="true" />
+            <element signature="e#12769#12770#0" expanded="true" />
+            <element signature="e#12831#12832#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -688,10 +668,10 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="9660">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#10533#10534#0" expanded="true" />
-            <element signature="e#10584#10585#0" expanded="true" />
-            <element signature="e#11506#11507#0" expanded="true" />
-            <element signature="e#11568#11569#0" expanded="true" />
+            <element signature="e#11118#11119#0" expanded="true" />
+            <element signature="e#11169#11170#0" expanded="true" />
+            <element signature="e#12769#12770#0" expanded="true" />
+            <element signature="e#12831#12832#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -701,10 +681,10 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="8620">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#10533#10534#0" expanded="true" />
-            <element signature="e#10584#10585#0" expanded="true" />
-            <element signature="e#11506#11507#0" expanded="true" />
-            <element signature="e#11568#11569#0" expanded="true" />
+            <element signature="e#11118#11119#0" expanded="true" />
+            <element signature="e#11169#11170#0" expanded="true" />
+            <element signature="e#12769#12770#0" expanded="true" />
+            <element signature="e#12831#12832#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -814,31 +794,31 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/LiveScript.flex">
+    <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptTypes.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="5640" max-vertical-offset="6300">
-          <caret line="293" column="67" selection-start-line="293" selection-start-column="67" selection-end-line="293" selection-end-column="67" />
+        <state vertical-scroll-proportion="0.33222592" vertical-offset="80" max-vertical-offset="1620">
+          <caret line="17" column="43" selection-start-line="17" selection-start-column="43" selection-end-line="17" selection-end-column="43" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptTypes.java">
+    <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/LiveScript.flex">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="478" max-vertical-offset="1560">
-          <caret line="17" column="0" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.8471761" vertical-offset="5370" max-vertical-offset="6280">
+          <caret line="294" column="0" selection-start-line="294" selection-start-column="0" selection-end-line="294" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptParserState.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.13289036" vertical-offset="2080" max-vertical-offset="8860">
-          <caret line="118" column="55" selection-start-line="118" selection-start-column="55" selection-end-line="118" selection-end-column="55" />
+        <state vertical-scroll-proportion="0.43189368" vertical-offset="1800" max-vertical-offset="9720">
+          <caret line="112" column="50" selection-start-line="112" selection-start-column="50" selection-end-line="112" selection-end-column="50" />
           <folding>
-            <element signature="e#10533#10534#0" expanded="true" />
-            <element signature="e#10584#10585#0" expanded="true" />
-            <element signature="e#11506#11507#0" expanded="true" />
-            <element signature="e#11568#11569#0" expanded="true" />
+            <element signature="e#11118#11119#0" expanded="true" />
+            <element signature="e#11169#11170#0" expanded="true" />
+            <element signature="e#12769#12770#0" expanded="true" />
+            <element signature="e#12831#12832#0" expanded="true" />
           </folding>
         </state>
       </provider>
