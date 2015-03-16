@@ -111,6 +111,17 @@ public class LiveScriptParserState {
 				errorToken.ErrorMessage = err.getMessage();
 			}
 
+			// Error: Indent outside of a block statement
+			if (this.Type != LiveScriptTypes.Block
+				&& this.ThisToken.TypeIsOneOf(LiveScriptTypes.INDENT))
+			{
+				errorToken.ErrorMessage = "Unexpected indent.";
+				this.StartTokenIndex = this.TokenIndex;
+				end = true;
+			}
+
+			else
+
 			// Error: Bad character
 			if (this.Type == TokenType.ERROR_ELEMENT
 				&& this.ThisToken.TypeIsOneOf(TokenType.BAD_CHARACTER))
@@ -208,7 +219,8 @@ public class LiveScriptParserState {
 		else
 
 		// Block
-		if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.INDENT)
+		if ((this.Type == LiveScriptTypes.ASSIGN_OPERATION || this.Type == LiveScriptTypes.List)
+			&& this.ThisToken.TypeIsOneOf(LiveScriptTypes.INDENT)
 			&& this.ThisToken.Text.length() > this.IndentSize)
 		{
 			newState = this.NewState(LiveScriptTypes.Block);
@@ -224,10 +236,11 @@ public class LiveScriptParserState {
 
 		else
 
-		// Parameter-less function call means — don't check for anything else
+		// Parameter-less function call
 		if (this.Type == LiveScriptTypes.FuncCall
 			&& this.ThisToken.TypeIsOneOf(LiveScriptTypes.BANG))
 		{
+			// We don't need to check for anything else
 			return this;
 		}
 
@@ -258,7 +271,7 @@ public class LiveScriptParserState {
 		// Function call with arguments
 		if (this.Type != LiveScriptTypes.FuncCall
 			&& this.ThisToken.TypeIsOneOf(LiveScriptTypes.IDENTIFIER)
-			&& !this.AtEndOfStatement()
+			&& !this.IsEndOfStatement(this.NextToken, LiveScriptTypes.FuncCall)
 			&& !this.NextToken.TypeIsOneOf(LiveScriptTypes.COMMA))
 		{
 			newState = this.NewState(LiveScriptTypes.FuncCall);
@@ -333,14 +346,9 @@ public class LiveScriptParserState {
 		else
 
 		// Block statement
-		if (this.Type == LiveScriptTypes.Block) {
-			if (!this.NextToken.TypeIsOneOf(LiveScriptTypes.INDENT)
-				|| this.NextToken.Text.length() < this.IndentSize
-				|| this.NextToken.TypeIsOneOf(LiveScriptTypes.EOF))
-			{
-				return true;
-			}
-			return false;
+		if (this.Type == LiveScriptTypes.Block)
+		{
+			return this.AtEndOfStatement();
 		}
 
 
@@ -407,26 +415,30 @@ public class LiveScriptParserState {
 	 * @return <tt>true</tt> if it is, <tt>false</tt> otherwise.
 	 */
 	protected boolean AtEndOfStatement() {
-		return this.IsEndOfStatement(this.NextToken);
+		return this.IsEndOfStatement(this.NextToken, this.Type);
 	}
 
 	/**
 	 * Check if <em>token</em> is an end-of-statement token.
 	 *
 	 * @param token Token to check.
+	 * @param statementType What kind of statement to check the end of.
 	 * @return
 	 */
-	protected boolean IsEndOfStatement(TreeToken token) {
+	protected boolean IsEndOfStatement(TreeToken token, IElementType statementType) {
 		boolean result = token.TypeIsOneOf(
 			LiveScriptTypes.SEMICOLON,
 			LiveScriptTypes.EOF
 		);
 
-		if (this.Type != LiveScriptTypes.ParenOp)
+		if (statementType != LiveScriptTypes.ParenOp)
 			result = result || token.TypeIsOneOf(LiveScriptTypes.PAREN_R);
 
-		if (this.Type != LiveScriptTypes.ARGUMENT_LIST)
-			result = result || token.TypeIsOneOf(LiveScriptTypes.NEWLINE);
+		if (statementType != LiveScriptTypes.Block)
+			result = result || token.TypeIsOneOf(LiveScriptTypes.INDENT);
+
+		if (statementType == LiveScriptTypes.Block)
+			result = result || (!this.NextToken.TypeIsOneOf(LiveScriptTypes.INDENT) || this.NextToken.Text.length() < this.IndentSize);
 
 		return result;
 	}
@@ -436,6 +448,6 @@ public class LiveScriptParserState {
 	 * @return
 	 */
 	protected boolean IsEndOfStatement() {
-		return this.IsEndOfStatement(this.ThisToken);
+		return this.IsEndOfStatement(this.ThisToken, this.Type);
 	}
 }
