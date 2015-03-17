@@ -103,11 +103,13 @@ public class LiveScriptParserState {
 			this.MoveToToken(this.TokenIndex);
 
 			// *) Check for normal state finishers.
-			try {
-				end = this.EndReached();
-			}
-			catch (ParseError err) {
-				errorToken.ErrorMessage = err.getMessage();
+			if (this.Type != LiveScriptTypes.None) {
+				try {
+					end = this.EndReached();
+				}
+				catch (ParseError err) {
+					errorToken.ErrorMessage = err.getMessage();
+				}
 			}
 
 			// Error: Indent outside of a correct statement
@@ -171,6 +173,15 @@ public class LiveScriptParserState {
 
 				// *) Determine the parent element's boundaries
 				parent.StartPosition = this.InputStream.get(this.StartTokenIndex).StartPosition;
+
+				if (this.Type == LiveScriptTypes.ImplicitList) {
+					// Indented statements are a bit of a special case because the last newline is parsed
+					// when it is "this" token instead of "next". This implicitly makes it part of
+					// the statement, so we must move the "parent" boundary back to leave the
+					// newline outside the statement and give the other states access to it.
+					this.MoveToToken(--this.TokenIndex);
+				}
+
 				parent.EndPosition = ThisToken.EndPosition;
 
 				// *) Replace the encompassed tokens in the input stream with the parent token
@@ -178,13 +189,14 @@ public class LiveScriptParserState {
 					this.InputStream.remove(a);
 				this.InputStream.add(this.StartTokenIndex, parent);
 				this.AddedTokens.add(parent);
+
 			}
 
 
 			// Set the end-of-statement marker so that any following tokens are recognized as strays,
 			// and clear it on newlines.
 			if (this.Type == LiveScriptTypes.None && !this.ThisToken.TypeIsOneOf(TokenType.ERROR_ELEMENT))
-				this.StatementFinished = !this.IsEndOfStatement();
+				this.StatementFinished = this.AtEndOfStatement();
 
 
 			// *) No matter what happens, we must end the parsing if we've reached the end of the input stream.
@@ -219,14 +231,12 @@ public class LiveScriptParserState {
 
 		else
 
-		// Implied list
+		// Implicit list
 		if ((this.Type == LiveScriptTypes.ASSIGN_OPERATION || this.Type == LiveScriptTypes.List)
 			&& this.AtIndent())
 		{
 			newState = this.NewState(LiveScriptTypes.ImplicitList);
 			newState.IndentSize = this.ThisToken.Text.length();
-			// Skip over the starting indent
-			newState.StartTokenIndex = this.TokenIndex + 1;
 		}
 
 		else
@@ -340,7 +350,7 @@ public class LiveScriptParserState {
 		if (this.Type == LiveScriptTypes.List) {
 			if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.LIST_END))
 				return true;
-			if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.ARGUMENT_LIST))
+			if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.Value, LiveScriptTypes.SEPARATOR))
 				return false;
 			throw new ParseError("Invalid list expression");
 		}
@@ -367,13 +377,6 @@ public class LiveScriptParserState {
 		}
 
 		else
-
-		// Block statement
-		if (this.Type == LiveScriptTypes.Block)
-		{
-			return this.AtEndOfStatement();
-		}
-
 
 		return false;
 	}

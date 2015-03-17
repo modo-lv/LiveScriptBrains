@@ -58,12 +58,11 @@ public class LiveScriptTypes {
 	public static IElementType PAREN_L = new LiveScriptElementType("PAREN_L");
 	public static IElementType PLUS = new LiveScriptElementType("PLUS");
 	public static IElementType PROPERTY = new LiveScriptElementType("PROPERTY");
+	public static IElementType SEPARATOR = new LiveScriptElementType("SEPARATOR");
 	public static IElementType SEMICOLON = new LiveScriptElementType("SEMICOLON");
 	public static IElementType STRING = new LiveScriptElementType("STRING");
+	public static IElementType YADA = new LiveScriptElementType("YADA");
 
-
-	public static IElementType EXPRESSION = new LiveScriptElementType("Expression");
-	public static IElementType EXPRESSION_OR_VALUE = new LiveScriptElementType("ExpressionOrValue");
 
 	/**
 	 * All operation (expression) elements.

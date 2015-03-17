@@ -187,6 +187,7 @@ BRACK_R = "]"
 DOT = "."
 SEMICOLON = ";"
 BANG = "!"
+YADA = "..."
 
 IDENTIFIER = [$_a-zA-Z][-$_a-zA-Z0-9]*
 
@@ -205,7 +206,7 @@ UNKNOWN=[:().]
 
 %state INDENTED, BLOCK_STATEMENT
 %state DSTRING, ISTRING, VSTRING, STRING_SUSPENDED
-%state REGEX, SPLIT_OP
+%state REGEX, SPLIT_OP, LIST
 
 %{
     private String[] _stateNames = new String[] {
@@ -217,7 +218,8 @@ UNKNOWN=[:().]
         "VSTRING",
         "STRING_SUSPENDED",
         "REGEX",
-        "SPLIT_OP"
+        "SPLIT_OP",
+        "LIST"
     };
     private String _stateName(int state) {
         return _stateNames[state / 2];
@@ -250,7 +252,15 @@ UNKNOWN=[:().]
 	.						{ _rewindBy(1); _exitState(); }
 }
 
-<YYINITIAL, ISTRING> {
+<LIST> {
+	({SPACE}|{NEWLINE})* 	{ return _out(LiveScriptTypes.SEPARATOR); }
+
+	{COMMA}					{ return _out(LiveScriptTypes.SEPARATOR); }
+
+    {BRACK_R}				{ _exitState(); return _out(LiveScriptTypes.LIST_END); }
+}
+
+<YYINITIAL, ISTRING, LIST> {
     // Literals
     {EMPTY}                 { return _out(LiveScriptTypes.EMPTY); }
 
@@ -274,9 +284,8 @@ UNKNOWN=[:().]
 
     {ASSIGN}                { return _out(LiveScriptTypes.ASSIGN); }
     
-    {BRACK_L}				{ return _out(LiveScriptTypes.LIST_START); }
-    {BRACK_R}				{ return _out(LiveScriptTypes.LIST_END); }
-    
+    {BRACK_L}				{ _enterState(LIST); return _out(LiveScriptTypes.LIST_START); }
+
     {CURL_L}				{ return _out(LiveScriptTypes.OBJ_START); }
     {CURL_R}				{ return _out(LiveScriptTypes.OBJ_END); }
 
@@ -285,6 +294,8 @@ UNKNOWN=[:().]
 
     {COMMA}					{ return _out(LiveScriptTypes.COMMA); }
     {BANG}					{ return _out(LiveScriptTypes.BANG); }
+
+    {YADA}					{ return _out(LiveScriptTypes.YADA); }
 
     {COLON}					{ return _out(LiveScriptTypes.COLON); }
 
