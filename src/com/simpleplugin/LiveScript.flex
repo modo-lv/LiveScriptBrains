@@ -301,12 +301,14 @@ UNKNOWN=[:().]
 
     {SEMICOLON}				{ return _out(LiveScriptTypes.SEMICOLON); }
 
+    ^{SPACE}*{NEWLINE}		{ return _out(TokenType.WHITE_SPACE); }
+    ^{SPACE}+$				{ return _out(TokenType.WHITE_SPACE); }
+
 	^{SPACE}+				{ return _out(LiveScriptTypes.INDENT); }
 
     // Non-code
     \\{SPACE}*{NEWLINE}{SPACE}*		{ return _out(TokenType.WHITE_SPACE); }
 
-    ^{SPACE}*{NEWLINE}		{ return _out(TokenType.WHITE_SPACE); }
 
     {NEWLINE}               { return _out(LiveScriptTypes.NEWLINE); }
 
