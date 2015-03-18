@@ -253,11 +253,11 @@ UNKNOWN=[:().]
 }
 
 <LIST> {
-	({SPACE}|{NEWLINE})* 	{ return _out(LiveScriptTypes.SEPARATOR); }
+	({SPACE}*{NEWLINE}{SPACE}*)+ 	{ return _out(LiveScriptTypes.SEPARATOR); }
 
-	{COMMA}					{ return _out(LiveScriptTypes.SEPARATOR); }
+	{COMMA}							{ return _out(LiveScriptTypes.SEPARATOR); }
 
-    {BRACK_R}				{ _exitState(); return _out(LiveScriptTypes.LIST_END); }
+    {BRACK_R}						{ _exitState(); return _out(LiveScriptTypes.LIST_END); }
 }
 
 <YYINITIAL, ISTRING, LIST> {
@@ -302,9 +302,9 @@ UNKNOWN=[:().]
     {SEMICOLON}				{ return _out(LiveScriptTypes.SEMICOLON); }
 
     ^{SPACE}*{NEWLINE}		{ return _out(TokenType.WHITE_SPACE); }
-    ^{SPACE}+$				{ return _out(TokenType.WHITE_SPACE); }
+    ^{SPACE}+				{ return _out(TokenType.WHITE_SPACE); }
 
-	^{SPACE}+				{ return _out(LiveScriptTypes.INDENT); }
+	^{SPACE}+.				{ _rewindBy(1); return _out(LiveScriptTypes.INDENT); }
 
     // Non-code
     \\{SPACE}*{NEWLINE}{SPACE}*		{ return _out(TokenType.WHITE_SPACE); }

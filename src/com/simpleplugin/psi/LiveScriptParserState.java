@@ -54,6 +54,13 @@ public class LiveScriptParserState {
 	 */
 	private int IndentSize;
 
+	/**
+	 * Tracker of how many elements are in this state.
+	 * Currently only used in ImplicitList to figure out alter if it's really a list
+	 * or just a value (i.e., has a single element).
+	 */
+	private int ElementCount = 0;
+
 
 	/**
 	 * @param type        {@link #Type}
@@ -101,6 +108,12 @@ public class LiveScriptParserState {
 
 			// Refresh current/next token references, in case parser has changed the tokens
 			this.MoveToToken(this.TokenIndex);
+
+			if (this.Type == LiveScriptTypes.ImplicitList
+				&& this.ThisToken.TypeIsOneOf(LiveScriptTypes.INDENT))
+			{
+				this.ElementCount++;
+			}
 
 			// *) Check for normal state finishers.
 			if (this.Type != LiveScriptTypes.None) {
@@ -184,6 +197,10 @@ public class LiveScriptParserState {
 
 				parent.EndPosition = ThisToken.EndPosition;
 
+				// *) In case of implicit list, we also need to save how many elments it has
+				if (this.Type == LiveScriptTypes.ImplicitList)
+					parent.ElementCount = this.ElementCount;
+
 				// *) Replace the encompassed tokens in the input stream with the parent token
 				for (int a = this.TokenIndex; a >= this.StartTokenIndex; a--)
 					this.InputStream.remove(a);
@@ -232,11 +249,11 @@ public class LiveScriptParserState {
 		else
 
 		// Implicit list
-		if ((this.Type == LiveScriptTypes.ASSIGN_OPERATION || this.Type == LiveScriptTypes.List)
+		if ((this.Type == LiveScriptTypes.ASSIGN_OPERATION)
 			&& this.AtIndent())
 		{
 			newState = this.NewState(LiveScriptTypes.ImplicitList);
-			newState.IndentSize = this.ThisToken.Text.length();
+			newState.IndentSize = this.NextToken.Text.length();
 		}
 
 		else
@@ -440,8 +457,10 @@ public class LiveScriptParserState {
 	 * @return
 	 */
 	private boolean AtDedent() {
-		if (this.ThisToken.Type == LiveScriptTypes.EOF)
+		if (this.NextToken.Type == LiveScriptTypes.EOF) {
+			this.TokenIndex++;
 			return true;
+		}
 
 		return (this.ThisToken.Type == LiveScriptTypes.NEWLINE &&
 			(this.NextToken.Type != LiveScriptTypes.INDENT || this.NextToken.Text.length() < this.IndentSize));

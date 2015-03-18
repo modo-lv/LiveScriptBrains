@@ -46,6 +46,13 @@ public class LiveScriptParser implements PsiParser {
 		 */
 		public String ErrorMessage;
 
+		/**
+		 * Number of non-space elements within this token.
+		 * Used in Implicit list tokens.
+		 */
+		public int ElementCount;
+
+
 		public TreeToken() {
 		}
 
@@ -137,6 +144,14 @@ public class LiveScriptParser implements PsiParser {
 			return result;
 		}
 
+		@Override
+		public boolean remove(Object o) {
+			TreeToken t = (TreeToken)o;
+			this.ByStartIndex.get(t.StartPosition).remove(o);
+			this.ByEndIndex.get(t.EndPosition).remove(o);
+			return this.remove(o);
+		}
+
 
 		/**
 		 * Parse input token list and build a token tree.
@@ -148,6 +163,16 @@ public class LiveScriptParser implements PsiParser {
 				LiveScriptParserState state = new LiveScriptParserState(LiveScriptTypes.None, this.InputList);
 
 				List<TreeToken> newTokens = state.ParseInput().GiveAddedTokens();
+
+				// Implicit lists with only one element are not actually lists, so we need
+				// to remove them and only leave the element as a simple value
+				for (int a = newTokens.size()-1; a >= 0; a--) {
+					if (newTokens.get(a).Type == LiveScriptTypes.ImplicitList
+						&& newTokens.get(a).ElementCount < 2)
+					{
+						newTokens.remove(a);
+					}
+				}
 
 				this.addAll(newTokens);
 			}
