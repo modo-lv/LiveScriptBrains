@@ -248,6 +248,20 @@ public class LiveScriptParserState {
 
 		else
 
+		// D-string
+		if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.STRING_START)) {
+			newState = this.NewState(LiveScriptTypes.StringOp);
+		}
+
+		else
+
+		// Explicit list
+		if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.LIST_START)) {
+			newState = this.NewState(LiveScriptTypes.List);
+		}
+
+		else
+
 		// Implicit list
 		if ((this.Type == LiveScriptTypes.ASSIGN_OPERATION)
 			&& this.AtIndent())
@@ -308,10 +322,10 @@ public class LiveScriptParserState {
 		else
 
 		// Function call with arguments
-		if (this.Type != LiveScriptTypes.FuncCall
+		if ((this.Type != LiveScriptTypes.FuncCall && this.Type != LiveScriptTypes.StringOp)
 			&& this.ThisToken.TypeIsOneOf(LiveScriptTypes.IDENTIFIER)
 			&& !this.IsEndOfStatement(this.NextToken, LiveScriptTypes.FuncCall)
-			&& !this.NextToken.TypeIsOneOf(LiveScriptTypes.COMMA))
+			&& !this.NextToken.TypeIsOneOf(LiveScriptTypes.COMMA, LiveScriptTypes.SEPARATOR))
 		{
 			newState = this.NewState(LiveScriptTypes.FuncCall);
 		}
@@ -334,6 +348,15 @@ public class LiveScriptParserState {
 		// Expression with parenthesis
 		if (this.Type == LiveScriptTypes.ParenOp) {
 			return this.ThisToken.TypeIsOneOf(LiveScriptTypes.PAREN_R);
+		}
+
+		if (this.Type == LiveScriptTypes.StringOp) {
+			return this.ThisToken.TypeIsOneOf(LiveScriptTypes.STRING_END);
+		}
+
+		// Explicit list
+		if (this.Type == LiveScriptTypes.List) {
+			return this.ThisToken.TypeIsOneOf(LiveScriptTypes.LIST_END);
 		}
 
 		// Property expression

@@ -20,8 +20,10 @@ public class LiveScriptTypes {
 	public static IElementType EOF = new LiveScriptElementType("EOF");
 	public static IElementType List = new LiveScriptElementType("List");
 	public static IElementType ParenOp = new LiveScriptElementType("ParenOp");
-	public static IElementType SumOp = new LiveScriptElementType("Sum expression");
 	public static IElementType PropertyOp = new LiveScriptElementType("Property expression");
+	public static IElementType StringOp = new LiveScriptElementType("Double-quoted string");
+	public static IElementType SumOp = new LiveScriptElementType("Sum expression");
+	
 
 
 	/**
@@ -44,6 +46,7 @@ public class LiveScriptTypes {
 	public static IElementType COMMA = new LiveScriptElementType("COMMA");
 	public static IElementType COMMENT_LINE = new LiveScriptElementType("COMMENT_LINE");
 	public static IElementType EMPTY = new LiveScriptElementType("EMPTY");
+	public static IElementType ESCAPE_CHAR = new LiveScriptElementType("ESCAPE_CHAR");
 	public static IElementType IDENTIFIER = new LiveScriptElementType("IDENTIFIER");
 	public static IElementType INDENT = new LiveScriptElementType("INDENT");
 	public static IElementType ISTRING = new LiveScriptElementType("ISTRING");
@@ -61,6 +64,8 @@ public class LiveScriptTypes {
 	public static IElementType SEPARATOR = new LiveScriptElementType("SEPARATOR");
 	public static IElementType SEMICOLON = new LiveScriptElementType("SEMICOLON");
 	public static IElementType STRING = new LiveScriptElementType("STRING");
+	public static IElementType STRING_START = new LiveScriptElementType("STRING_START");
+	public static IElementType STRING_END = new LiveScriptElementType("STRING_END");
 	public static IElementType YADA = new LiveScriptElementType("YADA");
 
 

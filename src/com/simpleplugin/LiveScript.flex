@@ -206,7 +206,7 @@ UNKNOWN=[:().]
 
 %state INDENTED, BLOCK_STATEMENT
 %state DSTRING, ISTRING, VSTRING, STRING_SUSPENDED
-%state REGEX, SPLIT_OP, LIST
+%state REGEX, SPLIT_OP, LIST, STRING_VAR
 
 %{
     private String[] _stateNames = new String[] {
@@ -219,7 +219,8 @@ UNKNOWN=[:().]
         "STRING_SUSPENDED",
         "REGEX",
         "SPLIT_OP",
-        "LIST"
+        "LIST",
+        "STRING_VAR",
     };
     private String _stateName(int state) {
         return _stateNames[state / 2];
@@ -228,14 +229,21 @@ UNKNOWN=[:().]
 
 %%
 
+// Variable inside double-quoted string
+<STRING_VAR> {
+	{IDENTIFIER}			{ _exitState(); return _out(LiveScriptTypes.IDENTIFIER); }
+
+	.						{ _exitState(); _rewindBy(1); }
+}
+
 // Inside a double-quoted string
 <DSTRING> {
     {ISTRING_START}         { _enterState(ISTRING); return _out(LiveScriptTypes.ISTRING); }
 
-    #{IDENTIFIER}           { return _out(LiveScriptTypes.IDENTIFIER); }
+    #			       		{ _enterState(STRING_VAR); return _out(LiveScriptTypes.ESCAPE_CHAR); }
 
     // Everything else is just regular string.
-    ({ISTRING}|#\{\})*\"    { _exitState(); return _out(LiveScriptTypes.STRING); }
+    \"    					{ _exitState(); return _out(LiveScriptTypes.STRING_END); }
 
     ({ISTRING}|#\{\})*      { return _out(LiveScriptTypes.STRING); }
 }
@@ -273,7 +281,7 @@ UNKNOWN=[:().]
     {BACKSTRING}            { return _out(LiveScriptTypes.STRING); }
     {SSTRING}               { return _out(LiveScriptTypes.STRING); }
     {DSTRING}               { return _out(LiveScriptTypes.STRING); }
-    {DSTRING_START}         { _enterState(DSTRING); return _out(LiveScriptTypes.STRING); }
+    {DSTRING_START}         { _enterState(DSTRING); return _out(LiveScriptTypes.STRING_START); }
 
     {IDENTIFIER}            { return _out(LiveScriptTypes.IDENTIFIER); }
     \.{IDENTIFIER}			{ return _out(LiveScriptTypes.PROPERTY); }

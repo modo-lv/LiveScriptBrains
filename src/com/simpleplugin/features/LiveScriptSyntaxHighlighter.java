@@ -42,8 +42,10 @@ public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase {
 	@Override
 	public TextAttributesKey[] getTokenHighlights(IElementType tokenType) {
 		IElementType[] strings = {
-				LiveScriptTypes.STRING,
-				LiveScriptTypes.ISTRING,
+			LiveScriptTypes.STRING,
+			LiveScriptTypes.ISTRING,
+			LiveScriptTypes.STRING_START,
+			LiveScriptTypes.STRING_END
 		};
 
 		for (IElementType i : strings)
