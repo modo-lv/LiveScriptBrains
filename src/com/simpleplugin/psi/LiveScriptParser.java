@@ -188,12 +188,19 @@ public class LiveScriptParser implements PsiParser {
 		public TokenTree SetMarkersOn(PsiBuilder builder) {
 			while (!builder.eof()) {
 				List<TreeToken> tokens;
+				IElementType tokenType = builder.getTokenType();
 
 				// Mark starting positions
 				tokens = this.ByStartIndex.get(builder.getCurrentOffset());
 				if (tokens != null) {
 					// Markers must be set in reverse order because the marker that's added last must be closed first.
 					for (int a = tokens.size()-1; a >= 0; a--) {
+
+						// If a token's type matches the type of the element that it wraps, it means that it's not
+						// actually a wrapping "parent" token, so we don't need to set any markers
+						if (tokens.get(a).Type == tokenType)
+							continue;
+
 						tokens.get(a).Marker = builder.mark();
 					}
 				}
@@ -206,6 +213,8 @@ public class LiveScriptParser implements PsiParser {
 
 				if (tokens != null) {
 					for (TreeToken token : tokens) {
+						if (token.Type == tokenType)
+							continue;
 						if (token.Type == TokenType.ERROR_ELEMENT)
 							token.Marker.error(token.ErrorMessage);
 						else
