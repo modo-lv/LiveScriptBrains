@@ -193,7 +193,7 @@ IDENTIFIER = [$_a-zA-Z][-$_a-zA-Z0-9]*
 
 // Comments
 COMMENT_LINE = #.*
-COMMENT_BLOCK = \/\*(.|{CRLF})*\*\/
+COMMENT_BLOCK = \/\*~\*\/
 
 // Whitespace
 CRLF = [\r\n]
@@ -321,6 +321,8 @@ UNKNOWN=[:().]
     {NEWLINE}               { return _out(LiveScriptTypes.NEWLINE); }
 
     {COMMENT_LINE}          { return _out(LiveScriptTypes.COMMENT_LINE); }
+
+    {COMMENT_BLOCK}			{ return _out(LiveScriptTypes.COMMENT_BLOCK); }
 
     {SPACE}+                { return _out(TokenType.WHITE_SPACE); }
 

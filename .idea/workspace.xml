@@ -41,8 +41,8 @@
       <file leaf-file-name="LiveScriptParserDefinition.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptParserDefinition.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="980">
-              <caret line="25" column="13" selection-start-line="25" selection-start-column="13" selection-end-line="25" selection-end-column="13" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="70" max-vertical-offset="980">
+              <caret line="27" column="119" selection-start-line="27" selection-start-column="119" selection-end-line="27" selection-end-column="119" />
               <folding />
             </state>
           </provider>
@@ -61,8 +61,8 @@
       <file leaf-file-name="LiveScriptTypes.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptTypes.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="660" max-vertical-offset="1700">
-              <caret line="48" column="83" selection-start-line="48" selection-start-column="83" selection-end-line="48" selection-end-column="83" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="660" max-vertical-offset="1720">
+              <caret line="46" column="36" selection-start-line="46" selection-start-column="36" selection-end-line="46" selection-end-column="36" />
               <folding />
             </state>
           </provider>
@@ -71,8 +71,8 @@
       <file leaf-file-name="LiveScript.flex" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/LiveScript.flex">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.5695142" vertical-offset="4500" max-vertical-offset="6700">
-              <caret line="242" column="94" selection-start-line="242" selection-start-column="94" selection-end-line="242" selection-end-column="94" />
+            <state vertical-scroll-proportion="0.5695142" vertical-offset="3560" max-vertical-offset="6740">
+              <caret line="195" column="21" selection-start-line="195" selection-start-column="21" selection-end-line="195" selection-end-column="21" />
               <folding />
             </state>
           </provider>
@@ -104,8 +104,9 @@
         <option value="$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptParser.java" />
         <option value="$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptParserState.java" />
         <option value="$PROJECT_DIR$/src/com/simpleplugin/features/LiveScriptSyntaxHighlighter.java" />
-        <option value="$PROJECT_DIR$/src/com/simpleplugin/LiveScript.flex" />
+        <option value="$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptParserDefinition.java" />
         <option value="$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptTypes.java" />
+        <option value="$PROJECT_DIR$/src/com/simpleplugin/LiveScript.flex" />
       </list>
     </option>
   </component>
@@ -450,7 +451,7 @@
       <window_info id="PsiViewer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3298109" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3336887" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3336887" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.18091561" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -806,14 +807,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/LiveScriptLexer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.43189368" vertical-offset="14440" max-vertical-offset="16800">
-          <caret line="763" column="16" selection-start-line="763" selection-start-column="16" selection-end-line="763" selection-end-column="16" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptTokenType.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="300">
@@ -832,7 +825,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.33222592" vertical-offset="4540" max-vertical-offset="14300">
           <caret line="260" column="12" selection-start-line="260" selection-start-column="12" selection-end-line="260" selection-end-column="12" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -847,7 +839,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.33222592" vertical-offset="4860" max-vertical-offset="8960">
           <caret line="280" column="19" selection-start-line="280" selection-start-column="19" selection-end-line="280" selection-end-column="19" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -885,24 +876,32 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptParserDefinition.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="980">
-          <caret line="25" column="13" selection-start-line="25" selection-start-column="13" selection-end-line="25" selection-end-column="13" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="70" max-vertical-offset="980">
+          <caret line="27" column="119" selection-start-line="27" selection-start-column="119" selection-end-line="27" selection-end-column="119" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/psi/LiveScriptTypes.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="660" max-vertical-offset="1700">
-          <caret line="48" column="83" selection-start-line="48" selection-start-column="83" selection-end-line="48" selection-end-column="83" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="660" max-vertical-offset="1720">
+          <caret line="46" column="36" selection-start-line="46" selection-start-column="36" selection-end-line="46" selection-end-column="36" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/LiveScriptLexer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.37362638" vertical-offset="16520" max-vertical-offset="17760">
+          <caret line="871" column="17" selection-start-line="871" selection-start-column="17" selection-end-line="871" selection-end-column="17" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/simpleplugin/LiveScript.flex">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.5695142" vertical-offset="4500" max-vertical-offset="6700">
-          <caret line="242" column="94" selection-start-line="242" selection-start-column="94" selection-end-line="242" selection-end-column="94" />
+        <state vertical-scroll-proportion="0.5695142" vertical-offset="3560" max-vertical-offset="6740">
+          <caret line="195" column="21" selection-start-line="195" selection-start-column="21" selection-end-line="195" selection-end-column="21" />
           <folding />
         </state>
       </provider>

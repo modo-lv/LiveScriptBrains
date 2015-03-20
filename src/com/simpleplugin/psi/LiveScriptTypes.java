@@ -44,6 +44,7 @@ public class LiveScriptTypes {
 	public static IElementType BOOLEAN = new LiveScriptElementType("BOOLEAN");
 	public static IElementType COLON = new LiveScriptElementType("COLON");
 	public static IElementType COMMA = new LiveScriptElementType("COMMA");
+	public static IElementType COMMENT_BLOCK = new LiveScriptElementType("COMMENT_BLOCK");
 	public static IElementType COMMENT_LINE = new LiveScriptElementType("COMMENT_LINE");
 	public static IElementType EMPTY = new LiveScriptElementType("EMPTY");
 	public static IElementType ESCAPE_CHAR = new LiveScriptElementType("ESCAPE_CHAR");
