@@ -1,4 +1,4 @@
-package com.simpleplugin.psi;
+package lv.modo.livescriptbrains.psi;
 
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.intellij.lang.ASTNode;

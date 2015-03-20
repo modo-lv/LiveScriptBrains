@@ -1,4 +1,4 @@
-package com.simpleplugin;
+package lv.modo.livescriptbrains.psi;
 
 import com.intellij.lexer.FlexAdapter;
 

@@ -1,4 +1,4 @@
-package com.simpleplugin.psi;
+package lv.modo.livescriptbrains.psi;
 
 import com.intellij.lang.ASTNode;
 import com.intellij.lang.PsiBuilder;
@@ -81,8 +81,8 @@ public class LiveScriptParser implements PsiParser {
 					result = this.TypeIsOneOf(LiveScriptTypes.STRING, LiveScriptTypes.BOOLEAN, LiveScriptTypes.NUMBER, LiveScriptTypes.EMPTY);
 				if (!result && type == LiveScriptTypes.OPERATOR)
 					result = this.TypeIsOneOf(LiveScriptTypes.PLUS, LiveScriptTypes.ASSIGN, LiveScriptTypes.MATH_OP);
-				if (!result && type == LiveScriptTypes.Operation)
-					result = Arrays.asList(LiveScriptTypes.OpElements).contains(this.Type);
+				if (!result && type == LiveScriptTypes.Expression)
+					result = Arrays.asList(LiveScriptTypes.ExpressionTypes).contains(this.Type);
 				if (!result && type == this.Type)
 					result = true;
 

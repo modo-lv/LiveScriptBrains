@@ -1,7 +1,7 @@
-package com.simpleplugin.psi;
+package lv.modo.livescriptbrains.psi;
 
 import com.intellij.psi.tree.IElementType;
-import com.simpleplugin.LiveScriptLanguage;
+import lv.modo.livescriptbrains.LiveScriptLanguage;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 

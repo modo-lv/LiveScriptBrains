@@ -1,4 +1,4 @@
-package com.simpleplugin.psi;
+package lv.modo.livescriptbrains.psi;
 
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.intellij.lang.ASTNode;
@@ -12,13 +12,10 @@ import com.intellij.psi.FileViewProvider;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.TokenType;
-import com.intellij.psi.impl.source.CharTableImpl;
-import com.intellij.psi.impl.source.PsiTypeElementImpl;
-import com.intellij.psi.impl.source.tree.LeafPsiElement;
 import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
-import com.simpleplugin.LiveScriptLanguage;
-import com.simpleplugin.LiveScriptLexer;
+import lv.modo.livescriptbrains.LiveScriptLanguage;
+import lv.modo.livescriptbrains.psi.LiveScriptLexer;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Reader;

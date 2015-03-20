@@ -1,11 +1,11 @@
-package com.simpleplugin.features;
+package lv.modo.livescriptbrains.features;
 
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.fileTypes.SyntaxHighlighter;
 import com.intellij.openapi.options.colors.AttributesDescriptor;
 import com.intellij.openapi.options.colors.ColorDescriptor;
 import com.intellij.openapi.options.colors.ColorSettingsPage;
-import com.simpleplugin.LiveScriptIcons;
+import lv.modo.livescriptbrains.LiveScriptIcons;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

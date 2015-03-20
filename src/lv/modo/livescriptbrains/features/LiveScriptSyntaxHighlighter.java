@@ -1,4 +1,4 @@
-package com.simpleplugin.features;
+package lv.modo.livescriptbrains.features;
 
 import com.intellij.lexer.FlexAdapter;
 import com.intellij.lexer.Lexer;
@@ -6,8 +6,8 @@ import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase;
 import com.intellij.psi.tree.IElementType;
-import com.simpleplugin.LiveScriptLexer;
-import com.simpleplugin.psi.LiveScriptTypes;
+import lv.modo.livescriptbrains.psi.LiveScriptLexer;
+import lv.modo.livescriptbrains.psi.LiveScriptTypes;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Reader;

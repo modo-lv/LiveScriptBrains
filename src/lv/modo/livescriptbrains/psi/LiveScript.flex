@@ -1,10 +1,11 @@
-package com.simpleplugin;
+package lv.modo.livescriptbrains.psi;
 
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
-import com.simpleplugin.psi.LiveScriptTypes;
 import com.intellij.psi.TokenType;
 import com.intellij.util.containers.Stack;
+
+import lv.modo.livescriptbrains.psi.LiveScriptTypes;
 
 %%
 
@@ -206,7 +207,7 @@ UNKNOWN=[:().]
 
 %state INDENTED, BLOCK_STATEMENT
 %state DSTRING, ISTRING, VSTRING, STRING_SUSPENDED
-%state REGEX, SPLIT_OP, LIST, STRING_VAR
+%state REGEX, SPLIT_OP, LIST, STRING_VAR, OBJECT
 
 %{
     private String[] _stateNames = new String[] {
@@ -221,6 +222,7 @@ UNKNOWN=[:().]
         "SPLIT_OP",
         "LIST",
         "STRING_VAR",
+        "OBJECT"
     };
     private String _stateName(int state) {
         return _stateNames[state / 2];
@@ -260,15 +262,21 @@ UNKNOWN=[:().]
 	.						{ _rewindBy(1); _exitState(); }
 }
 
-<LIST> {
+<LIST, OBJECT> {
 	({SPACE}*{NEWLINE}{SPACE}*)+ 	{ return _out(LiveScriptTypes.SEPARATOR); }
 
 	{COMMA}							{ return _out(LiveScriptTypes.SEPARATOR); }
-
-    {BRACK_R}						{ _exitState(); return _out(LiveScriptTypes.LIST_END); }
 }
 
-<YYINITIAL, ISTRING, LIST> {
+<LIST> {
+	{BRACK_R}	{ _exitState(); return _out(LiveScriptTypes.LIST_END); }
+}
+
+<OBJECT> {
+    {CURL_R}	{ _exitState(); return _out(LiveScriptTypes.OBJ_END); }
+}
+
+<YYINITIAL, ISTRING, LIST, OBJECT> {
     // Literals
     {EMPTY}                 { return _out(LiveScriptTypes.EMPTY); }
 
@@ -294,8 +302,7 @@ UNKNOWN=[:().]
     
     {BRACK_L}				{ _enterState(LIST); return _out(LiveScriptTypes.LIST_START); }
 
-    {CURL_L}				{ return _out(LiveScriptTypes.OBJ_START); }
-    {CURL_R}				{ return _out(LiveScriptTypes.OBJ_END); }
+    {CURL_L}				{ _enterState(OBJECT); return _out(LiveScriptTypes.OBJ_START); }
 
     {PAREN_L}				{ return _out(LiveScriptTypes.PAREN_L); }
     {PAREN_R}				{ return _out(LiveScriptTypes.PAREN_R); }

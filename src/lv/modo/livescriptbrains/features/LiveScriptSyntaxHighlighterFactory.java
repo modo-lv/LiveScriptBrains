@@ -1,4 +1,4 @@
-package com.simpleplugin.features;
+package lv.modo.livescriptbrains.features;
 
 import com.intellij.openapi.fileTypes.SyntaxHighlighter;
 import com.intellij.openapi.fileTypes.SyntaxHighlighterFactory;

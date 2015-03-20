@@ -1,10 +1,10 @@
-package com.simpleplugin.psi;
+package lv.modo.livescriptbrains.psi;
 
 import com.intellij.extapi.psi.PsiFileBase;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.psi.FileViewProvider;
-import com.simpleplugin.LiveScriptFileType;
-import com.simpleplugin.LiveScriptLanguage;
+import lv.modo.livescriptbrains.LiveScriptFileType;
+import lv.modo.livescriptbrains.LiveScriptLanguage;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;

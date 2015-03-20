@@ -1,5 +1,5 @@
 
-package com.simpleplugin;
+package lv.modo.livescriptbrains;
 
 import com.intellij.openapi.fileTypes.FileTypeConsumer;
 import com.intellij.openapi.fileTypes.FileTypeFactory;

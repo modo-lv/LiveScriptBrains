@@ -1,4 +1,4 @@
-package com.simpleplugin;
+package lv.modo.livescriptbrains;
 
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import org.jetbrains.annotations.NotNull;

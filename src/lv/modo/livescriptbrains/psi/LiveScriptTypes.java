@@ -1,9 +1,6 @@
-package com.simpleplugin.psi;
+package lv.modo.livescriptbrains.psi;
 
 import com.intellij.psi.tree.IElementType;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class LiveScriptTypes {
 	/**
@@ -19,8 +16,10 @@ public class LiveScriptTypes {
 	public static IElementType ARGUMENT_LIST = new LiveScriptElementType("ARGUMENT_LIST");
 	public static IElementType EOF = new LiveScriptElementType("EOF");
 	public static IElementType List = new LiveScriptElementType("List");
+	public static IElementType Object = new LiveScriptElementType("Object");
 	public static IElementType ParenOp = new LiveScriptElementType("ParenOp");
 	public static IElementType PropertyOp = new LiveScriptElementType("Property expression");
+	public static IElementType PropDefOp = new LiveScriptElementType("PropDef expression");
 	public static IElementType StringOp = new LiveScriptElementType("Double-quoted string");
 	public static IElementType SumOp = new LiveScriptElementType("Sum expression");
 	
@@ -32,7 +31,7 @@ public class LiveScriptTypes {
 	public static IElementType LITERAL = new LiveScriptElementType("LITERAL");
 	public static IElementType Value = new LiveScriptElementType("Value");
 	public static IElementType OPERATOR = new LiveScriptElementType("OPERATOR");
-	public static IElementType Operation = new LiveScriptElementType("Operation");
+	public static IElementType Expression = new LiveScriptElementType("Expression");
 	public static IElementType Separator = new LiveScriptElementType("Separator");
 
 
@@ -73,7 +72,7 @@ public class LiveScriptTypes {
 	/**
 	 * All operation (expression) elements.
 	 */
-	public static IElementType[] OpElements = new IElementType[] {
+	public static IElementType[] ExpressionTypes = new IElementType[] {
 		ASSIGN_OPERATION,
 		SumOp,
 		IDENTIFIER,

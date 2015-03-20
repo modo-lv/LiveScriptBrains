@@ -1,8 +1,7 @@
-package com.simpleplugin.psi;
+package lv.modo.livescriptbrains.psi;
 
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
-import com.simpleplugin.psi.LiveScriptParser.TreeToken;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +15,7 @@ public class LiveScriptParserState {
 	/**
 	 * List of tokens to parse.
 	 */
-	protected List<TreeToken> InputStream;
+	protected List<LiveScriptParser.TreeToken> InputStream;
 
 	/**
 	 * Token index in the {@link #InputStream} at which the state wast started.
@@ -31,17 +30,17 @@ public class LiveScriptParserState {
 	/**
 	 * Currently parsing token.
 	 */
-	protected TreeToken ThisToken = null;
+	protected LiveScriptParser.TreeToken ThisToken = null;
 
 	/**
 	 * Next token in the input stream.
 	 */
-	protected TreeToken NextToken = null;
+	protected LiveScriptParser.TreeToken NextToken = null;
 
 	/**
 	 * Additional tokens created during parsing.
 	 */
-	protected List<TreeToken> AddedTokens = new ArrayList<TreeToken>();
+	protected List<LiveScriptParser.TreeToken> AddedTokens = new ArrayList<LiveScriptParser.TreeToken>();
 
 	/**
 	 * Used on {@link LiveScriptTypes#None} to check for leftover tokens on a statement line
@@ -66,7 +65,7 @@ public class LiveScriptParserState {
 	 * @param type        {@link #Type}
 	 * @param inputStream {@link #InputStream}
 	 */
-	public LiveScriptParserState(IElementType type, List<TreeToken> inputStream) {
+	public LiveScriptParserState(IElementType type, List<LiveScriptParser.TreeToken> inputStream) {
 		this(type, inputStream, 0);
 	}
 
@@ -75,7 +74,7 @@ public class LiveScriptParserState {
 	 * @param inputStream     {@link #InputStream}
 	 * @param startTokenIndex {@link #StartTokenIndex}
 	 */
-	public LiveScriptParserState(IElementType type, List<TreeToken> inputStream, int startTokenIndex) {
+	public LiveScriptParserState(IElementType type, List<LiveScriptParser.TreeToken> inputStream, int startTokenIndex) {
 		this.Type = type;
 		this.InputStream = inputStream;
 		this.StartTokenIndex = startTokenIndex;
@@ -89,7 +88,7 @@ public class LiveScriptParserState {
 	 *
 	 * @return List of additional tokens.
 	 */
-	public List<TreeToken> GiveAddedTokens() {
+	public List<LiveScriptParser.TreeToken> GiveAddedTokens() {
 		return AddedTokens;
 	}
 
@@ -102,7 +101,7 @@ public class LiveScriptParserState {
 	public LiveScriptParserState ParseInput() {
 		boolean end = false;
 		do {
-			TreeToken errorToken = new TreeToken(TokenType.ERROR_ELEMENT);
+			LiveScriptParser.TreeToken errorToken = new LiveScriptParser.TreeToken(TokenType.ERROR_ELEMENT);
 
 			this.ParseToken();
 
@@ -176,7 +175,7 @@ public class LiveScriptParserState {
 
 				// *) Create the "parent" token that wil encompass all tokens in the state
 				// If there was an error, the parent token must be of ErrorElement type.
-				TreeToken parent = new TreeToken();
+				LiveScriptParser.TreeToken parent = new LiveScriptParser.TreeToken();
 
 				if (errorToken.ErrorMessage != null) {
 					parent = errorToken;
@@ -314,9 +313,25 @@ public class LiveScriptParserState {
 
 		else
 
+		// Explicit object
+		if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.OBJ_START)) {
+			newState = this.NewState(LiveScriptTypes.Object);
+		}
+
+		else
+
 		// Function argument list
 		if (this.Type == LiveScriptTypes.FuncCall) {
 			newState = this.NewState(LiveScriptTypes.FuncArgList, false);
+		}
+
+		else
+
+		// Explicit property definition
+		if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.Expression)
+			&& this.NextToken.TypeIsOneOf(LiveScriptTypes.COLON))
+		{
+			newState = this.NewState(LiveScriptTypes.PropDefOp);
 		}
 
 		else
@@ -357,6 +372,21 @@ public class LiveScriptParserState {
 		// Explicit list
 		if (this.Type == LiveScriptTypes.List) {
 			return this.ThisToken.TypeIsOneOf(LiveScriptTypes.LIST_END);
+		}
+
+		// Explicit object
+		if (this.Type == LiveScriptTypes.Object) {
+			return this.ThisToken.TypeIsOneOf(LiveScriptTypes.OBJ_END);
+		}
+
+		// Explicit property definition
+		if (this.Type == LiveScriptTypes.PropDefOp) {
+			// First colon is part of the statement
+			if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.COLON) && this.StartTokenIndex == this.TokenIndex)
+				return false;
+			if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.Expression))
+				return true;
+			throw new ParseError("Unexpected token in " + this.Type.toString());
 		}
 
 		// Property expression
@@ -460,7 +490,7 @@ public class LiveScriptParserState {
 		this.ThisToken = this.InputStream.get(this.TokenIndex);
 		this.NextToken = this.InputStream.size() - this.TokenIndex > 1
 			? this.InputStream.get(this.TokenIndex + 1)
-			: new TreeToken(LiveScriptTypes.EOF);
+			: new LiveScriptParser.TreeToken(LiveScriptTypes.EOF);
 
 		return this;
 	}
@@ -515,7 +545,7 @@ public class LiveScriptParserState {
 	 * @param statementType What kind of statement to check the end of.
 	 * @return
 	 */
-	protected boolean IsEndOfStatement(TreeToken token, IElementType statementType) {
+	protected boolean IsEndOfStatement(LiveScriptParser.TreeToken token, IElementType statementType) {
 		boolean result = token.TypeIsOneOf(
 			LiveScriptTypes.SEMICOLON,
 			LiveScriptTypes.EOF
