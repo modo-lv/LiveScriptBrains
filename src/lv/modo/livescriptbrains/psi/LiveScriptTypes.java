@@ -10,6 +10,7 @@ public class LiveScriptTypes {
 	
 	public static IElementType ASSIGN_OPERATION = new LiveScriptElementType("ASSIGN_OPERATION");
 	public static IElementType Block = new LiveScriptElementType("Block");
+	public static IElementType EmptyClass = new LiveScriptElementType("EmptyClass");
 	public static IElementType FuncArgList = new LiveScriptElementType("FuncArgList");
 	public static IElementType FuncCall = new LiveScriptElementType("FuncCall");
 	public static IElementType ImplicitList = new LiveScriptElementType("Implicit list");
@@ -18,10 +19,11 @@ public class LiveScriptTypes {
 	public static IElementType List = new LiveScriptElementType("List");
 	public static IElementType Object = new LiveScriptElementType("Object");
 	public static IElementType ParenOp = new LiveScriptElementType("ParenOp");
-	public static IElementType PropertyOp = new LiveScriptElementType("Property expression");
+	public static IElementType PropertyAccess = new LiveScriptElementType("Property expression");
 	public static IElementType PropDefOp = new LiveScriptElementType("PropDef expression");
 	public static IElementType StringOp = new LiveScriptElementType("Double-quoted string");
 	public static IElementType SumOp = new LiveScriptElementType("Sum expression");
+	public static IElementType IfExists = new LiveScriptElementType("IfExists expression");
 	
 
 
@@ -41,10 +43,12 @@ public class LiveScriptTypes {
 	public static IElementType ASSIGN = new LiveScriptElementType("ASSIGN");
 	public static IElementType BANG = new LiveScriptElementType("BANG");
 	public static IElementType BOOLEAN = new LiveScriptElementType("BOOLEAN");
+	public static IElementType CLASS = new LiveScriptElementType("CLASS");
 	public static IElementType COLON = new LiveScriptElementType("COLON");
 	public static IElementType COMMA = new LiveScriptElementType("COMMA");
 	public static IElementType COMMENT_BLOCK = new LiveScriptElementType("COMMENT_BLOCK");
 	public static IElementType COMMENT_LINE = new LiveScriptElementType("COMMENT_LINE");
+	public static IElementType DOT = new LiveScriptElementType("DOT");
 	public static IElementType EMPTY = new LiveScriptElementType("EMPTY");
 	public static IElementType ESCAPE_CHAR = new LiveScriptElementType("ESCAPE_CHAR");
 	public static IElementType IDENTIFIER = new LiveScriptElementType("IDENTIFIER");
@@ -60,7 +64,7 @@ public class LiveScriptTypes {
 	public static IElementType PAREN_R = new LiveScriptElementType("PAREN_R");
 	public static IElementType PAREN_L = new LiveScriptElementType("PAREN_L");
 	public static IElementType PLUS = new LiveScriptElementType("PLUS");
-	public static IElementType PROPERTY = new LiveScriptElementType("PROPERTY");
+	public static IElementType Q = new LiveScriptElementType("Q");
 	public static IElementType SEPARATOR = new LiveScriptElementType("SEPARATOR");
 	public static IElementType SEMICOLON = new LiveScriptElementType("SEMICOLON");
 	public static IElementType STRING = new LiveScriptElementType("STRING");
@@ -78,5 +82,8 @@ public class LiveScriptTypes {
 		IDENTIFIER,
 		NUMBER,
 		STRING,
+		IfExists,
+		PropertyAccess,
+		EmptyClass
 	};
 }

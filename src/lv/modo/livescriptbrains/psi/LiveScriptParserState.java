@@ -15,7 +15,7 @@ public class LiveScriptParserState {
 	/**
 	 * List of tokens to parse.
 	 */
-	protected List<LiveScriptParser.TreeToken> InputStream;
+	protected List<TreeToken> InputStream;
 
 	/**
 	 * Token index in the {@link #InputStream} at which the state wast started.
@@ -30,17 +30,17 @@ public class LiveScriptParserState {
 	/**
 	 * Currently parsing token.
 	 */
-	protected LiveScriptParser.TreeToken ThisToken = null;
+	protected TreeToken ThisToken = null;
 
 	/**
 	 * Next token in the input stream.
 	 */
-	protected LiveScriptParser.TreeToken NextToken = null;
+	protected TreeToken NextToken = null;
 
 	/**
 	 * Additional tokens created during parsing.
 	 */
-	protected List<LiveScriptParser.TreeToken> AddedTokens = new ArrayList<LiveScriptParser.TreeToken>();
+	protected List<TreeToken> AddedTokens = new ArrayList<TreeToken>();
 
 	/**
 	 * Used on {@link LiveScriptTypes#None} to check for leftover tokens on a statement line
@@ -65,7 +65,7 @@ public class LiveScriptParserState {
 	 * @param type        {@link #Type}
 	 * @param inputStream {@link #InputStream}
 	 */
-	public LiveScriptParserState(IElementType type, List<LiveScriptParser.TreeToken> inputStream) {
+	public LiveScriptParserState(IElementType type, List<TreeToken> inputStream) {
 		this(type, inputStream, 0);
 	}
 
@@ -74,7 +74,7 @@ public class LiveScriptParserState {
 	 * @param inputStream     {@link #InputStream}
 	 * @param startTokenIndex {@link #StartTokenIndex}
 	 */
-	public LiveScriptParserState(IElementType type, List<LiveScriptParser.TreeToken> inputStream, int startTokenIndex) {
+	public LiveScriptParserState(IElementType type, List<TreeToken> inputStream, int startTokenIndex) {
 		this.Type = type;
 		this.InputStream = inputStream;
 		this.StartTokenIndex = startTokenIndex;
@@ -88,7 +88,7 @@ public class LiveScriptParserState {
 	 *
 	 * @return List of additional tokens.
 	 */
-	public List<LiveScriptParser.TreeToken> GiveAddedTokens() {
+	public List<TreeToken> GiveAddedTokens() {
 		return AddedTokens;
 	}
 
@@ -100,10 +100,11 @@ public class LiveScriptParserState {
 	 */
 	public LiveScriptParserState ParseInput() {
 		boolean end = false;
+		boolean parsed = false;
 		do {
-			LiveScriptParser.TreeToken errorToken = new LiveScriptParser.TreeToken(TokenType.ERROR_ELEMENT);
+			TreeToken errorToken = new TreeToken(TokenType.ERROR_ELEMENT);
 
-			this.ParseToken();
+			parsed = this.ParseToken();
 
 			// Refresh current/next token references, in case parser has changed the tokens
 			this.MoveToToken(this.TokenIndex);
@@ -175,7 +176,7 @@ public class LiveScriptParserState {
 
 				// *) Create the "parent" token that wil encompass all tokens in the state
 				// If there was an error, the parent token must be of ErrorElement type.
-				LiveScriptParser.TreeToken parent = new LiveScriptParser.TreeToken();
+				TreeToken parent = new TreeToken();
 
 				if (errorToken.ErrorMessage != null) {
 					parent = errorToken;
@@ -218,7 +219,7 @@ public class LiveScriptParserState {
 			// *) No matter what happens, we must end the parsing if we've reached the end of the input stream.
 			end = this.AtLastToken() || (end && this.Type != LiveScriptTypes.None);
 
-			if (!end) {
+			if (!end && !parsed) {
 				this.MoveToNextToken();
 			}
 
@@ -231,9 +232,9 @@ public class LiveScriptParserState {
 	/**
 	 * Parse the token at the current input position, starting new parser states as needed.
 	 *
-	 * @return Self for method chaining.
+	 * @return <tt>true</tt> if a new state was started and parsed, <tt>false</tt> otherwise.
 	 */
-	protected LiveScriptParserState ParseToken() {
+	protected boolean ParseToken() {
 		LiveScriptParserState newState = null;
 
 		// Bad char
@@ -243,6 +244,15 @@ public class LiveScriptParserState {
 			// this.NewState moves the input token marker forward, but in case of bad char we want to keep it
 			// at the same position so that it can end on the same token it starts.
 			newState = this.NewState(TokenType.ERROR_ELEMENT, false);
+		}
+
+		else
+
+		// Class without content
+		if (ThisToken.TypeIsOneOf(LiveScriptTypes.CLASS)
+			&& NextToken.TypeIsOneOf(LiveScriptTypes.IDENTIFIER))
+		{
+			newState = NewState(LiveScriptTypes.EmptyClass);
 		}
 
 		else
@@ -279,10 +289,10 @@ public class LiveScriptParserState {
 		else
 
 		// Property access
-		if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.Value)
-			&& this.NextToken.TypeIsOneOf(LiveScriptTypes.PROPERTY))
+		if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.Expression)
+			&& this.NextToken.TypeIsOneOf(LiveScriptTypes.DOT))
 		{
-			newState = this.NewState(LiveScriptTypes.PropertyOp);
+			newState = this.NewState(LiveScriptTypes.PropertyAccess);
 		}
 
 		else
@@ -292,7 +302,7 @@ public class LiveScriptParserState {
 			&& this.ThisToken.TypeIsOneOf(LiveScriptTypes.BANG))
 		{
 			// We don't need to check for anything else
-			return this;
+			return true;
 		}
 
 		else
@@ -306,8 +316,20 @@ public class LiveScriptParserState {
 
 		else
 
+		// If-exists
+		if (ThisToken.TypeIsOneOf(LiveScriptTypes.IDENTIFIER) &&
+			NextToken.TypeIsOneOf(LiveScriptTypes.Q))
+		{
+			newState = this.NewState(LiveScriptTypes.IfExists);
+		}
+
+		else
+
 		// Assignment
-		if (ThisToken.TypeIsOneOf(LiveScriptTypes.IDENTIFIER) && NextToken.TypeIsOneOf(LiveScriptTypes.ASSIGN)) {
+		if (!this.TypeIsOneOf(LiveScriptTypes.PropertyAccess)
+			&& ThisToken.TypeIsOneOf(LiveScriptTypes.IDENTIFIER, LiveScriptTypes.PropertyAccess)
+			&& NextToken.TypeIsOneOf(LiveScriptTypes.ASSIGN))
+		{
 			newState = this.NewState(LiveScriptTypes.ASSIGN_OPERATION);
 		}
 
@@ -337,10 +359,10 @@ public class LiveScriptParserState {
 		else
 
 		// Function call with arguments
-		if ((this.Type != LiveScriptTypes.FuncCall && this.Type != LiveScriptTypes.StringOp)
+		if (!this.TypeIsOneOf(LiveScriptTypes.FuncCall, LiveScriptTypes.StringOp)
 			&& this.ThisToken.TypeIsOneOf(LiveScriptTypes.IDENTIFIER)
 			&& !this.IsEndOfStatement(this.NextToken, LiveScriptTypes.FuncCall)
-			&& !this.NextToken.TypeIsOneOf(LiveScriptTypes.COMMA, LiveScriptTypes.SEPARATOR))
+			&& this.NextToken.TypeIsOneOf(LiveScriptTypes.Expression))
 		{
 			newState = this.NewState(LiveScriptTypes.FuncCall);
 		}
@@ -349,9 +371,27 @@ public class LiveScriptParserState {
 		if (newState != null) {
 			// Run the new state's parse
 			this.AddedTokens.addAll(newState.ParseInput().GiveAddedTokens());
+			return true;
 		}
 
-		return this;
+		return false;
+	}
+
+	/**
+	 * Check if this state's type is among a given set.
+	 * @param types Set of types to check against.
+	 * @return <tt>true</tt> if found, <tt>false</tt> otherwise.
+	 */
+	private boolean TypeIsOneOf(IElementType... types) {
+		boolean result = false;
+		for (IElementType type : types) {
+			if (!result && type == this.Type)
+				result = true;
+
+			if (result)
+				return true;
+		}
+		return false;
 	}
 
 	/**
@@ -365,6 +405,11 @@ public class LiveScriptParserState {
 			return this.ThisToken.TypeIsOneOf(LiveScriptTypes.PAREN_R);
 		}
 
+		// Empty class
+		if (this.Type == LiveScriptTypes.EmptyClass)
+			return true;
+
+		// String
 		if (this.Type == LiveScriptTypes.StringOp) {
 			return this.ThisToken.TypeIsOneOf(LiveScriptTypes.STRING_END);
 		}
@@ -389,11 +434,16 @@ public class LiveScriptParserState {
 			throw new ParseError("Unexpected token in " + this.Type.toString());
 		}
 
-		// Property expression
-		if (this.Type == LiveScriptTypes.PropertyOp) {
+		// Property access expression
+		if (this.Type == LiveScriptTypes.PropertyAccess) {
 			// Property state only starts when there is a property accessor,
 			// and ends at the same, so it always ends by the time this check
 			// is performed.
+			return !ThisToken.TypeIsOneOf(LiveScriptTypes.DOT);
+		}
+
+		// IfExists expression
+		if (this.Type == LiveScriptTypes.IfExists) {
 			return true;
 		}
 
@@ -411,7 +461,7 @@ public class LiveScriptParserState {
 		if (this.Type == LiveScriptTypes.ASSIGN_OPERATION) {
 			if (this.ThisToken.Type == LiveScriptTypes.ASSIGN)
 				return false;
-			if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.SumOp, LiveScriptTypes.Value, LiveScriptTypes.ImplicitList))
+			if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.Expression))
 				return true;
 			throw new ParseError("Invalid assign expression.");
 		}
@@ -490,7 +540,7 @@ public class LiveScriptParserState {
 		this.ThisToken = this.InputStream.get(this.TokenIndex);
 		this.NextToken = this.InputStream.size() - this.TokenIndex > 1
 			? this.InputStream.get(this.TokenIndex + 1)
-			: new LiveScriptParser.TreeToken(LiveScriptTypes.EOF);
+			: new TreeToken(LiveScriptTypes.EOF);
 
 		return this;
 	}
@@ -545,7 +595,7 @@ public class LiveScriptParserState {
 	 * @param statementType What kind of statement to check the end of.
 	 * @return
 	 */
-	protected boolean IsEndOfStatement(LiveScriptParser.TreeToken token, IElementType statementType) {
+	protected boolean IsEndOfStatement(TreeToken token, IElementType statementType) {
 		boolean result = token.TypeIsOneOf(
 			LiveScriptTypes.SEMICOLON,
 			LiveScriptTypes.EOF

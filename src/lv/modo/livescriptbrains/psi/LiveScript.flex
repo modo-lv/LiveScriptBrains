@@ -15,9 +15,7 @@ import lv.modo.livescriptbrains.psi.LiveScriptTypes;
 %function advance
 %type IElementType
 %eof{
-    System.out.println("End of file reached, clearing out indentation stack.");
-    _currentIndent = 0;
-    _indents.clear();
+    System.out.println("End of file reached, clearing out state stack.");
     _states.clear();
     return;
 %eof}
@@ -34,44 +32,10 @@ import lv.modo.livescriptbrains.psi.LiveScriptTypes;
     private static Boolean _tabIndents = null;
 
     /**
-     * Indent stack to keep track of indentation levels.
-     */
-    private static Stack<Integer> _indents = new Stack<Integer>();
-
-    /**
      * Current indent baseline.
      */
     private static int _currentIndent = 0;
 
-    /**
-     * Are we currently inside an indented block?
-     */
-    private static boolean _isIndented = false;
-
-    /**
-     * Start a new indented block (increase indent).
-     */
-
-    private IElementType _parseIndent(int count) {
-/*
-        if (count > _currentIndent) {
-            _indents.push(_currentIndent);
-            _currentIndent += count;
-            _switchToState(INDENTED);
-            return _out(LiveScriptTypes.INDENT);
-        }
-        else if (count < _currentIndent) {
-            if (!_indents.empty())
-                _currentIndent = _indents.pop();
-            _exitState();
-            if (_currentIndent < 1) {
-                _isIndented = false;
-            }
-            return _out(LiveScriptTypes.DEDENT);
-        }
-*/
-        return null;
-    }
 
     private void _switchToState(int state) {
         System.out.println("Switching to state " + _stateName(state) + ".");
@@ -82,7 +46,7 @@ import lv.modo.livescriptbrains.psi.LiveScriptTypes;
      * Enter a lexical state and push the previous one to the stack.
      */
     private void _enterState(int state) {
-        System.out.println("Entering state " + _stateName(state) + ".");
+        //System.out.println("Entering state " + _stateName(state) + ".");
         _states.push(yystate());
         yybegin(state);
     }
@@ -93,13 +57,13 @@ import lv.modo.livescriptbrains.psi.LiveScriptTypes;
      */
     private boolean _exitState() {
         if (_states.empty()) {
-            System.out.println("State stack empty, defaulting to YYINITIAL.");
+            //System.out.println("State stack empty, defaulting to YYINITIAL.");
             yybegin(YYINITIAL);
             return false;
         }
         else {
             int newState = _states.pop();
-            System.out.println("Exiting state " + _stateName(yystate()) + ", state is now " + _stateName(newState));
+            //System.out.println("Exiting state " + _stateName(yystate()) + ", state is now " + _stateName(newState));
             yybegin(newState);
             return true;
         }
@@ -189,6 +153,10 @@ DOT = "."
 SEMICOLON = ";"
 BANG = "!"
 YADA = "..."
+Q = "?"
+
+// Keywords
+CLASS = "class"
 
 IDENTIFIER = [$_a-zA-Z][-$_a-zA-Z0-9]*
 
@@ -277,6 +245,9 @@ UNKNOWN=[:().]
 }
 
 <YYINITIAL, ISTRING, LIST, OBJECT> {
+    // Keywords
+    {CLASS}					{ return _out(LiveScriptTypes.CLASS); }
+
     // Literals
     {EMPTY}                 { return _out(LiveScriptTypes.EMPTY); }
 
@@ -292,7 +263,7 @@ UNKNOWN=[:().]
     {DSTRING_START}         { _enterState(DSTRING); return _out(LiveScriptTypes.STRING_START); }
 
     {IDENTIFIER}            { return _out(LiveScriptTypes.IDENTIFIER); }
-    \.{IDENTIFIER}			{ return _out(LiveScriptTypes.PROPERTY); }
+
 
     // Operators & punctuation
     {MATH_OP}               { _enterState(SPLIT_OP); return _out(LiveScriptTypes.MATH_OP); }
@@ -311,6 +282,8 @@ UNKNOWN=[:().]
     {BANG}					{ return _out(LiveScriptTypes.BANG); }
 
     {YADA}					{ return _out(LiveScriptTypes.YADA); }
+    {Q}						{ return _out(LiveScriptTypes.Q); }
+    {DOT}					{ return _out(LiveScriptTypes.DOT); }
 
     {COLON}					{ return _out(LiveScriptTypes.COLON); }
 
