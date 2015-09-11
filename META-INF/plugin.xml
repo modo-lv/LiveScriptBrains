@@ -1,8 +1,8 @@
 <idea-plugin version="2">
     <id>lv.modo.livescriptbrains</id>
     <name>LiveScriptBrains</name>
-    <version>0.0.1</version>
-    <vendor email="modo@modo.lv" url="http://modo.lv">Martins "MoDo" Osis</vendor>
+    <version>0.0.1a</version>
+    <vendor email="modo@modo.lv" url="http://modo.lv">Martins "@modo_lv" Osis</vendor>
 
     <description><![CDATA[
       Plugin for supporting LiveScript in JetBrains IDEs.
