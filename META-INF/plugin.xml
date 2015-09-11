@@ -1,7 +1,7 @@
 <idea-plugin version="2">
     <id>lv.modo.livescriptbrains</id>
     <name>LiveScriptBrains</name>
-    <version>0.0.1a</version>
+    <version>0.0.1b</version>
     <vendor email="modo@modo.lv" url="http://modo.lv">Martins "@modo_lv" Osis</vendor>
 
     <description><![CDATA[
@@ -18,9 +18,7 @@
 
     <!-- please see http://confluence.jetbrains.com/display/IDEADEV/Plugin+Compatibility+with+IntelliJ+Platform+Products
          on how to target different products -->
-    <!-- uncomment to enable plugin in all products
     <depends>com.intellij.modules.lang</depends>
-    -->
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
