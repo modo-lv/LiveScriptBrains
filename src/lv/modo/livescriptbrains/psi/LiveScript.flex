@@ -130,6 +130,8 @@ DSTRING = %?\"{ISTRING}*\"
 DSTRING_START = %?\"{ISTRING}*
 ISTRING_START = "#{"
 
+TSTRING = \"\"\"
+
 
 // Regex
 REGEX = \/[^\/] ~\/g?m?i?
@@ -181,7 +183,7 @@ UNKNOWN=[:().]
 
 
 %state INDENTED, BLOCK_STATEMENT, COMMENT_BLOCK
-%state DSTRING, ISTRING, VSTRING, STRING_SUSPENDED
+%state DSTRING, ISTRING, VSTRING, STRING_SUSPENDED, TSTRING
 %state REGEX, SPLIT_OP, LIST, STRING_VAR, OBJECT
 
 %{
@@ -194,6 +196,7 @@ UNKNOWN=[:().]
         "ISTRING",
         "VSTRING",
         "STRING_SUSPENDED",
+        "TSTRING",
         "REGEX",
         "SPLIT_OP",
         "LIST",
@@ -224,6 +227,17 @@ UNKNOWN=[:().]
     \"    					{ _exitState(); return _out(LiveScriptTypes.STRING_END); }
 
     ({ISTRING}|#\{\})*      { return _out(LiveScriptTypes.STRING); }
+}
+
+<TSTRING> {
+    {ISTRING_START}         { _enterState(ISTRING); return _out(LiveScriptTypes.ISTRING); }
+
+    #			       		{ _enterState(STRING_VAR); return _out(LiveScriptTypes.ESCAPE_CHAR); }
+
+    // Everything else is just regular string.
+    \"\"\"					{ _exitState(); return _out(LiveScriptTypes.STRING_END); }
+
+    {NEWLINE}|.				{ return _out(LiveScriptTypes.STRING); }
 }
 
 <ISTRING> {
@@ -281,6 +295,7 @@ UNKNOWN=[:().]
     {SSTRING}               { return _out(LiveScriptTypes.STRING); }
     {DSTRING}               { return _out(LiveScriptTypes.STRING); }
     {DSTRING_START}         { _enterState(DSTRING); return _out(LiveScriptTypes.STRING_START); }
+    {TSTRING}				{ _enterState(TSTRING); return _out(LiveScriptTypes.STRING_START); }
 
     {IDENTIFIER}            { return _out(LiveScriptTypes.IDENTIFIER); }
 
