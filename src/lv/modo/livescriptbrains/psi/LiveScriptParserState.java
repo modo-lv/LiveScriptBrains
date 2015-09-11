@@ -101,6 +101,7 @@ public class LiveScriptParserState {
 	public LiveScriptParserState ParseInput() {
 		boolean end = false;
 		boolean parsed = false;
+/*
 		do {
 			TreeToken errorToken = new TreeToken(TokenType.ERROR_ELEMENT);
 
@@ -157,6 +158,7 @@ public class LiveScriptParserState {
 			}
 
 
+*/
 /*
 			// Error: Parser state is not done, but we've reached the end of the input tokens for the statement
 			if (this.Type != LiveScriptTypes.None
@@ -168,7 +170,8 @@ public class LiveScriptParserState {
 				errorToken.ErrorMessage = "Unexpected end to " + this.Type + " statement";
 				end = true;
 			}
-*/
+*//*
+
 
 
 			if (end) {
@@ -224,6 +227,7 @@ public class LiveScriptParserState {
 			}
 
 		} while (!end);
+*/
 
 		return this;
 	}
@@ -272,7 +276,7 @@ public class LiveScriptParserState {
 		else
 
 		// Implicit list
-		if ((this.Type == LiveScriptTypes.ASSIGN_OPERATION)
+		if ((this.Type == LiveScriptTypes.AssignOperation)
 			&& this.AtIndent())
 		{
 			newState = this.NewState(LiveScriptTypes.ImplicitList);
@@ -330,7 +334,7 @@ public class LiveScriptParserState {
 			&& ThisToken.TypeIsOneOf(LiveScriptTypes.IDENTIFIER, LiveScriptTypes.PropertyAccess)
 			&& NextToken.TypeIsOneOf(LiveScriptTypes.ASSIGN))
 		{
-			newState = this.NewState(LiveScriptTypes.ASSIGN_OPERATION);
+			newState = this.NewState(LiveScriptTypes.AssignOperation);
 		}
 
 		else
@@ -458,10 +462,9 @@ public class LiveScriptParserState {
 		}
 
 		// Assignment expression
-		if (this.Type == LiveScriptTypes.ASSIGN_OPERATION) {
+		if (this.Type == LiveScriptTypes.AssignOperation) {
 			if (this.ThisToken.Type == LiveScriptTypes.ASSIGN)
-				return false;
-			if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.Expression))
+				return false;if (this.ThisToken.TypeIsOneOf(LiveScriptTypes.Expression))
 				return true;
 			throw new ParseError("Invalid assign expression.");
 		}

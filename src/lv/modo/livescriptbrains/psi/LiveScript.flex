@@ -140,6 +140,8 @@ REGEX_MULTI_END = \/\/g?m?i?
 MATH_OP = [-*/]
 PLUS = "+"
 ASSIGN = "="
+LOGIC_OP = or|and|\|\||&&|not|xor
+MISC_OP = [<>\^~]
 
 COLON = ":"
 COMMA = ","
@@ -157,12 +159,17 @@ Q = "?"
 
 // Keywords
 CLASS = "class"
+KEYWORD = if|then|else|unless|otherwise|in|of|for|by|delete|do|while
 
 IDENTIFIER = [$_a-zA-Z][-$_a-zA-Z0-9]*
 
 // Comments
 COMMENT_LINE = #.*
 COMMENT_BLOCK = \/\*~\*\/
+
+COMMENT_BLOCK_START = "/*"
+
+COMMENT_BLOCK_END = "*/"
 
 // Whitespace
 CRLF = [\r\n]
@@ -173,7 +180,7 @@ TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
 UNKNOWN=[:().]
 
 
-%state INDENTED, BLOCK_STATEMENT
+%state INDENTED, BLOCK_STATEMENT, COMMENT_BLOCK
 %state DSTRING, ISTRING, VSTRING, STRING_SUSPENDED
 %state REGEX, SPLIT_OP, LIST, STRING_VAR, OBJECT
 
@@ -182,6 +189,7 @@ UNKNOWN=[:().]
         "YYINITIAL",
         "INDENTED",
         "BLOCK_STATEMENT",
+        "COMMENT_BLOCK",
         "DSTRING",
         "ISTRING",
         "VSTRING",
@@ -190,7 +198,7 @@ UNKNOWN=[:().]
         "SPLIT_OP",
         "LIST",
         "STRING_VAR",
-        "OBJECT"
+        "OBJECT",
     };
     private String _stateName(int state) {
         return _stateNames[state / 2];
@@ -244,9 +252,21 @@ UNKNOWN=[:().]
     {CURL_R}	{ _exitState(); return _out(LiveScriptTypes.OBJ_END); }
 }
 
+<COMMENT_BLOCK> {
+    {COMMENT_BLOCK_START}   { _enterState(COMMENT_BLOCK); return _out(LiveScriptTypes.COMMENT_BLOCK); }
+
+    {COMMENT_BLOCK_END}     { _exitState(); return _out(LiveScriptTypes.COMMENT_BLOCK); }
+
+    .|{NEWLINE}             { return _out(LiveScriptTypes.COMMENT_BLOCK); }
+}
+
 <YYINITIAL, ISTRING, LIST, OBJECT> {
     // Keywords
     {CLASS}					{ return _out(LiveScriptTypes.CLASS); }
+
+    {KEYWORD}               { return _out(LiveScriptTypes.KEYWORD); }
+
+    {THIS}|{THIS_AT}        { return _out(LiveScriptTypes.KEYWORD); }
 
     // Literals
     {EMPTY}                 { return _out(LiveScriptTypes.EMPTY); }
@@ -270,10 +290,13 @@ UNKNOWN=[:().]
     {PLUS}					{ _enterState(SPLIT_OP); return _out(LiveScriptTypes.PLUS); }
 
     {ASSIGN}                { return _out(LiveScriptTypes.ASSIGN); }
-    
+
     {BRACK_L}				{ _enterState(LIST); return _out(LiveScriptTypes.LIST_START); }
 
     {CURL_L}				{ _enterState(OBJECT); return _out(LiveScriptTypes.OBJ_START); }
+
+    {MISC_OP}               { return _out(LiveScriptTypes.MISC_OP); }
+    {LOGIC_OP}              { return _out(LiveScriptTypes.LOGIC_OP); }
 
     {PAREN_L}				{ return _out(LiveScriptTypes.PAREN_L); }
     {PAREN_R}				{ return _out(LiveScriptTypes.PAREN_R); }
@@ -302,7 +325,8 @@ UNKNOWN=[:().]
 
     {COMMENT_LINE}          { return _out(LiveScriptTypes.COMMENT_LINE); }
 
-    {COMMENT_BLOCK}			{ return _out(LiveScriptTypes.COMMENT_BLOCK); }
+    //{COMMENT_BLOCK}			{ return _out(LiveScriptTypes.COMMENT_BLOCK); }
+    {COMMENT_BLOCK_START}   { _enterState(COMMENT_BLOCK); return _out(LiveScriptTypes.COMMENT_BLOCK); }
 
     {SPACE}+                { return _out(TokenType.WHITE_SPACE); }
 

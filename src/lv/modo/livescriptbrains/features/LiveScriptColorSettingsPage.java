@@ -14,10 +14,14 @@ import java.util.Map;
 
 public class LiveScriptColorSettingsPage implements ColorSettingsPage {
 	public static final AttributesDescriptor[] DESCRIPTORS = new AttributesDescriptor[]{
-			new AttributesDescriptor("String", LiveScriptSyntaxHighlighter.STRING),
-			new AttributesDescriptor("Number", LiveScriptSyntaxHighlighter.NUMBER),
 			new AttributesDescriptor("Line comment", LiveScriptSyntaxHighlighter.COMMENT_LINE),
 			new AttributesDescriptor("Block comment", LiveScriptSyntaxHighlighter.COMMENT_BLOCK),
+			new AttributesDescriptor("String", LiveScriptSyntaxHighlighter.STRING),
+			new AttributesDescriptor("Number", LiveScriptSyntaxHighlighter.NUMBER),
+			new AttributesDescriptor("Operation sign", LiveScriptSyntaxHighlighter.OPERATOR),
+			new AttributesDescriptor("Predefined constant", LiveScriptSyntaxHighlighter.CONSTANTS),
+			new AttributesDescriptor("Identifier", LiveScriptSyntaxHighlighter.IDENTIFIER),
+			new AttributesDescriptor("Keyword", LiveScriptSyntaxHighlighter.KEYWORD),
 	};
 
 	@Nullable
@@ -39,7 +43,10 @@ public class LiveScriptColorSettingsPage implements ColorSettingsPage {
 				"# Line comment\n" +
 				"/* Block comment\n" +
 				"can span multiple\n" +
-				"lines */";
+				"lines */\n" +
+				"\n" +
+				"x = true; y = off\n" +
+				"undef-var = undefined; empty-var = null; unset-var = void";
 	}
 
 	@Nullable

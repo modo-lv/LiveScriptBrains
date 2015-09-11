@@ -8,13 +8,13 @@ public class LiveScriptTypes {
 	 */
 	public static IElementType None = new LiveScriptElementType("None");
 	
-	public static IElementType ASSIGN_OPERATION = new LiveScriptElementType("ASSIGN_OPERATION");
+	public static IElementType AssignOperation = new LiveScriptElementType("AssignOperation");
 	public static IElementType Block = new LiveScriptElementType("Block");
 	public static IElementType EmptyClass = new LiveScriptElementType("EmptyClass");
 	public static IElementType FuncArgList = new LiveScriptElementType("FuncArgList");
 	public static IElementType FuncCall = new LiveScriptElementType("FuncCall");
 	public static IElementType ImplicitList = new LiveScriptElementType("Implicit list");
-	public static IElementType ARGUMENT_LIST = new LiveScriptElementType("ARGUMENT_LIST");
+	public static IElementType ArgumentList = new LiveScriptElementType("ArgumentList");
 	public static IElementType EOF = new LiveScriptElementType("EOF");
 	public static IElementType List = new LiveScriptElementType("List");
 	public static IElementType Object = new LiveScriptElementType("Object");
@@ -56,7 +56,10 @@ public class LiveScriptTypes {
 	public static IElementType ISTRING = new LiveScriptElementType("ISTRING");
 	public static IElementType LIST_START = new LiveScriptElementType("LIST_START");
 	public static IElementType LIST_END = new LiveScriptElementType("LIST_END");
+	public static IElementType LOGIC_OP = new LiveScriptElementType("LOGIC_OP");
+	public static IElementType KEYWORD = new LiveScriptElementType("KEYWORD");
 	public static IElementType MATH_OP = new LiveScriptElementType("MATH_OP");
+	public static IElementType MISC_OP = new LiveScriptElementType("MISC_OP");
 	public static IElementType NEWLINE = new LiveScriptElementType("NEWLINE");
 	public static IElementType NUMBER = new LiveScriptElementType("NUMBER");
 	public static IElementType OBJ_END = new LiveScriptElementType("OBJ_END");
@@ -77,7 +80,7 @@ public class LiveScriptTypes {
 	 * All operation (expression) elements.
 	 */
 	public static IElementType[] ExpressionTypes = new IElementType[] {
-		ASSIGN_OPERATION,
+		AssignOperation,
 		SumOp,
 		IDENTIFIER,
 		NUMBER,
