@@ -46,7 +46,7 @@ import lv.modo.livescriptbrains.psi.LiveScriptTypes;
      * Enter a lexical state and push the previous one to the stack.
      */
     private void _enterState(int state) {
-        //System.out.println("Entering state " + _stateName(state) + ".");
+        System.out.println("Entering state " + _stateName(state) + ".");
         _states.push(yystate());
         yybegin(state);
     }
@@ -57,13 +57,13 @@ import lv.modo.livescriptbrains.psi.LiveScriptTypes;
      */
     private boolean _exitState() {
         if (_states.empty()) {
-            //System.out.println("State stack empty, defaulting to YYINITIAL.");
+            System.out.println("State stack empty, defaulting to YYINITIAL.");
             yybegin(YYINITIAL);
             return false;
         }
         else {
             int newState = _states.pop();
-            //System.out.println("Exiting state " + _stateName(yystate()) + ", state is now " + _stateName(newState));
+            System.out.println("Exiting state " + _stateName(yystate()) + ", state is now " + _stateName(newState));
             yybegin(newState);
             return true;
         }
@@ -102,7 +102,7 @@ import lv.modo.livescriptbrains.psi.LiveScriptTypes;
     }
 
     private IElementType _out(IElementType input) {
-        //System.out.println("Matched [" + yytext() + "] as " + input);
+        System.out.println("Matched [" + yytext() + "] as " + input);
         return input;
     }
 %}
@@ -221,12 +221,14 @@ UNKNOWN=[:().]
 <DSTRING> {
     {ISTRING_START}         { _enterState(ISTRING); return _out(LiveScriptTypes.ISTRING); }
 
-    #			       		{ _enterState(STRING_VAR); return _out(LiveScriptTypes.ESCAPE_CHAR); }
+    #{IDENTIFIER}      		{ _rewind(); _advanceBy(1); _enterState(STRING_VAR); return _out(LiveScriptTypes.ESCAPE_CHAR); }
 
-    // Everything else is just regular string.
     \"    					{ _exitState(); return _out(LiveScriptTypes.STRING_END); }
 
     ({ISTRING}|#\{\})*      { return _out(LiveScriptTypes.STRING); }
+
+    // Everything else is just regular string.
+    .						{ return null; }
 }
 
 <TSTRING> {
