@@ -15,7 +15,8 @@ import lv.modo.livescriptbrains.psi.LiveScriptTypes;
 %function advance
 %type IElementType
 %eof{
-    System.out.println("End of file reached, clearing out state stack.");
+	if (_debug)
+    	System.out.println("End of file reached, clearing out state stack.");
     _states.clear();
     return;
 %eof}
@@ -36,9 +37,12 @@ import lv.modo.livescriptbrains.psi.LiveScriptTypes;
      */
     private static int _currentIndent = 0;
 
+    private static Boolean _debug = true;
+
 
     private void _switchToState(int state) {
-        System.out.println("Switching to state " + _stateName(state) + ".");
+        if (_debug)
+            System.out.println("Switching to state " + _stateName(state) + ".");
         yybegin(state);
     }
 
@@ -46,7 +50,8 @@ import lv.modo.livescriptbrains.psi.LiveScriptTypes;
      * Enter a lexical state and push the previous one to the stack.
      */
     private void _enterState(int state) {
-        System.out.println("Entering state " + _stateName(state) + ".");
+        if (_debug)
+            System.out.println("Entering state " + _stateName(state) + ".");
         _states.push(yystate());
         yybegin(state);
     }
@@ -57,13 +62,15 @@ import lv.modo.livescriptbrains.psi.LiveScriptTypes;
      */
     private boolean _exitState() {
         if (_states.empty()) {
-            System.out.println("State stack empty, defaulting to YYINITIAL.");
+            if (_debug)
+                System.out.println("State stack empty, defaulting to YYINITIAL.");
             yybegin(YYINITIAL);
             return false;
         }
         else {
             int newState = _states.pop();
-            System.out.println("Exiting state " + _stateName(yystate()) + ", state is now " + _stateName(newState));
+            if (_debug)
+                System.out.println("Exiting state " + _stateName(yystate()) + ", state is now " + _stateName(newState));
             yybegin(newState);
             return true;
         }
@@ -102,11 +109,23 @@ import lv.modo.livescriptbrains.psi.LiveScriptTypes;
     }
 
     private IElementType _out(IElementType input) {
-        System.out.println("Matched [" + yytext() + "] as " + input);
+        if (_debug)
+            System.out.println("Matched [" + yytext() + "] as " + input);
         return input;
     }
 %}
 
+
+// Whitespace
+CRLF = [\r\n]
+NEWLINE = \r\n|{CRLF}
+SPACE = [\f\t ]
+
+// Meta
+ANY = {NEWLINE}|.
+
+// Identifier
+IDENTIFIER = [$_a-zA-Z][-$_a-zA-Z0-9]*
 
 // Literals
 BASED_NUMBER = ([0-9]|[1-2][0-9]|3[0-2])\~[0-9a-zA-Z]+
@@ -118,20 +137,18 @@ BOOLEAN=true|false|yes|no|on|off
 THIS="this"
 THIS_AT="@"
 
-// Strings
-BACKSTRING = \\[^,;\]\)\} \t\r\n]+
-HEREDOC = \'\'\'~\'\'\'
-SSS = \' // Simple string start
+// Simple strings
+WORDSTR = \\[^,;\]\)\} \t\r\n]+		//: \word
+MSTR = \'\'\'~\'\'\'				//: '''string that preserves newlines'''
+STR = \'(\\\'|[^'])*\'				//: 'string'
+
+// Interpolated strings
 FSS = %\"|\" // Full string start
-SSTRING = \'(\\\'|[^\'])*\'
 ISTRING = (\\\"|[^\"#])
-
-DSTRING = %?\"{ISTRING}*\"
-DSTRING_START = %?\"{ISTRING}*
+DSTRING = \"{ISTRING}*\"
+DSTRING_START = \"{ISTRING}*
 ISTRING_START = "#{"
-
 TSTRING = \"\"\"
-
 
 // Regex
 REGEX = \/[^\/] ~\/g?m?i?
@@ -163,20 +180,9 @@ Q = "?"
 CLASS = "class"
 KEYWORD = if|then|else|unless|otherwise|in|of|for|by|delete|do|while
 
-IDENTIFIER = [$_a-zA-Z][-$_a-zA-Z0-9]*
-
 // Comments
 COMMENT_LINE = #.*
-COMMENT_BLOCK = \/\*~\*\/
-
-COMMENT_BLOCK_START = "/*"
-
-COMMENT_BLOCK_END = "*/"
-
-// Whitespace
-CRLF = [\r\n]
-NEWLINE = \r\n|{CRLF}
-SPACE = [\f\t ]
+COMMENT_BLOCK = \/\*{ANY}*\*\/
 
 TEST = "!@#$%^&*()TEEEEEEEEESESESETESTESTETETTTT!!)*(!)@(*)*(##"
 UNKNOWN=[:().]
@@ -218,32 +224,26 @@ UNKNOWN=[:().]
 }
 
 // Inside a double-quoted string
-<DSTRING> {
+<DSTRING, TSTRING> {
     {ISTRING_START}         { _enterState(ISTRING); return _out(LiveScriptTypes.ISTRING); }
 
     #{IDENTIFIER}      		{ _rewind(); _advanceBy(1); _enterState(STRING_VAR); return _out(LiveScriptTypes.ESCAPE_CHAR); }
 
-    \"    					{ _exitState(); return _out(LiveScriptTypes.STRING_END); }
+	<DSTRING> {
+		\"    					{ _exitState(); return _out(LiveScriptTypes.STRING_END); }
+	}
 
-    ({ISTRING}|#\{\})*      { return _out(LiveScriptTypes.STRING); }
+	<TSTRING> {
+		\"\"\"					{ _exitState(); return _out(LiveScriptTypes.STRING_END); }
+	}
 
-    // Everything else is just regular string.
-    .						{ return null; }
+    // Pure strings
+    {ANY}					{ return _out(LiveScriptTypes.STRING); }
 }
 
-<TSTRING> {
-    {ISTRING_START}         { _enterState(ISTRING); return _out(LiveScriptTypes.ISTRING); }
-
-    #			       		{ _enterState(STRING_VAR); return _out(LiveScriptTypes.ESCAPE_CHAR); }
-
-    // Everything else is just regular string.
-    \"\"\"					{ _exitState(); return _out(LiveScriptTypes.STRING_END); }
-
-    {NEWLINE}|.				{ return _out(LiveScriptTypes.STRING); }
-}
 
 <ISTRING> {
-    {CURL_R}                { _exitState(); return _out(LiveScriptTypes.ISTRING); }
+    {CURL_R}			{ _exitState(); return _out(LiveScriptTypes.ISTRING); }
 }
 
 // An operation that allows continuation on the next line even without a backslash
@@ -269,11 +269,7 @@ UNKNOWN=[:().]
 }
 
 <COMMENT_BLOCK> {
-    {COMMENT_BLOCK_START}   { _enterState(COMMENT_BLOCK); return _out(LiveScriptTypes.COMMENT_BLOCK); }
-
-    {COMMENT_BLOCK_END}     { _exitState(); return _out(LiveScriptTypes.COMMENT_BLOCK); }
-
-    .|{NEWLINE}             { return _out(LiveScriptTypes.COMMENT_BLOCK); }
+    {ANY}		             { return _out(LiveScriptTypes.COMMENT_BLOCK); }
 }
 
 <YYINITIAL, ISTRING, LIST, OBJECT> {
@@ -292,11 +288,11 @@ UNKNOWN=[:().]
     {NUMBER}|{BASED_NUMBER} { return _out(LiveScriptTypes.NUMBER); }
 
     // Strings
-    {HEREDOC}               { return _out(LiveScriptTypes.STRING); }
-    {BACKSTRING}            { return _out(LiveScriptTypes.STRING); }
-    {SSTRING}               { return _out(LiveScriptTypes.STRING); }
+    {MSTR}               { return _out(LiveScriptTypes.STRING); }
+    {WORDSTR}            { return _out(LiveScriptTypes.STRING); }
+    {STR}					{ return _out(LiveScriptTypes.STRING); }
     {DSTRING}               { return _out(LiveScriptTypes.STRING); }
-    {DSTRING_START}         { _enterState(DSTRING); return _out(LiveScriptTypes.STRING_START); }
+    {DSTRING_START}         { _rewind(); _advanceBy(1); _enterState(DSTRING); return _out(LiveScriptTypes.STRING_START); }
     {TSTRING}				{ _enterState(TSTRING); return _out(LiveScriptTypes.STRING_START); }
 
     {IDENTIFIER}            { return _out(LiveScriptTypes.IDENTIFIER); }
@@ -342,12 +338,12 @@ UNKNOWN=[:().]
 
     {COMMENT_LINE}          { return _out(LiveScriptTypes.COMMENT_LINE); }
 
-    //{COMMENT_BLOCK}			{ return _out(LiveScriptTypes.COMMENT_BLOCK); }
-    {COMMENT_BLOCK_START}   { _enterState(COMMENT_BLOCK); return _out(LiveScriptTypes.COMMENT_BLOCK); }
+    {COMMENT_BLOCK}			{ return _out(LiveScriptTypes.COMMENT_BLOCK); }
+    //{COMMENT_BLOCK_START}   { _enterState(COMMENT_BLOCK); return _out(LiveScriptTypes.COMMENT_BLOCK); }
 
     {SPACE}+                { return _out(TokenType.WHITE_SPACE); }
 
 }
 
 // Fall-through
-.                       { System.out.println("State is " + _stateName(yystate())); return _out(TokenType.BAD_CHARACTER); }
+.                       { if (_debug) System.out.println("State is " + _stateName(yystate())); return _out(TokenType.BAD_CHARACTER); }
