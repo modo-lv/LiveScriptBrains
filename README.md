@@ -1,7 +1,7 @@
 # LiveScriptBrains
 A plugin for JetBrains IntelliJ IDEA set if IDE's, primarily targeted for WebStorm.
 
-# Status: v0.1.1c
+# Status: v0.0.1c
 First version, just barely working. Very basic syntax highlight, nothing else.
 
 # Usage
