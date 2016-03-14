@@ -34,7 +34,7 @@ public class LiveScriptParserDefinition implements ParserDefinition{
 	@NotNull
     @Override
     public Lexer createLexer(Project project) {
-		return new FlexAdapter(new LiveScriptLexer((Reader) null));
+		return new FlexAdapter(new LiveScriptLexer());
     }
 
     @NotNull

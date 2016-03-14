@@ -6,6 +6,6 @@ import java.io.Reader;
 
 public class LiveScriptLexerAdapter extends FlexAdapter {
     public LiveScriptLexerAdapter() {
-        super(new LiveScriptLexer((Reader) null));
+        super(new LiveScriptLexer());
     }
 }

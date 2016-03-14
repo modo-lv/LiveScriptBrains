@@ -43,7 +43,7 @@ public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase {
 	@NotNull
 	@Override
 	public Lexer getHighlightingLexer() {
-		return new FlexAdapter(new LiveScriptLexer((Reader) null));
+		return new FlexAdapter(new LiveScriptLexer());
 	}
 
 	private TextAttributesKey[] getKeySetFor(TextAttributesKey taKey) {

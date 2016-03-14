@@ -9,7 +9,7 @@ import lv.modo.livescriptbrains.psi.LiveScriptTypes;
 
 %%
 
-%public %class LiveScriptLexer
+%public %class OldLiveScriptLexer
 %implements FlexLexer
 %unicode
 %function advance
@@ -178,7 +178,7 @@ Q = "?"
 
 // Keywords
 CLASS = "class"
-KEYWORD = if|then|else|unless|otherwise|in|of|for|by|delete|do|while
+KEYWORD = if|then|else|unless|otherwise|in|of|for|by|delete|do|while|new
 
 // Comments
 COMMENT_LINE = #.*
