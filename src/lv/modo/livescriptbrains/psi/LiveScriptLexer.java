@@ -161,49 +161,12 @@ public class LiveScriptLexer implements FlexLexer {
 			//System.out.println("Indent char is [" + this._getIndentChar() + "] x " + this._indentSize);
 		}
 
-		if (this._indentSize > 0)
+		// Once we know what an indent is, we can check for it.
+		if (this._indentSize > 0
+				&& (matcher = this._tryMatch("^" + this._getIndentChar() + "{" + this._indentSize + "}"))
+					.find(this._line.Index))
 		{
-			// Differentiating between indents and dedents is tricky.
-			// In order to know if a given indent is actually dedent, we must first count all of the indents
-			// in the line and compare the total to the current indentation level.
-			// If the total is less than current level, every indent on this line is actually a dedent.
-			// If the total is same as current level, the indents are actually treated like newlines.
-			// If the total is more than current indentation level, every indent on the line is an indent.
-
-			// First, we count all the indents in the line.
-			if (!this._indentTracker.LineProcessed) {
-				matcher = this._tryMatch("" + this._getIndentChar() + "{" + this._indentSize + "}");
-				while (matcher.find()) {
-					// If the indent isn't the first character on the line, there's no indents and we drop tracking.
-					if (this._indentTracker.IndentCount == 0 && matcher.start() > 0) {
-						break;
-					}
-					this._indentTracker.IndentCount++;
-				}
-				if (this._indentTracker.IndentCount < this._currentIndentLevel)
-					this._indentTracker.IndentType = LiveScriptTypes.DEDENT;
-				else if (this._indentTracker.IndentCount > this._currentIndentLevel)
-					this._indentTracker.IndentType = LiveScriptTypes.INDENT;
-				else
-					this._indentTracker.IndentType = LiveScriptTypes.NEWLINE;
-
-				this._currentIndentLevel = this._indentTracker.IndentCount;
-				this._indentTracker.LineProcessed = true;
-			}
-			// Then, since we know that the first X characters are indents, we can just return them immediately,
-			// no matching required.
-			if (this._indentTracker.CurrentIndent < this._indentTracker.IndentCount) {
-				tokenLength = this._indentSize;
-
-				result = this._indentTracker.IndentType;
-
-				this._indentTracker.CurrentIndent++;
-			}
-			// There is another special case - no indent after an indent on the previous line
-			else if (this._indentTracker.IndentType == LiveScriptTypes.DEDENT && this._currentIndentLevel == 0) {
-				tokenLength = 0;
-				result = this._indentTracker.IndentType;
-			}
+			result = LiveScriptTypes.INDENT;
 		}
 
 		if (result == null) {
