@@ -45,9 +45,14 @@ public class LiveScriptLexer implements FlexLexer {
 	private int _tokenEndIndex;
 
 	/**
-	 * Has the end of the text been reached?
+	 * Are tabs used as indents, instead of spaces?
 	 */
-	private boolean _atEndOfFile;
+	private boolean _indentTab;
+
+	/**
+	 * How many tabs/spaces wide is one indent.
+	 */
+	private int _indentSize;
 
 	/**
 	 * Text that we're processing.
@@ -110,24 +115,56 @@ public class LiveScriptLexer implements FlexLexer {
 			getLine();
 
 		// Match
-		Pattern pattern = Pattern.compile("^module");
-		Matcher matcher = pattern.matcher(this._line);
-		if (matcher.find()) {
-			this._tokenStartIndex = this._currentIndex;
-			this._tokenEndIndex = this._currentIndex + matcher.end();
-			result = LiveScriptTypes.KEYWORD;
-			this._currentIndex += matcher.end();
-			this._line = null;
+		return this._matchLine();
+	}
+
+	private Character _getIndentChar() {
+		return this._indentTab ? '\t' : ' ';
+	}
+
+	/**
+	 * Takes the [remaining] line as returned by {@link #getLine()} and tries to
+	 * find the first token in it.
+	 * @return
+	 */
+	private IElementType _matchLine() {
+		IElementType result;
+		Boolean matched = true;
+		Matcher matcher;
+
+
+		// Indent size of 0 means we haven't encountered an indent yet, so whichever -- tab or space --
+		// we encounter first will become the tab character, and the number of this character on first
+		// encounter will determine the indent size
+		String pattern = this._indentSize == 0
+				? "^(\\t+| +)"
+				: "^" + this._getIndentChar() + "{" + this._indentSize + "}";
+
+		if ((matcher = this._tryMatch(pattern)).find()) {
+			if (this._indentSize == 0) {
+				this._indentTab = matcher.group(1).startsWith("\t");
+				this._indentSize = matcher.group(1).length();
+				System.out.println("Indent char is [" + this._getIndentChar() + "] x " + this._indentSize);
+			}
+			result = LiveScriptTypes.INDENT;
 		}
 		else {
-			this._tokenStartIndex = this._currentIndex;
-			this._tokenEndIndex = this._tokenStartIndex + this._line.length();
+			matched = false;
 			result = ElementType.ERROR_ELEMENT;
-			this._currentIndex = this._tokenEndIndex;
-			this._line = null;
 		}
 
+		this._tokenStartIndex = this._currentIndex;
+		this._tokenEndIndex = this._tokenStartIndex + (matched ? matcher.end() : this._line.length());
+		this._currentIndex = this._tokenEndIndex;
+		this._line = null;
+
 		return result;
+	}
+
+	private Matcher _tryMatch(String patternString) {
+		Pattern pattern = Pattern.compile(patternString);
+		Matcher matcher = pattern.matcher(this._line);
+		return matcher;
 	}
 
 	/**
@@ -167,7 +204,6 @@ public class LiveScriptLexer implements FlexLexer {
 	public void reset(CharSequence buf, int start, int end, int initialState) {
 		this._currentIndex = start;
 		this._textLength = end;
-		this._atEndOfFile = false;
 		this._text = buf;
 	}
 
