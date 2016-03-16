@@ -79,9 +79,6 @@ public class LiveScriptLexer implements FlexLexer {
 	 */
 	private LexerLine _line;
 
-	private LiveScriptLexerIndentTracker _indentTracker;
-
-
 	/**
 	 * Must always return the position of the first character of whatever the last token returned by {@link #advance()}.
 	 * @return
@@ -102,7 +99,6 @@ public class LiveScriptLexer implements FlexLexer {
 
 	public LiveScriptLexer() {
 		this._line = null;
-		this._indentTracker = new LiveScriptLexerIndentTracker();
 	}
 
 	/**
@@ -155,7 +151,7 @@ public class LiveScriptLexer implements FlexLexer {
 		// Indent size of 0 means we haven't encountered an indent yet, so whichever -- tab or space --
 		// we encounter first will become the indent character, and the number of this character on first
 		// encounter will determine the indent size.
-		if (this._indentSize == 0 && (matcher = this._tryMatch("^(\\t+| +)")).find()) {
+		if (this._indentSize == 0 && (matcher = this._tryMatch("^(\\t+| +)", true)).find()) {
 			this._indentTab = matcher.group(1).startsWith("\t");
 			this._indentSize = matcher.group(1).length();
 			//System.out.println("Indent char is [" + this._getIndentChar() + "] x " + this._indentSize);
@@ -163,11 +159,23 @@ public class LiveScriptLexer implements FlexLexer {
 
 		// Once we know what an indent is, we can check for it.
 		if (this._indentSize > 0
-				&& (matcher = this._tryMatch("^" + this._getIndentChar() + "{" + this._indentSize + "}"))
+				&& (matcher = this._tryMatch("^" + this._getIndentChar() + "{" + this._indentSize + "}", true))
 					.find(this._line.Index))
 		{
 			result = LiveScriptTypes.INDENT;
 		}
+
+		// "class" keyword
+		if (result == null && (matcher = this._tryMatch("^(class)\\s+")).find()) {
+			tokenLength = matcher.group(1).length();
+			result = LiveScriptTypes.CLASS;
+		}
+
+		// whitespace
+		if (result == null && (matcher = this._tryMatch("^\\s+")).find()) {
+			result = ElementType.WHITE_SPACE;
+		}
+
 
 		if (result == null) {
 			if (false) {
@@ -175,8 +183,8 @@ public class LiveScriptLexer implements FlexLexer {
 			}
 			else {
 				matched = false;
-				result = ElementType.ERROR_ELEMENT;
-				tokenLength = this._line.RemainingLength();
+				result = ElementType.BAD_CHARACTER;
+				tokenLength = 1;
 			}
 		}
 
@@ -194,10 +202,14 @@ public class LiveScriptLexer implements FlexLexer {
 		return result;
 	}
 
-	private Matcher _tryMatch(String patternString) {
+	private Matcher _tryMatch(String patternString, boolean fullLine) {
 		Pattern pattern = Pattern.compile(patternString);
-		Matcher matcher = pattern.matcher(this._line.Text);
+		Matcher matcher = pattern.matcher(fullLine ? this._line.Text : this._line.RemainingText());
 		return matcher;
+	}
+
+	private Matcher _tryMatch(String patternString) {
+		return this._tryMatch(patternString, false);
 	}
 
 	/**
@@ -222,7 +234,6 @@ public class LiveScriptLexer implements FlexLexer {
 				cr = true;
 			}
 		}
-		this._indentTracker = new LiveScriptLexerIndentTracker();
 	}
 
 

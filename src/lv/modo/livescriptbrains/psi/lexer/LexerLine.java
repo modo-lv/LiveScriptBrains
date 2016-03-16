@@ -31,6 +31,14 @@ public class LexerLine {
 	}
 
 	/**
+	 * Get the remaining unprocessed text.
+	 * @return
+	 */
+	public String RemainingText() {
+		return this.Text.substring(this.Index);
+	}
+
+	/**
 	 * Length of the remaining line still to be processed.
 	 */
 	public int RemainingLength() {
