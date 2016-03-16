@@ -3,6 +3,7 @@ package lv.modo.livescriptbrains.psi;
 import com.intellij.psi.tree.IElementType;
 
 public class LiveScriptTypes {
+	public static final IElementType DEDENT = new LiveScriptElementType("DEDENT");
 	/**
 	 * Parser types
 	 */

@@ -5,6 +5,7 @@ package lv.modo.livescriptbrains.psi;
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.impl.source.tree.ElementType;
 import com.intellij.psi.tree.IElementType;
+import lv.modo.livescriptbrains.psi.lexer.LexerLine;
 
 import java.io.IOException;
 import java.util.regex.Matcher;
@@ -18,11 +19,19 @@ import java.util.regex.Pattern;
  * must be converted into an "if" token.
  */
 public class LiveScriptLexer implements FlexLexer {
+	private int STATE_NORMAL = 0;
+	private int STATE_INDENT = 1;
+
 
 	/**
 	 * Character index that the lexer is currently at.
 	 */
 	private int _currentIndex;
+
+	/**
+	 *
+	 */
+	private int _currentLineIndex;
 
 	/**
 	 * Index of the first character in the text to process
@@ -55,6 +64,12 @@ public class LiveScriptLexer implements FlexLexer {
 	private int _indentSize;
 
 	/**
+	 * What's the current indentation level. Keeping track of this allows lexer to
+	 * distinguish between an indent and a dedent.
+	 */
+	private int _currentIndentLevel;
+
+	/**
 	 * Text that we're processing.
 	 */
 	private CharSequence _text;
@@ -62,7 +77,9 @@ public class LiveScriptLexer implements FlexLexer {
 	/**
 	 * Contains the line of text that is currently being worked on.
 	 */
-	private CharSequence _line;
+	private LexerLine _line;
+
+	private LiveScriptLexerIndentTracker _indentTracker;
 
 
 	/**
@@ -84,7 +101,8 @@ public class LiveScriptLexer implements FlexLexer {
 	}
 
 	public LiveScriptLexer() {
-		this._line = new StringBuilder();
+		this._line = null;
+		this._indentTracker = new LiveScriptLexerIndentTracker();
 	}
 
 	/**
@@ -107,11 +125,12 @@ public class LiveScriptLexer implements FlexLexer {
 		// If the line matches no tokens and there are still characters left, mark
 		// all remaining characters as invalid.
 
+		// If we are at the end of the text, we're done.
 		if (this._currentIndex >= this._textLength)
 			return null;
 
 		// Make sure we have a line to work with
-		if (this._line == null)
+		if (this._line == null || this._line.IsFinished())
 			getLine();
 
 		// Match
@@ -128,42 +147,93 @@ public class LiveScriptLexer implements FlexLexer {
 	 * @return
 	 */
 	private IElementType _matchLine() {
-		IElementType result;
+		IElementType result = null;
 		Boolean matched = true;
-		Matcher matcher;
-
+		Matcher matcher = null;
+		int tokenLength = 0;
 
 		// Indent size of 0 means we haven't encountered an indent yet, so whichever -- tab or space --
-		// we encounter first will become the tab character, and the number of this character on first
-		// encounter will determine the indent size
-		String pattern = this._indentSize == 0
-				? "^(\\t+| +)"
-				: "^" + this._getIndentChar() + "{" + this._indentSize + "}";
+		// we encounter first will become the indent character, and the number of this character on first
+		// encounter will determine the indent size.
+		if (this._indentSize == 0 && (matcher = this._tryMatch("^(\\t+| +)")).find()) {
+			this._indentTab = matcher.group(1).startsWith("\t");
+			this._indentSize = matcher.group(1).length();
+			//System.out.println("Indent char is [" + this._getIndentChar() + "] x " + this._indentSize);
+		}
 
-		if ((matcher = this._tryMatch(pattern)).find()) {
-			if (this._indentSize == 0) {
-				this._indentTab = matcher.group(1).startsWith("\t");
-				this._indentSize = matcher.group(1).length();
-				System.out.println("Indent char is [" + this._getIndentChar() + "] x " + this._indentSize);
+		if (this._indentSize > 0)
+		{
+			// Differentiating between indents and dedents is tricky.
+			// In order to know if a given indent is actually dedent, we must first count all of the indents
+			// in the line and compare the total to the current indentation level.
+			// If the total is less than current level, every indent on this line is actually a dedent.
+			// If the total is same as current level, the indents are actually treated like newlines.
+			// If the total is more than current indentation level, every indent on the line is an indent.
+
+			// First, we count all the indents in the line.
+			if (!this._indentTracker.LineProcessed) {
+				matcher = this._tryMatch("" + this._getIndentChar() + "{" + this._indentSize + "}");
+				while (matcher.find()) {
+					// If the indent isn't the first character on the line, there's no indents and we drop tracking.
+					if (this._indentTracker.IndentCount == 0 && matcher.start() > 0) {
+						break;
+					}
+					this._indentTracker.IndentCount++;
+				}
+				if (this._indentTracker.IndentCount < this._currentIndentLevel)
+					this._indentTracker.IndentType = LiveScriptTypes.DEDENT;
+				else if (this._indentTracker.IndentCount > this._currentIndentLevel)
+					this._indentTracker.IndentType = LiveScriptTypes.INDENT;
+				else
+					this._indentTracker.IndentType = LiveScriptTypes.NEWLINE;
+
+				this._currentIndentLevel = this._indentTracker.IndentCount;
+				this._indentTracker.LineProcessed = true;
 			}
-			result = LiveScriptTypes.INDENT;
+			// Then, since we know that the first X characters are indents, we can just return them immediately,
+			// no matching required.
+			if (this._indentTracker.CurrentIndent < this._indentTracker.IndentCount) {
+				tokenLength = this._indentSize;
+
+				result = this._indentTracker.IndentType;
+
+				this._indentTracker.CurrentIndent++;
+			}
+			// There is another special case - no indent after an indent on the previous line
+			else if (this._indentTracker.IndentType == LiveScriptTypes.DEDENT && this._currentIndentLevel == 0) {
+				tokenLength = 0;
+				result = this._indentTracker.IndentType;
+			}
 		}
-		else {
-			matched = false;
-			result = ElementType.ERROR_ELEMENT;
+
+		if (result == null) {
+			if (false) {
+
+			}
+			else {
+				matched = false;
+				result = ElementType.ERROR_ELEMENT;
+				tokenLength = this._line.RemainingLength();
+			}
 		}
+
+		if (tokenLength == 0 && matched)
+			tokenLength = matcher.end() - matcher.start();
 
 		this._tokenStartIndex = this._currentIndex;
-		this._tokenEndIndex = this._tokenStartIndex + (matched ? matcher.end() : this._line.length());
+		// Move the line index beyond the matched token
+		this._line.Index += tokenLength;
+		// Mark the token's end index
+		this._tokenEndIndex = this._tokenStartIndex + tokenLength;
+		// Move the current index forwards
 		this._currentIndex = this._tokenEndIndex;
-		this._line = null;
 
 		return result;
 	}
 
 	private Matcher _tryMatch(String patternString) {
 		Pattern pattern = Pattern.compile(patternString);
-		Matcher matcher = pattern.matcher(this._line);
+		Matcher matcher = pattern.matcher(this._line.Text);
 		return matcher;
 	}
 
@@ -181,7 +251,7 @@ public class LiveScriptLexer implements FlexLexer {
 				sb.append(c);
 
 			if (cr || c == '\n' || a == this._textLength - 1) {
-				this._line = sb.toString();
+				this._line = new LexerLine(this._currentIndex, sb.toString());
 				break;
 			}
 
@@ -189,6 +259,7 @@ public class LiveScriptLexer implements FlexLexer {
 				cr = true;
 			}
 		}
+		this._indentTracker = new LiveScriptLexerIndentTracker();
 	}
 
 
