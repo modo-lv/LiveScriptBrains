@@ -72,6 +72,7 @@ public class LiveScriptTypes {
 	public static IElementType SEPARATOR = new LiveScriptElementType("SEPARATOR");
 	public static IElementType SEMICOLON = new LiveScriptElementType("SEMICOLON");
 	public static IElementType STRING = new LiveScriptElementType("STRING");
+	public static final IElementType STRING_BROKEN = new LiveScriptElementType("STRING_BROKEN");
 	public static IElementType STRING_START = new LiveScriptElementType("STRING_START");
 	public static IElementType STRING_END = new LiveScriptElementType("STRING_END");
 	public static IElementType YADA = new LiveScriptElementType("YADA");

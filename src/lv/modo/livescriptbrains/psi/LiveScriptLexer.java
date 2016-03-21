@@ -3,11 +3,15 @@
 package lv.modo.livescriptbrains.psi;
 
 import com.intellij.lexer.FlexLexer;
+import com.intellij.lexer.Lexer;
 import com.intellij.psi.impl.source.tree.ElementType;
 import com.intellij.psi.tree.IElementType;
-import lv.modo.livescriptbrains.psi.lexer.LexerLine;
+import lv.modo.livescriptbrains.psi.lexer.LexerPatterns;
+import lv.modo.livescriptbrains.psi.lexer.LexerStates;
 
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,24 +23,26 @@ import java.util.regex.Pattern;
  * must be converted into an "if" token.
  */
 public class LiveScriptLexer implements FlexLexer {
-	private int STATE_NORMAL = 0;
-	private int STATE_INDENT = 1;
+	/**
+	 * When a new lexer state is entered, the previous one is pushed
+	 * on to the stack, and when the state is exited, it's popped
+	 * off and resumed again.
+	 * This allows for infinite depth of states, which can be
+	 * necessary, for example in case of interpolated strings containing
+	 * code that contains more interpolated strings and so on.
+	 */
+	private Stack<Integer> _stateStack;
+
+	/**
+	 * Current lexer state.
+	 */
+	private int _currentState;
 
 
 	/**
 	 * Character index that the lexer is currently at.
 	 */
 	private int _currentIndex;
-
-	/**
-	 *
-	 */
-	private int _currentLineIndex;
-
-	/**
-	 * Index of the first character in the text to process
-	 */
-	private int _startPosition;
 
 	/**
 	 * Length of the input text [fragment].
@@ -64,23 +70,27 @@ public class LiveScriptLexer implements FlexLexer {
 	private int _indentSize;
 
 	/**
-	 * What's the current indentation level. Keeping track of this allows lexer to
-	 * distinguish between an indent and a dedent.
-	 */
-	private int _currentIndentLevel;
-
-	/**
 	 * Text that we're processing.
 	 */
-	private CharSequence _text;
+	private String _text;
+
 
 	/**
-	 * Contains the line of text that is currently being worked on.
+	 * How many characters the current token consists of.
 	 */
-	private LexerLine _line;
+	private int _tokenLength = 0;
+
+	private Matcher _matcher = null;
+
+	/**
+	 * Found token type.
+	 */
+	private IElementType _tokenType = null;
+
 
 	/**
 	 * Must always return the position of the first character of whatever the last token returned by {@link #advance()}.
+	 *
 	 * @return
 	 */
 	@Override
@@ -90,6 +100,7 @@ public class LiveScriptLexer implements FlexLexer {
 
 	/**
 	 * Must always return the index of the last character in the last token returned by {@link #advance()}.
+	 *
 	 * @return
 	 */
 	@Override
@@ -97,8 +108,9 @@ public class LiveScriptLexer implements FlexLexer {
 		return this._tokenEndIndex;
 	}
 
+
 	public LiveScriptLexer() {
-		this._line = null;
+		this._stateStack = new Stack<Integer>();
 	}
 
 	/**
@@ -106,168 +118,225 @@ public class LiveScriptLexer implements FlexLexer {
 	 * <p>This is the main lexer processor method. During the parsing process, this method is called over and over, to get
 	 * the tokens one after another. It must return the next token every time, or <tt>null</tt> when the end of file
 	 * is reached.</p>
+	 * <p>
+	 * We'll achieve this by taking the whole text buffer as a string, and trying to determine the first token in it.
+	 * When determined, the token is returned, and its content cut from the text buffer, thus when the method is called
+	 * next, it will be working on the text following the last token.
+	 * Repeat until there is no more text to parse.
+	 * </p>
+	 *
 	 * @return
 	 * @throws IOException
 	 */
 	@Override
 	public IElementType advance() throws IOException {
-		IElementType result = null;
-
-		// We go through the input, one line at a time.
-		// Each line is run through the possible token matches.
-		// Whenever a token matches, the index of the search is moved beyond it,
-		// and the remaining line is run through the possible token matches again.
-		// Repeat this until the end of the line is reached or it matches no tokens.
-		// If the line matches no tokens and there are still characters left, mark
-		// all remaining characters as invalid.
+		// Reset/initialize variables
+		this._tokenType = null;
+		this._tokenLength = 0;
 
 		// If we are at the end of the text, we're done.
 		if (this._currentIndex >= this._textLength)
-			return null;
+			return this._tokenType;
 
-		// Make sure we have a line to work with
-		if (this._line == null || this._line.IsFinished())
-			getLine();
+		LinkedList<Runnable> methods = new LinkedList<>();
 
-		// Match
-		return this._matchLine();
+		methods.add(this::_tryPlainStrings);
+		methods.add(this::_tryFullString);
+		methods.add(this::_tryId);
+
+		while (this._tokenType == null && !methods.isEmpty()) {
+			Runnable method = methods.removeFirst();
+			method.run();
+		}
+
+
+		// If we haven't matched anything, mark the character as unknown/error.
+		if (this._tokenType == null) {
+			this._tokenType = ElementType.BAD_CHARACTER;
+			this._tokenLength = 1;
+		} else {
+			// If we did match
+			if (this._tokenLength == 0)
+				this._tokenLength = this._matcher.end();
+		}
+
+		this._tokenStartIndex = this._currentIndex;
+		this._tokenEndIndex = this._tokenStartIndex + this._tokenLength;
+		this._currentIndex = this._tokenEndIndex;
+		if (this._currentIndex < this._textLength)
+			this._text = this._text.substring(this._tokenLength);
+
+		return this._tokenType;
+	}
+
+	private void _tryFullString() {
+		boolean justStarted = false;
+
+		// If we are already going through a string, we can't start another.
+		if (!this._stateIsOneOf(LexerStates.STATE_STRING, LexerStates.STATE_STRING_MULTILINE)) {
+			if (this._text.charAt(0) == '"') {
+				justStarted = true;
+				// We must find out if it's a single double-quote or a triple double-quote
+				this._enterState(this._tryMatch("^\"{3}") ? LexerStates.STATE_STRING_MULTILINE : LexerStates.STATE_STRING);
+			}
+		}
+
+		// At this point we must be inside a string.
+		if (!this._stateIsOneOf(LexerStates.STATE_STRING, LexerStates.STATE_STRING_MULTILINE))
+			return;
+
+		// Since we are already in the string state, we know the token type will be string,
+		// no matter what else happens.
+		this._tokenType = LiveScriptTypes.STRING;
+
+		// Set up variables and initial values.
+		boolean triple = this.yystate() == LexerStates.STATE_STRING_MULTILINE;
+		String boundary = triple ? "\"{3}" : "\"";
+		int flags = triple ? Pattern.DOTALL : 0;
+		int offset = justStarted ? boundary.length() : 0;
+		this._tokenLength = offset;
+
+		// We need to match the string up to the end or the first possible interpolation point.
+		do {
+			if (!this._tryMatch(".*?(#|" + boundary + ")", flags, offset)) {
+				// If we didn't match this, it means it's a broken (unfinished) string so we must
+				// match to the end of the line or file, and return that as a broken string.
+				this._tryMatch("^.+", flags);
+				this._tokenType = LiveScriptTypes.STRING_BROKEN;
+				this._exitState();
+				return;
+			}
+
+			// Increase the match length to as far as we've gotten.
+			this._tokenLength += this._matcher.end() - this._matcher.start();
+
+			if (this._matcher.group(1).equals("#")) {
+				// Move offset to the end of the match for any further matching.
+				offset = this._matcher.end();
+
+				// Here we must figure out if we have an interpolation on our hands or not.
+				if (this._text.charAt(offset) == '{') {
+					this._tokenLength++;
+					this._enterState(LexerStates.STATE_INTERPOLATED);
+				} else if (this._tryMatch(LexerPatterns.ID, 0, offset)) {
+					this._enterState(LexerStates.STATE_INTERPOLATED_VARIABLE);
+				}
+
+				// If none of the previous match, we do nothing.
+				// The loop will repeat and try to match further.
+			} else {
+				// End of string reached.
+				this._exitState();
+			}
+		} while (this._stateIsOneOf(LexerStates.STATE_STRING, LexerStates.STATE_STRING_MULTILINE));
+	}
+
+	private void _tryId() {
+		if (!this._stateIsOneOf(LexerStates.STATE_NORMAL, LexerStates.STATE_INTERPOLATED, LexerStates.STATE_INTERPOLATED_VARIABLE))
+			return;
+
+		if (this._tryMatch("^" + LexerPatterns.ID)) {
+			this._tokenType = LiveScriptTypes.IDENTIFIER;
+			if (this.yystate() == LexerStates.STATE_INTERPOLATED_VARIABLE)
+				this._exitState();
+		}
+	}
+
+	/**
+	 *
+	 * @param states
+	 * @return
+	 */
+	private boolean _stateIsOneOf(int... states) {
+		for (int state : states)
+			if (this.yystate() == state)
+				return true;
+		return false;
+	}
+
+	/**
+	 * Matches simple single-quoted strings.
+	 */
+	private void _tryPlainStrings() {
+		if (this._tryMatch("^'{3}.*?'{3}", Pattern.DOTALL) || this._tryMatch("^'(?:\\\\'|.)*?'"))
+			this._tokenType = LiveScriptTypes.STRING;
 	}
 
 	private Character _getIndentChar() {
 		return this._indentTab ? '\t' : ' ';
 	}
 
-	/**
-	 * Takes the [remaining] line as returned by {@link #getLine()} and tries to
-	 * find the first token in it.
-	 * @return
-	 */
-	private IElementType _matchLine() {
-		IElementType result = null;
-		Boolean matched = true;
-		Matcher matcher = null;
-		int tokenLength = 0;
 
-		// Indent size of 0 means we haven't encountered an indent yet, so whichever -- tab or space --
-		// we encounter first will become the indent character, and the number of this character on first
-		// encounter will determine the indent size.
-		if (this._indentSize == 0 && (matcher = this._tryMatch("^(\\t+| +)", true)).find()) {
-			this._indentTab = matcher.group(1).startsWith("\t");
-			this._indentSize = matcher.group(1).length();
-			//System.out.println("Indent char is [" + this._getIndentChar() + "] x " + this._indentSize);
-		}
-
-		// Once we know what an indent is, we can check for it.
-		if (this._indentSize > 0
-				&& (matcher = this._tryMatch("^" + this._getIndentChar() + "{" + this._indentSize + "}", true))
-					.find(this._line.Index))
-		{
-			result = LiveScriptTypes.INDENT;
-		}
-
-		// "class" keyword
-		if (result == null && (matcher = this._tryMatch("^(class)\\s+")).find()) {
-			tokenLength = matcher.group(1).length();
-			result = LiveScriptTypes.CLASS;
-		}
-
-		// whitespace
-		if (result == null && (matcher = this._tryMatch("^\\s+")).find()) {
-			result = ElementType.WHITE_SPACE;
-		}
-
-
-		if (result == null) {
-			if (false) {
-
-			}
-			else {
-				matched = false;
-				result = ElementType.BAD_CHARACTER;
-				tokenLength = 1;
-			}
-		}
-
-		if (tokenLength == 0 && matched)
-			tokenLength = matcher.end() - matcher.start();
-
-		this._tokenStartIndex = this._currentIndex;
-		// Move the line index beyond the matched token
-		this._line.Index += tokenLength;
-		// Mark the token's end index
-		this._tokenEndIndex = this._tokenStartIndex + tokenLength;
-		// Move the current index forwards
-		this._currentIndex = this._tokenEndIndex;
-
-		return result;
+	private boolean _tryMatch(String patternString, int flags) {
+		return _tryMatch(patternString, flags, 0);
 	}
 
-	private Matcher _tryMatch(String patternString, boolean fullLine) {
-		Pattern pattern = Pattern.compile(patternString);
-		Matcher matcher = pattern.matcher(fullLine ? this._line.Text : this._line.RemainingText());
-		return matcher;
+	private boolean _tryMatch(String patternString, int flags, int startAt) {
+		Pattern pattern = Pattern.compile(patternString, flags);
+		this._matcher = pattern.matcher(this._text);
+		return this._matcher.find(startAt);
 	}
 
-	private Matcher _tryMatch(String patternString) {
-		return this._tryMatch(patternString, false);
+	private boolean _tryMatch(String patternString) {
+		return this._tryMatch(patternString, 0, 0);
 	}
-
-	/**
-	 * Gets the remaining characters from the current index to the
-	 * end of the line and returns it as a single string for matching
-	 * against possible tokens.
-	 */
-	private void getLine() {
-		boolean cr = false;
-		StringBuilder sb = new StringBuilder();
-		for (int a = this._currentIndex; a < this._textLength; a++) {
-			char c = this._text.charAt(a);
-			if (!cr || c == '\n')
-				sb.append(c);
-
-			if (cr || c == '\n' || a == this._textLength - 1) {
-				this._line = new LexerLine(this._currentIndex, sb.toString());
-				break;
-			}
-
-			if (c == '\r') {
-				cr = true;
-			}
-		}
-	}
-
 
 	/**
 	 * Commands the lexer to start over from the beginning.
 	 * The lexing process starts with this entry point, receiving the text and its
-	 * @param buf Text to parse for tokens.
-	 * @param start The starting position of the text. Usually 0, but can be larger if only a fragment of text is processed.
-	 * @param end Ending position of the text. Usually text.length, but can be smaller if only a fragment is used.
+	 *
+	 * @param buf          Text to parse for tokens.
+	 * @param start        The starting position of the text. Usually 0, but can be larger if only a fragment of text is processed.
+	 * @param end          Ending position of the text. Usually text.length, but can be smaller if only a fragment is used.
 	 * @param initialState ?
 	 */
 	@Override
 	public void reset(CharSequence buf, int start, int end, int initialState) {
 		this._currentIndex = start;
 		this._textLength = end;
-		this._text = buf;
+		this._text = buf.toString();
+		this._stateStack = new Stack<>();
+		this._currentState = LexerStates.STATE_NORMAL;
 	}
 
 
 	/**
-	 * Unused?
+	 * Go back to the previous lexer state (or {@link lv.modo.livescriptbrains.psi.lexer.LexerStates#STATE_NORMAL} if
+	 * there is no previous state.
+	 */
+	private void _exitState() {
+		if (this._stateStack.empty()) {
+			this._currentState = LexerStates.STATE_NORMAL;
+			return;
+		}
+		this._currentState = this._stateStack.pop();
+	}
+
+	private void _enterState(int state) {
+		this.yybegin(state);
+	}
+
+
+	/**
+	 * Enter a new lexer state.
+	 *
 	 * @param state
 	 */
 	@Override
 	public void yybegin(int state) {
+		this._stateStack.push(this._currentState);
+		this._currentState = state;
 	}
 
 	/**
-	 * Unused?
+	 * Return current lexer state.
+	 *
 	 * @return
 	 */
 	@Override
 	public int yystate() {
-		return 0;
+
+		return this._currentState;
 	}
 
 }
