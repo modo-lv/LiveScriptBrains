@@ -75,6 +75,7 @@ public class LiveScriptTypes {
 	public static final IElementType STRING_BROKEN = new LiveScriptElementType("STRING_BROKEN");
 	public static IElementType STRING_START = new LiveScriptElementType("STRING_START");
 	public static IElementType STRING_END = new LiveScriptElementType("STRING_END");
+	public static IElementType THIS = new LiveScriptElementType("THIS");
 	public static IElementType YADA = new LiveScriptElementType("YADA");
 
 

@@ -9,7 +9,9 @@ import lv.modo.livescriptbrains.psi.lexer.LexerPatterns;
 import lv.modo.livescriptbrains.psi.lexer.LexerStates;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -145,9 +147,9 @@ public class LiveScriptLexer implements FlexLexer {
 		// If a token is detected, this._tokenType is set which breaks the loop and stops
 		// further checking.
 		methods.add(this::_tryExitInterpolation);
+		methods.add(this::_tryComments);
 		methods.add(this::_trySimpleValues);
 		methods.add(this::_tryFullString);
-		methods.add(this::_tryComments);
 		methods.add(this::_tryPlainStrings);
 		methods.add(this::_tryId);
 
@@ -184,20 +186,28 @@ public class LiveScriptLexer implements FlexLexer {
 		if (!this._isNormalState())
 			return;
 
+		LinkedHashMap<String, IElementType> typeMap = new LinkedHashMap<>();
+
 		// Numbers
-		if (this._tryMatch(LexerPatterns.BASED_NUMBER) || this._tryMatch(LexerPatterns.NUMBER))
-			this._tokenType = LiveScriptTypes.NUMBER;
-
+		typeMap.put(LexerPatterns.BASED_NUMBER, LiveScriptTypes.NUMBER);
+		typeMap.put(LexerPatterns.NUMBER, LiveScriptTypes.NUMBER);
 		// Booleans
-		else if (this._tryMatch(LexerPatterns.BOOLEANS))
-			this._tokenType = LiveScriptTypes.BOOLEAN;
-
+		typeMap.put(LexerPatterns.BOOLEANS, LiveScriptTypes.BOOLEAN);
 		// Empty
-		else if (this._tryMatch(LexerPatterns.EMPTY))
-			this._tokenType = LiveScriptTypes.EMPTY;
+		typeMap.put(LexerPatterns.EMPTY, LiveScriptTypes.EMPTY);
+		// Keywords
+		typeMap.put(LexerPatterns.KEYWORD, LiveScriptTypes.KEYWORD);
+		// "this"
+		typeMap.put(LexerPatterns.THIS, LiveScriptTypes.THIS);
+		// operators
+		typeMap.put(LexerPatterns.OPERATOR, LiveScriptTypes.OPERATOR);
 
-		else if (this._tryMatch(LexerPatterns.KEYWORD))
-			this._tokenType = LiveScriptTypes.KEYWORD;
+		for (Map.Entry<String, IElementType> token : typeMap.entrySet()) {
+			if (this._tryMatch(token.getKey())) {
+				this._tokenType = token.getValue();
+				return;
+			}
+		}
 	}
 
 	/**

@@ -31,4 +31,8 @@ public class LexerPatterns {
 	public static final String EMPTY = "^(?:null|void)\\b";
 
 	public static final String KEYWORD = "^(?:class|extends|if|then|else|unless|otherwise|in|of|for|to|til|by|delete|do|while|new)\\b";
+
+	public static final String THIS = "^(?:this\\b|@)";
+
+	public static final String OPERATOR = "^(?:[!~=]=|(?:or|and|&&|not|xor)\\b|\\.\\.\\.|[/\\|*+=<>\\^~:;{}()\\[\\].!?-])";
 }

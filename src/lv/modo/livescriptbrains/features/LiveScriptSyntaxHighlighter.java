@@ -34,6 +34,8 @@ public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase {
 			createTextAttributesKey("LS_IDENTIFIER", DefaultLanguageHighlighterColors.IDENTIFIER);
 	public static final TextAttributesKey KEYWORD =
 			createTextAttributesKey("LS_KEYWORD", DefaultLanguageHighlighterColors.KEYWORD);
+	public static final TextAttributesKey THIS =
+			createTextAttributesKey("LS_THIS", LiveScriptHighlighterColors.THIS);
 
 	// Custom
 
@@ -84,11 +86,15 @@ public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase {
 			if (tokenType.equals(o))
 				return getKeySetFor(KEYWORD);
 
+		// THIS
+		if (tokenType.equals(LiveScriptTypes.THIS))
+			return getKeySetFor(THIS);
+
 
 		// PREDEFINED VALUES & SYMBOLS
 		IElementType[] constants = {
 				LiveScriptTypes.BOOLEAN,
-				LiveScriptTypes.EMPTY
+				LiveScriptTypes.EMPTY,
 		};
 
 		for (IElementType o : constants)

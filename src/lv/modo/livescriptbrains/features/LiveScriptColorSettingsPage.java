@@ -22,6 +22,7 @@ public class LiveScriptColorSettingsPage implements ColorSettingsPage {
 			new AttributesDescriptor("Predefined constant", LiveScriptSyntaxHighlighter.CONSTANTS),
 			new AttributesDescriptor("Identifier", LiveScriptSyntaxHighlighter.IDENTIFIER),
 			new AttributesDescriptor("Keyword", LiveScriptSyntaxHighlighter.KEYWORD),
+			new AttributesDescriptor("'this' keyword", LiveScriptSyntaxHighlighter.THIS),
 	};
 
 	@Nullable
@@ -46,7 +47,9 @@ public class LiveScriptColorSettingsPage implements ColorSettingsPage {
 				"lines */\n" +
 				"\n" +
 				"x = true; y = off\n" +
-				"undef-var = undefined; empty-var = null; unset-var = void";
+				"undef-var = undefined; empty-var = null; unset-var = void\n" +
+				"class Klass\n" +
+				"	(@test) ->";
 	}
 
 	@Nullable
