@@ -361,7 +361,7 @@ public class LiveScriptLexer implements FlexLexer {
 	public void reset(CharSequence buf, int start, int end, int initialState) {
 		this._currentIndex = start;
 		this._textLength = end;
-		this._text = buf.toString();
+		this._text = buf.toString().substring(start, end);
 		this._stateStack = new Stack<>();
 		this._currentState = LexerStates.NORMAL;
 	}

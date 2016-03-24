@@ -26,6 +26,7 @@
         <lang.parserDefinition language="LiveScript" implementationClass="lv.modo.livescriptbrains.psi.LiveScriptParserDefinition"/>
 
         <lang.syntaxHighlighterFactory key="LiveScript" implementationClass="lv.modo.livescriptbrains.features.LiveScriptSyntaxHighlighterFactory"/>
+        <lang.commenter language="LiveScript" implementationClass="lv.modo.livescriptbrains.features.LiveScriptCommenter"/>
 
         <colorSettingsPage implementation="lv.modo.livescriptbrains.features.LiveScriptColorSettingsPage"/>
     </extensions>
