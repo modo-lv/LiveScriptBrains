@@ -3,7 +3,6 @@
 package lv.modo.livescriptbrains.psi;
 
 import com.intellij.lexer.FlexLexer;
-import com.intellij.lexer.Lexer;
 import com.intellij.psi.impl.source.tree.ElementType;
 import com.intellij.psi.tree.IElementType;
 import lv.modo.livescriptbrains.psi.lexer.LexerPatterns;
@@ -140,8 +139,16 @@ public class LiveScriptLexer implements FlexLexer {
 
 		LinkedList<Runnable> methods = new LinkedList<>();
 
-		methods.add(this::_tryPlainStrings);
+		// Here we add all the token matching methods to be run through.
+		// Each method tries to detect if there is a token at the start of the text (which gets cut when
+		// a token is found, so the start of the text is the index just after the last token).
+		// If a token is detected, this._tokenType is set which breaks the loop and stops
+		// further checking.
+		methods.add(this::_tryExitInterpolation);
+		methods.add(this::_trySimpleValues);
 		methods.add(this::_tryFullString);
+		methods.add(this::_tryComments);
+		methods.add(this::_tryPlainStrings);
 		methods.add(this::_tryId);
 
 		while (this._tokenType == null && !methods.isEmpty()) {
@@ -160,6 +167,7 @@ public class LiveScriptLexer implements FlexLexer {
 				this._tokenLength = this._matcher.end();
 		}
 
+		// Set the token positions and move the current index just after it.
 		this._tokenStartIndex = this._currentIndex;
 		this._tokenEndIndex = this._tokenStartIndex + this._tokenLength;
 		this._currentIndex = this._tokenEndIndex;
@@ -169,20 +177,69 @@ public class LiveScriptLexer implements FlexLexer {
 		return this._tokenType;
 	}
 
+	/**
+	 * Try a whole range of simple values - numbers, keywords
+	 */
+	private void _trySimpleValues() {
+		if (!this._isNormalState())
+			return;
+
+		// Numbers
+		if (this._tryMatch(LexerPatterns.BASED_NUMBER) || this._tryMatch(LexerPatterns.NUMBER))
+			this._tokenType = LiveScriptTypes.NUMBER;
+
+		// Booleans
+		else if (this._tryMatch(LexerPatterns.BOOLEANS))
+			this._tokenType = LiveScriptTypes.BOOLEAN;
+
+		// Empty
+		else if (this._tryMatch(LexerPatterns.EMPTY))
+			this._tokenType = LiveScriptTypes.EMPTY;
+
+		else if (this._tryMatch(LexerPatterns.KEYWORD))
+			this._tokenType = LiveScriptTypes.KEYWORD;
+	}
+
+	/**
+	 * When inside the interpolation part of a string, check for when it's closed.
+	 */
+	private void _tryExitInterpolation() {
+		if (this._stateIsOneOf(LexerStates.INTERPOLATED) && this._tryMatch("^}")) {
+			this._exitState();
+		}
+	}
+
+	/**
+	 * Match comment tokens.
+	 */
+	private void _tryComments() {
+		if (!this._isNormalState())
+			return;
+
+		if (this._tryMatch("^/\\*.*?\\*/", Pattern.DOTALL))
+			this._tokenType = LiveScriptTypes.COMMENT_BLOCK;
+		else if (this._tryMatch("^#.*"))
+			this._tokenType = LiveScriptTypes.COMMENT_LINE;
+	}
+
+	private boolean _isNormalState() {
+		return this._stateIsOneOf(LexerStates.NORMAL, LexerStates.INTERPOLATED);
+	}
+
 	private void _tryFullString() {
 		boolean justStarted = false;
 
 		// If we are already going through a string, we can't start another.
-		if (!this._stateIsOneOf(LexerStates.STATE_STRING, LexerStates.STATE_STRING_MULTILINE)) {
+		if (!this._stateIsOneOf(LexerStates.STRING, LexerStates.STRING_MULTILINE)) {
 			if (this._text.charAt(0) == '"') {
 				justStarted = true;
 				// We must find out if it's a single double-quote or a triple double-quote
-				this._enterState(this._tryMatch("^\"{3}") ? LexerStates.STATE_STRING_MULTILINE : LexerStates.STATE_STRING);
+				this._enterState(this._tryMatch("^\"{3}") ? LexerStates.STRING_MULTILINE : LexerStates.STRING);
 			}
 		}
 
 		// At this point we must be inside a string.
-		if (!this._stateIsOneOf(LexerStates.STATE_STRING, LexerStates.STATE_STRING_MULTILINE))
+		if (!this._stateIsOneOf(LexerStates.STRING, LexerStates.STRING_MULTILINE))
 			return;
 
 		// Since we are already in the string state, we know the token type will be string,
@@ -190,18 +247,17 @@ public class LiveScriptLexer implements FlexLexer {
 		this._tokenType = LiveScriptTypes.STRING;
 
 		// Set up variables and initial values.
-		boolean triple = this.yystate() == LexerStates.STATE_STRING_MULTILINE;
+		boolean triple = this.yystate() == LexerStates.STRING_MULTILINE;
 		String boundary = triple ? "\"{3}" : "\"";
-		int flags = triple ? Pattern.DOTALL : 0;
-		int offset = justStarted ? boundary.length() : 0;
+		int offset = justStarted ? (triple ? 3 : 1) : 0;
 		this._tokenLength = offset;
 
 		// We need to match the string up to the end or the first possible interpolation point.
 		do {
-			if (!this._tryMatch(".*?(#|" + boundary + ")", flags, offset)) {
+			if (!this._tryMatch(".*?(#|" + boundary + ")", Pattern.DOTALL, offset)) {
 				// If we didn't match this, it means it's a broken (unfinished) string so we must
 				// match to the end of the line or file, and return that as a broken string.
-				this._tryMatch("^.+", flags);
+				this._tryMatch("^.+", Pattern.DOTALL);
 				this._tokenType = LiveScriptTypes.STRING_BROKEN;
 				this._exitState();
 				return;
@@ -217,9 +273,9 @@ public class LiveScriptLexer implements FlexLexer {
 				// Here we must figure out if we have an interpolation on our hands or not.
 				if (this._text.charAt(offset) == '{') {
 					this._tokenLength++;
-					this._enterState(LexerStates.STATE_INTERPOLATED);
+					this._enterState(LexerStates.INTERPOLATED);
 				} else if (this._tryMatch(LexerPatterns.ID, 0, offset)) {
-					this._enterState(LexerStates.STATE_INTERPOLATED_VARIABLE);
+					this._enterState(LexerStates.INTERPOLATED_VARIABLE);
 				}
 
 				// If none of the previous match, we do nothing.
@@ -228,22 +284,21 @@ public class LiveScriptLexer implements FlexLexer {
 				// End of string reached.
 				this._exitState();
 			}
-		} while (this._stateIsOneOf(LexerStates.STATE_STRING, LexerStates.STATE_STRING_MULTILINE));
+		} while (this._stateIsOneOf(LexerStates.STRING, LexerStates.STRING_MULTILINE));
 	}
 
 	private void _tryId() {
-		if (!this._stateIsOneOf(LexerStates.STATE_NORMAL, LexerStates.STATE_INTERPOLATED, LexerStates.STATE_INTERPOLATED_VARIABLE))
+		if (!this._stateIsOneOf(LexerStates.NORMAL, LexerStates.INTERPOLATED, LexerStates.INTERPOLATED_VARIABLE))
 			return;
 
 		if (this._tryMatch("^" + LexerPatterns.ID)) {
 			this._tokenType = LiveScriptTypes.IDENTIFIER;
-			if (this.yystate() == LexerStates.STATE_INTERPOLATED_VARIABLE)
+			if (this.yystate() == LexerStates.INTERPOLATED_VARIABLE)
 				this._exitState();
 		}
 	}
 
 	/**
-	 *
 	 * @param states
 	 * @return
 	 */
@@ -258,7 +313,9 @@ public class LiveScriptLexer implements FlexLexer {
 	 * Matches simple single-quoted strings.
 	 */
 	private void _tryPlainStrings() {
-		if (this._tryMatch("^'{3}.*?'{3}", Pattern.DOTALL) || this._tryMatch("^'(?:\\\\'|.)*?'"))
+		if (this._tryMatch(LexerPatterns.BACKSTRING)
+				|| this._tryMatch("^'{3}.*?'{3}", Pattern.DOTALL)
+				|| this._tryMatch("^'(?:\\\\'|.)*?'", Pattern.DOTALL))
 			this._tokenType = LiveScriptTypes.STRING;
 	}
 
@@ -296,17 +353,17 @@ public class LiveScriptLexer implements FlexLexer {
 		this._textLength = end;
 		this._text = buf.toString();
 		this._stateStack = new Stack<>();
-		this._currentState = LexerStates.STATE_NORMAL;
+		this._currentState = LexerStates.NORMAL;
 	}
 
 
 	/**
-	 * Go back to the previous lexer state (or {@link lv.modo.livescriptbrains.psi.lexer.LexerStates#STATE_NORMAL} if
+	 * Go back to the previous lexer state (or {@link lv.modo.livescriptbrains.psi.lexer.LexerStates#NORMAL} if
 	 * there is no previous state.
 	 */
 	private void _exitState() {
 		if (this._stateStack.empty()) {
-			this._currentState = LexerStates.STATE_NORMAL;
+			this._currentState = LexerStates.NORMAL;
 			return;
 		}
 		this._currentState = this._stateStack.pop();
