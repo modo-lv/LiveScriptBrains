@@ -396,7 +396,7 @@ public class LiveScriptLexer implements FlexLexer {
 		this._textLength = end;
 		this._text = buf.toString().substring(start, end);
 		this._stateStack = new Stack<>();
-		this._currentState = LexerStates.NORMAL;
+		this._currentState = initialState;
 	}
 
 

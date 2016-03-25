@@ -33,7 +33,7 @@ public class LexerPatterns {
 	/**
 	 * All keywords. Will be split into separate tokens as needed.
 	 */
-	public static final String KEYWORD = "^(?:class|extends|if|then|else|unless|otherwise|in|of|for|to|til|by|delete|do|while|new)\\b";
+	public static final String KEYWORD = "^(?:class|extends|if|then|else|unless|otherwise|in|of|for|from|to|til|by|delete|do|while|new)\\b";
 
 	/**
 	 * The "this." token.
