@@ -22,4 +22,9 @@ public class LexerStates {
 	 * Lexer is inside a simple interpolation, e.g. "some #variable inserted"
 	 */
 	public static final int INTERPOLATED_VARIABLE = 5;
+
+	/**
+	 * Lexer has encountered a dot.
+	 */
+	public static final int DOT = 6;
 }

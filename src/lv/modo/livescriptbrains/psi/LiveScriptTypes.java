@@ -4,6 +4,8 @@ import com.intellij.psi.tree.IElementType;
 
 public class LiveScriptTypes {
 	public static final IElementType DEDENT = new LiveScriptElementType("DEDENT");
+	public static final IElementType WHITESPACE = new LiveScriptElementType("WHITESPACE");
+
 	/**
 	 * Parser types
 	 */

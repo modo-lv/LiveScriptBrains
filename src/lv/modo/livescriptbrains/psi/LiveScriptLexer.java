@@ -3,7 +3,6 @@
 package lv.modo.livescriptbrains.psi;
 
 import com.intellij.lexer.FlexLexer;
-import com.intellij.psi.impl.source.tree.ElementType;
 import com.intellij.psi.tree.IElementType;
 import lv.modo.livescriptbrains.psi.lexer.LexerPatterns;
 import lv.modo.livescriptbrains.psi.lexer.LexerStates;
@@ -74,7 +73,6 @@ public class LiveScriptLexer implements FlexLexer {
 	 * Text that we're processing.
 	 */
 	private String _text;
-
 
 	/**
 	 * How many characters the current token consists of.
@@ -152,10 +150,20 @@ public class LiveScriptLexer implements FlexLexer {
 		methods.add(this::_tryFullString);
 		methods.add(this::_tryPlainStrings);
 		methods.add(this::_tryId);
+		methods.add(this::_tryWhitespace);
+		methods.add(this::_tryDot);
 
 		while (this._tokenType == null && !methods.isEmpty()) {
 			Runnable method = methods.removeFirst();
 			method.run();
+
+			if (this.yystate() == LexerStates.DOT
+					&& this._tokenType != null
+					&& this._tokenType != LiveScriptTypes.DOT
+					&& this._tokenType != LiveScriptTypes.WHITESPACE)
+			{
+				this._exitState();
+			}
 		}
 
 
@@ -180,6 +188,28 @@ public class LiveScriptLexer implements FlexLexer {
 	}
 
 	/**
+	 * Dot is a special case because if it precedes a keyword, that keyword is interpreted as
+	 * an object member instead. So we must mark
+	 */
+	private void _tryDot() {
+		if (!this._isNormalState())
+			return;
+
+		if (this._tryMatch(LexerPatterns.DOT)) {
+			this._tokenType = LiveScriptTypes.DOT;
+			this._enterState(LexerStates.DOT);
+		}
+	}
+
+	private void _tryWhitespace() {
+		if (!this._isNormalState())
+			return;
+
+		if (this._tryMatch(LexerPatterns.WHITESPACE))
+			this._tokenType = LiveScriptTypes.WHITESPACE;
+	}
+
+	/**
 	 * Try a whole range of simple values - numbers, keywords
 	 */
 	private void _trySimpleValues() {
@@ -193,14 +223,17 @@ public class LiveScriptLexer implements FlexLexer {
 		typeMap.put(LexerPatterns.NUMBER, LiveScriptTypes.NUMBER);
 		// Booleans
 		typeMap.put(LexerPatterns.BOOLEANS, LiveScriptTypes.BOOLEAN);
-		// Empty
-		typeMap.put(LexerPatterns.EMPTY, LiveScriptTypes.EMPTY);
-		// Keywords
-		typeMap.put(LexerPatterns.KEYWORD, LiveScriptTypes.KEYWORD);
-		// "this"
-		typeMap.put(LexerPatterns.THIS, LiveScriptTypes.THIS);
 		// operators
 		typeMap.put(LexerPatterns.OPERATOR, LiveScriptTypes.OPERATOR);
+		if (this.yystate() != LexerStates.DOT) {
+			// Empty
+			typeMap.put(LexerPatterns.EMPTY, LiveScriptTypes.EMPTY);
+			// Keywords
+			typeMap.put(LexerPatterns.KEYWORD, LiveScriptTypes.KEYWORD);
+			// "this"
+			typeMap.put(LexerPatterns.THIS, LiveScriptTypes.THIS);
+		}
+
 
 		for (Map.Entry<String, IElementType> token : typeMap.entrySet()) {
 			if (this._tryMatch(token.getKey())) {

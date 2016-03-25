@@ -43,5 +43,9 @@ public class LexerPatterns {
 	/**
 	 * All operators.
 	 */
-	public static final String OPERATOR = "^(?:[!~=]=|(?:or|and|&&|not|xor)\\b|\\.\\.\\.|[/\\|*+=<>\\^~:;{}()\\[\\].!?-])";
+	public static final String OPERATOR = "^(?:[!~=]=|(?:or|and|&&|not|xor)\\b|\\.\\.\\.|[/\\|*+=<>\\^~:;{}()\\[\\]!?-])";
+
+	public static final String WHITESPACE = "^\\s+";
+
+	public static final String DOT = "^\\.";
 }
