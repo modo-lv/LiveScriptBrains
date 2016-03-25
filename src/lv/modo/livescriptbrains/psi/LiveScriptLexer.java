@@ -266,7 +266,7 @@ public class LiveScriptLexer implements FlexLexer {
 	}
 
 	private boolean _isNormalState() {
-		return this._stateIsOneOf(LexerStates.NORMAL, LexerStates.INTERPOLATED);
+		return this._stateIsOneOf(LexerStates.NORMAL, LexerStates.INTERPOLATED, LexerStates.DOT);
 	}
 
 	private void _tryFullString() {
@@ -331,7 +331,7 @@ public class LiveScriptLexer implements FlexLexer {
 	}
 
 	private void _tryId() {
-		if (!this._stateIsOneOf(LexerStates.NORMAL, LexerStates.INTERPOLATED, LexerStates.INTERPOLATED_VARIABLE))
+		if (!this._isNormalState() && !this._stateIsOneOf(LexerStates.INTERPOLATED, LexerStates.INTERPOLATED_VARIABLE))
 			return;
 
 		if (this._tryMatch("^" + LexerPatterns.ID)) {
