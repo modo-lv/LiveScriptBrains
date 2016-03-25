@@ -111,7 +111,7 @@ public class LiveScriptLexer implements FlexLexer {
 
 
 	public LiveScriptLexer() {
-		this._stateStack = new Stack<Integer>();
+		this._stateStack = new Stack<>();
 	}
 
 	/**
@@ -161,7 +161,7 @@ public class LiveScriptLexer implements FlexLexer {
 
 		// If we haven't matched anything, mark the character as unknown/error.
 		if (this._tokenType == null) {
-			this._tokenType = ElementType.BAD_CHARACTER;
+			this._tokenType = LiveScriptTypes.BAD_CHAR;
 			this._tokenLength = 1;
 		} else {
 			// If we did match

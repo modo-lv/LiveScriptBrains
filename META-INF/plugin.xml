@@ -1,46 +1,49 @@
 <idea-plugin version="2">
-    <id>lv.modo.livescriptbrains</id>
-    <name>LiveScriptBrains</name>
-    <version>0.0.1c</version>
-    <vendor email="modo@modo.lv" url="http://modo.lv">Martins "@modo_lv" Osis</vendor>
+	<id>lv.modo.livescriptbrains</id>
+	<name>LiveScriptBrains</name>
+	<version>0.0.1d</version>
+	<vendor email="modo@modo.lv" url="http://modo.lv">Martins "@modo_lv" Osis</vendor>
 
-    <description><![CDATA[
-      Plugin for supporting LiveScript in JetBrains IDEs.
-    ]]></description>
+	<description><![CDATA[Plugin for supporting LiveScript in JetBrains IDEs.]]></description>
 
-    <change-notes><![CDATA[
+	<change-notes><![CDATA[]]></change-notes>
 
-    ]]>
-    </change-notes>
+	<!-- please see http://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges for description -->
+	<idea-version since-build="131"/>
 
-    <!-- please see http://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges for description -->
-    <idea-version since-build="131"/>
+	<!-- please see http://confluence.jetbrains.com/display/IDEADEV/Plugin+Compatibility+with+IntelliJ+Platform+Products
+			 on how to target different products -->
+	<depends>com.intellij.modules.lang</depends>
 
-    <!-- please see http://confluence.jetbrains.com/display/IDEADEV/Plugin+Compatibility+with+IntelliJ+Platform+Products
-         on how to target different products -->
-    <depends>com.intellij.modules.lang</depends>
+	<extensions defaultExtensionNs="com.intellij">
+		<!-- Add your extensions here -->
+		<fileTypeFactory implementation="lv.modo.livescriptbrains.LiveScriptFileTypeFactory"/>
 
-    <extensions defaultExtensionNs="com.intellij">
-        <!-- Add your extensions here -->
-        <fileTypeFactory implementation="lv.modo.livescriptbrains.LiveScriptFileTypeFactory"/>
-        <lang.parserDefinition language="LiveScript" implementationClass="lv.modo.livescriptbrains.psi.LiveScriptParserDefinition"/>
+		<lang.parserDefinition
+			language="LiveScript"
+			implementationClass="lv.modo.livescriptbrains.psi.LiveScriptParserDefinition"/>
 
-        <lang.syntaxHighlighterFactory key="LiveScript" implementationClass="lv.modo.livescriptbrains.features.LiveScriptSyntaxHighlighterFactory"/>
-        <lang.commenter language="LiveScript" implementationClass="lv.modo.livescriptbrains.features.LiveScriptCommenter"/>
+		<lang.syntaxHighlighterFactory
+			language="LiveScript"
+			implementationClass="lv.modo.livescriptbrains.features.LiveScriptSyntaxHighlighterFactory"/>
 
-        <colorSettingsPage implementation="lv.modo.livescriptbrains.features.LiveScriptColorSettingsPage"/>
-    </extensions>
+		<lang.commenter
+			language="LiveScript"
+			implementationClass="lv.modo.livescriptbrains.features.LiveScriptCommenter"/>
 
-    <application-components>
-        <!-- Add your application components here -->
-    </application-components>
+		<colorSettingsPage implementation="lv.modo.livescriptbrains.features.LiveScriptColorSettingsPage"/>
+	</extensions>
 
-    <project-components>
-        <!-- Add your project components here -->
-    </project-components>
+	<application-components>
+		<!-- Add your application components here -->
+	</application-components>
 
-    <actions>
-        <!-- Add your actions here -->
-    </actions>
+	<project-components>
+		<!-- Add your project components here -->
+	</project-components>
+
+	<actions>
+		<!-- Add your actions here -->
+	</actions>
 
 </idea-plugin>

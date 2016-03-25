@@ -44,6 +44,7 @@ public class LiveScriptTypes {
 	public static IElementType ASSIGN = new LiveScriptElementType("ASSIGN");
 	public static IElementType BANG = new LiveScriptElementType("BANG");
 	public static IElementType BOOLEAN = new LiveScriptElementType("BOOLEAN");
+	public static IElementType BAD_CHAR = new LiveScriptElementType("BAD_CHAR");
 	public static IElementType CLASS = new LiveScriptElementType("CLASS");
 	public static IElementType COLON = new LiveScriptElementType("COLON");
 	public static IElementType COMMA = new LiveScriptElementType("COMMA");

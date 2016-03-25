@@ -4,7 +4,7 @@ public class LexerPatterns {
 	/**
 	 * A name of a variable, class, method or any other symbol.
 	 */
-	public static final String ID = "\\p{IsAlphabetic}[\\p{IsAlphabetic}\\p{IsDigit}_-]*";
+	public static final String ID = "[\\p{IsAlphabetic}$_][\\p{IsAlphabetic}\\p{IsDigit}_-]*";
 
 	/**
 	 * Normal numbers.
@@ -30,9 +30,18 @@ public class LexerPatterns {
 	 */
 	public static final String EMPTY = "^(?:null|void)\\b";
 
+	/**
+	 * All keywords. Will be split into separate tokens as needed.
+	 */
 	public static final String KEYWORD = "^(?:class|extends|if|then|else|unless|otherwise|in|of|for|to|til|by|delete|do|while|new)\\b";
 
+	/**
+	 * The "this." token.
+	 */
 	public static final String THIS = "^(?:this\\b|@)";
 
+	/**
+	 * All operators.
+	 */
 	public static final String OPERATOR = "^(?:[!~=]=|(?:or|and|&&|not|xor)\\b|\\.\\.\\.|[/\\|*+=<>\\^~:;{}()\\[\\].!?-])";
 }
