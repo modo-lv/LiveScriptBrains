@@ -161,6 +161,7 @@ public class LiveScriptLexer implements FlexLexer
 		methods.add(this::_tryId);
 		methods.add(this::_tryWhitespace);
 		methods.add(this::_tryDot);
+		methods.add(this::_tryOperators);
 
 		while (this._tokenType == null && !methods.isEmpty())
 		{
@@ -198,6 +199,18 @@ public class LiveScriptLexer implements FlexLexer
 			this._text = this._text.substring(this._tokenLength);
 
 		return this._tokenType;
+	}
+
+	/**
+	 * Tries to match simple operators.
+	 */
+	private void _tryOperators()
+	{
+		switch (this._text.charAt(0)) {
+			case '+' : this._tokenType = LexerTokens.PLUS; break;
+		}
+		if (this._tokenType != null)
+			this._tokenLength = 1;
 	}
 
 	/**

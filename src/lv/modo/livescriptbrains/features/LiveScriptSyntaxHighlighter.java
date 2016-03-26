@@ -15,52 +15,52 @@ import java.util.Map;
 
 import static com.intellij.openapi.editor.colors.TextAttributesKey.createTextAttributesKey;
 
-public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase {
+public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase
+{
 	// Inherited
 	public static final TextAttributesKey STRING =
-			createTextAttributesKey("LS_STRING", DefaultLanguageHighlighterColors.STRING);
+		createTextAttributesKey("LS_STRING", DefaultLanguageHighlighterColors.STRING);
 	public static final TextAttributesKey NUMBER =
-			createTextAttributesKey("LS_NUMBER", DefaultLanguageHighlighterColors.NUMBER);
+		createTextAttributesKey("LS_NUMBER", DefaultLanguageHighlighterColors.NUMBER);
 	public static final TextAttributesKey COMMENT_LINE =
-			createTextAttributesKey("LS_COMMENT_LINE", DefaultLanguageHighlighterColors.LINE_COMMENT);
+		createTextAttributesKey("LS_COMMENT_LINE", DefaultLanguageHighlighterColors.LINE_COMMENT);
 	public static final TextAttributesKey COMMENT_BLOCK =
-			createTextAttributesKey("LS_COMMENT_BLOCK", DefaultLanguageHighlighterColors.BLOCK_COMMENT);
+		createTextAttributesKey("LS_COMMENT_BLOCK", DefaultLanguageHighlighterColors.BLOCK_COMMENT);
 	public static final TextAttributesKey OPERATOR =
-			createTextAttributesKey("LS_OPERATOR", DefaultLanguageHighlighterColors.OPERATION_SIGN);
+		createTextAttributesKey("LS_OPERATOR", DefaultLanguageHighlighterColors.OPERATION_SIGN);
 	public static final TextAttributesKey CONSTANTS =
-			createTextAttributesKey("LS_CONSTANT", DefaultLanguageHighlighterColors.CONSTANT);
+		createTextAttributesKey("LS_CONSTANT", DefaultLanguageHighlighterColors.CONSTANT);
 	public static final TextAttributesKey IDENTIFIER =
-			createTextAttributesKey("LS_IDENTIFIER", DefaultLanguageHighlighterColors.IDENTIFIER);
+		createTextAttributesKey("LS_IDENTIFIER", DefaultLanguageHighlighterColors.IDENTIFIER);
 	public static final TextAttributesKey KEYWORD =
-			createTextAttributesKey("LS_KEYWORD", DefaultLanguageHighlighterColors.KEYWORD);
+		createTextAttributesKey("LS_KEYWORD", DefaultLanguageHighlighterColors.KEYWORD);
 	public static final TextAttributesKey THIS =
-			createTextAttributesKey("LS_THIS", LiveScriptHighlighterColors.THIS);
+		createTextAttributesKey("LS_THIS", LiveScriptHighlighterColors.THIS);
 
 	// Custom
 
 
-
-
 	@NotNull
 	@Override
-	public Lexer getHighlightingLexer() {
+	public Lexer getHighlightingLexer()
+	{
 		return new FlexAdapter(new LiveScriptLexer());
 	}
 
-	private TextAttributesKey[] getKeySetFor(TextAttributesKey taKey) {
-		return new TextAttributesKey[] {taKey};
+	private TextAttributesKey[] getKeySetFor(TextAttributesKey taKey)
+	{
+		return new TextAttributesKey[]{taKey};
 	}
 
 	@NotNull
 	@Override
-	public TextAttributesKey[] getTokenHighlights(IElementType tokenType) {
+	public TextAttributesKey[] getTokenHighlights(IElementType tokenType)
+	{
 		IElementType[] strings = {
 			LexerTokens.STRING,
-/*
-			LexerTokens.ISTRING,
 			LexerTokens.STRING_START,
-			LexerTokens.STRING_END
-*/
+			LexerTokens.STRING_END,
+			LexerTokens.STRING_LITERAL
 		};
 
 		for (IElementType i : strings)
@@ -79,8 +79,8 @@ public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase {
 
 		// KEYWORDS
 		IElementType[] keywords = {
-				LexerTokens.CLASS,
-				//LexerTokens.KEYWORD
+			LexerTokens.CLASS,
+			//LexerTokens.KEYWORD
 		};
 
 		for (IElementType o : keywords)
@@ -94,8 +94,8 @@ public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase {
 
 		// PREDEFINED VALUES & SYMBOLS
 		IElementType[] constants = {
-				LexerTokens.BOOLEAN,
-				//LexerTokens.EMPTY,
+			LexerTokens.BOOLEAN,
+			//LexerTokens.EMPTY,
 		};
 
 		for (IElementType o : constants)
@@ -104,13 +104,17 @@ public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase {
 
 		// OPERATORS
 		IElementType[] operators = {
+			LexerTokens.INTERPOLATED_VAR_START,
+			LexerTokens.INTERPOLATION_START,
+			LexerTokens.INTERPOLATION_END,
+
 /*
 				LexerTokens.ASSIGN,
 				LexerTokens.BANG,
 */
-				LexerTokens.COLON,
-				LexerTokens.COMMA,
-				LexerTokens.DOT,
+			LexerTokens.COLON,
+			LexerTokens.COMMA,
+			LexerTokens.DOT,
 /*
 				LexerTokens.LIST_START,
 				LexerTokens.LIST_END,
@@ -121,8 +125,8 @@ public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase {
 				LexerTokens.PAREN_L,
 				LexerTokens.PAREN_R,
 */
-				LexerTokens.PLUS,
-				LexerTokens.SEMICOLON,
+			LexerTokens.PLUS,
+			LexerTokens.SEMICOLON,
 /*
 				LexerTokens.YADA,
 				LexerTokens.MISC_OP,

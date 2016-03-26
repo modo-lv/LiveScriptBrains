@@ -48,4 +48,6 @@ public class LexerPatterns {
 	public static final String WHITESPACE = "^\\s+";
 
 	public static final String DOT = "^\\.";
+
+	public static final String PLUS = "^\\+";
 }
