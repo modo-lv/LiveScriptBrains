@@ -159,6 +159,7 @@ public class LiveScriptLexer implements FlexLexer
 		methods.add(this::_tryPlainStrings);
 		methods.add(this::_tryFullString);
 		methods.add(this::_tryKeywords);
+
 		methods.add(this::_tryId);
 		methods.add(this::_tryWhitespace);
 		methods.add(this::_tryDot);
@@ -243,7 +244,8 @@ public class LiveScriptLexer implements FlexLexer
 	 */
 	private void _tryOperators()
 	{
-		LinkedHashMap<String, IElementType> typeMap = new LinkedHashMap<String, IElementType>() {{
+		LinkedHashMap<String, IElementType> typeMap = new LinkedHashMap<String, IElementType>()
+		{{
 			put("===", LexerTokens.EQ_EQ_EQ);
 			put("!==", LexerTokens.NOT_EQ_EQ);
 			put("++", LexerTokens.PLUS_PLUS);
@@ -271,7 +273,8 @@ public class LiveScriptLexer implements FlexLexer
 			put("%", LexerTokens.PERC);
 		}};
 
-		for (Map.Entry<String, IElementType> entry : typeMap.entrySet()) {
+		for (Map.Entry<String, IElementType> entry : typeMap.entrySet())
+		{
 			String key = entry.getKey();
 			if (this._text.length() >= key.length() && this._text.substring(0, key.length()).equals(key))
 			{
@@ -370,21 +373,22 @@ public class LiveScriptLexer implements FlexLexer
 			this._tokenType = LexerTokens.COMMENT_LINE;
 	}
 
-	private boolean _isNormalState()
-	{
-		return this._stateIsOneOf(LexerState.NORMAL, LexerState.INTERPOLATED, LexerState.DOT);
-	}
-
 	private void _tryFullString()
 	{
-		String suffix = this._stateIs(LexerState.HEREDOC) ? "\"{3}" : "\"";
+		String suffix;
+		if (this._stateIs(LexerState.HEREDOC))
+			suffix = "\"{3}";
+		else if (this._stateIs(LexerState.REGEX))
+			suffix = "//[gmi]{0,3}";
+		else
+			suffix = "\"";
 
-		// First we check if we are inside a string, in which case everything up to interpolation /
-		// end of string is a string.
+		// First we check if we are inside a string/regex, in which case everything up to
+		// interpolation / end of string is a string.
 		if (this._stateIsOneOf(LexerStateSet.STRINGS))
 		{
 			// Check if we're at an interpolation point
-			if (this._tryMatch("^(#\\{|#)"))
+			if (this._tryMatch("^(#\\{|#[^ ])"))
 			{
 				if (this._matcher.group(1).equals("#{"))
 				{
@@ -395,19 +399,22 @@ public class LiveScriptLexer implements FlexLexer
 				{
 					this._enterState(LexerState.INTERPOLATED_VAR);
 					this._tokenType = LexerTokens.INTERPOLATED_VAR_START;
+					// We need to move back 1 char to only include the "#" in the token.
+					this._tokenLength = this._matcher.end() - 1;
 				}
 				return;
 			}
 
 			this._tokenType = LexerTokens.STRING;
 
+
 			// Match until end or interpolation.
-			if (this._tryMatch("^(?:\\\\\"|\\\\#|[^\"])*?(#\\{|#)", Pattern.DOTALL))
+			if (this._tryMatch("^(?:\\\\\"|\\\\/|\\\\#|[^\"])*?(#\\{|# |#)", Pattern.DOTALL))
 			{
 				this._tokenLength = this._matcher.end() - this._matcher.group(1).length();
 				return;
 			}
-			if (this._tryMatch("^(?:\\\\\"|\\\\#|[^#])*?(" + suffix + ")", Pattern.DOTALL))
+			if (this._tryMatch("^(?:\\\\\"|\\\\/|\\\\#|[^#])*?(" + suffix + ")", Pattern.DOTALL))
 			{
 				this._tokenLength = this._matcher.end() - this._matcher.group(1).length();
 			}
@@ -419,17 +426,27 @@ public class LiveScriptLexer implements FlexLexer
 		{
 			if (this._tryMatch("^" + suffix))
 			{
-				this._tokenType = LexerTokens.STRING_END;
+				this._tokenType = suffix.startsWith("//")
+					? LexerTokens.REGEX_END
+					: LexerTokens.STRING_END;
 				this._exitState();
 			}
 		}
-		else if (this._tryMatch("^(\"{3}|\")"))
+		else if (this._tryMatch("^(\"{3}|\"|//)"))
 		{
-			this._tokenType = LexerTokens.STRING_START;
-			this._enterState(
-				this._matcher.group(1).equals("\"")
-					? LexerState.STRING
-					: LexerState.HEREDOC);
+			if (this._matcher.group(1).equals("//"))
+			{
+				this._enterState(LexerState.REGEX);
+				this._tokenType = LexerTokens.REGEX_START;
+			}
+			else
+			{
+				this._tokenType = LexerTokens.STRING_START;
+				this._enterState(
+					this._matcher.group(1).equals("\"")
+						? LexerState.STRING
+						: LexerState.HEREDOC);
+			}
 		}
 
 
@@ -506,6 +523,11 @@ public class LiveScriptLexer implements FlexLexer
 			if (this.yystate() == LexerState.INTERPOLATED_VAR)
 				this._exitState();
 		}
+	}
+
+	private boolean _isNormalState()
+	{
+		return this._stateIsOneOf(LexerState.NORMAL, LexerState.INTERPOLATED, LexerState.DOT);
 	}
 
 	/**
