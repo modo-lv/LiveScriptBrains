@@ -1,8 +1,6 @@
-package lv.modo.livescriptbrains.psi;
+package lv.modo.livescriptbrains.lexer;
 
 import com.intellij.lexer.FlexAdapter;
-
-import java.io.Reader;
 
 public class LiveScriptLexerAdapter extends FlexAdapter {
     public LiveScriptLexerAdapter() {

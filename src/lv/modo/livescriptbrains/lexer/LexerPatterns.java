@@ -1,4 +1,4 @@
-package lv.modo.livescriptbrains.psi.lexer;
+package lv.modo.livescriptbrains.lexer;
 
 public class LexerPatterns {
 	/**

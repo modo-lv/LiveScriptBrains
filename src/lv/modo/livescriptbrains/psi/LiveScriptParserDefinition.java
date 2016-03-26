@@ -15,14 +15,13 @@ import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IFileElementType;
 import com.intellij.psi.tree.TokenSet;
 import lv.modo.livescriptbrains.LiveScriptLanguage;
-import lv.modo.livescriptbrains.psi.LiveScriptLexer;
+import lv.modo.livescriptbrains.lexer.LexerTokens;
+import lv.modo.livescriptbrains.lexer.LiveScriptLexer;
 import org.jetbrains.annotations.NotNull;
-
-import java.io.Reader;
 
 public class LiveScriptParserDefinition implements ParserDefinition{
     public static final TokenSet WHITE_SPACES = TokenSet.create(TokenType.WHITE_SPACE);
-    public static final TokenSet COMMENTS = TokenSet.create(LiveScriptTypes.COMMENT_LINE, LiveScriptTypes.COMMENT_BLOCK);
+    public static final TokenSet COMMENTS = TokenSet.create(LexerTokens.COMMENT_LINE, LexerTokens.COMMENT_BLOCK);
 	public static LiveScriptParserDefinition INSTANCE;
 
     public static final IFileElementType FILE = new IFileElementType(Language.<LiveScriptLanguage>findInstance(LiveScriptLanguage.class));

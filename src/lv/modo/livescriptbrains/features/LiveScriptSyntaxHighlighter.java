@@ -6,11 +6,10 @@ import com.intellij.openapi.editor.DefaultLanguageHighlighterColors;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase;
 import com.intellij.psi.tree.IElementType;
-import lv.modo.livescriptbrains.psi.LiveScriptLexer;
-import lv.modo.livescriptbrains.psi.LiveScriptTypes;
+import lv.modo.livescriptbrains.lexer.LexerTokens;
+import lv.modo.livescriptbrains.lexer.LiveScriptLexer;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,10 +55,12 @@ public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase {
 	@Override
 	public TextAttributesKey[] getTokenHighlights(IElementType tokenType) {
 		IElementType[] strings = {
-			LiveScriptTypes.STRING,
-			LiveScriptTypes.ISTRING,
-			LiveScriptTypes.STRING_START,
-			LiveScriptTypes.STRING_END
+			LexerTokens.STRING,
+/*
+			LexerTokens.ISTRING,
+			LexerTokens.STRING_START,
+			LexerTokens.STRING_END
+*/
 		};
 
 		for (IElementType i : strings)
@@ -67,10 +68,10 @@ public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase {
 				return getKeySetFor(STRING);
 
 		Map<IElementType, TextAttributesKey> types = new HashMap<IElementType, TextAttributesKey>();
-		types.put(LiveScriptTypes.COMMENT_LINE, COMMENT_LINE);
-		types.put(LiveScriptTypes.NUMBER, NUMBER);
-		types.put(LiveScriptTypes.COMMENT_BLOCK, COMMENT_BLOCK);
-		types.put(LiveScriptTypes.IDENTIFIER, IDENTIFIER);
+		types.put(LexerTokens.COMMENT_LINE, COMMENT_LINE);
+		types.put(LexerTokens.NUMBER, NUMBER);
+		types.put(LexerTokens.COMMENT_BLOCK, COMMENT_BLOCK);
+		types.put(LexerTokens.IDENTIFIER, IDENTIFIER);
 
 		for (IElementType e : types.keySet())
 			if (tokenType.equals(e))
@@ -78,8 +79,8 @@ public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase {
 
 		// KEYWORDS
 		IElementType[] keywords = {
-				LiveScriptTypes.CLASS,
-				LiveScriptTypes.KEYWORD
+				LexerTokens.CLASS,
+				//LexerTokens.KEYWORD
 		};
 
 		for (IElementType o : keywords)
@@ -87,14 +88,14 @@ public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase {
 				return getKeySetFor(KEYWORD);
 
 		// THIS
-		if (tokenType.equals(LiveScriptTypes.THIS))
+		if (tokenType.equals(LexerTokens.THIS))
 			return getKeySetFor(THIS);
 
 
 		// PREDEFINED VALUES & SYMBOLS
 		IElementType[] constants = {
-				LiveScriptTypes.BOOLEAN,
-				LiveScriptTypes.EMPTY,
+				LexerTokens.BOOLEAN,
+				//LexerTokens.EMPTY,
 		};
 
 		for (IElementType o : constants)
@@ -103,25 +104,31 @@ public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase {
 
 		// OPERATORS
 		IElementType[] operators = {
-				LiveScriptTypes.ASSIGN,
-				LiveScriptTypes.BANG,
-				LiveScriptTypes.COLON,
-				LiveScriptTypes.COMMA,
-				LiveScriptTypes.DOT,
-				LiveScriptTypes.LIST_START,
-				LiveScriptTypes.LIST_END,
-				LiveScriptTypes.MATH_OP,
-				LiveScriptTypes.OBJ_START,
-				LiveScriptTypes.OBJ_END,
-				LiveScriptTypes.OPERATOR,
-				LiveScriptTypes.PAREN_L,
-				LiveScriptTypes.PAREN_R,
-				LiveScriptTypes.PLUS,
-				LiveScriptTypes.SEMICOLON,
-				LiveScriptTypes.YADA,
-				LiveScriptTypes.MISC_OP,
-				LiveScriptTypes.LOGIC_OP,
-				LiveScriptTypes.Q
+/*
+				LexerTokens.ASSIGN,
+				LexerTokens.BANG,
+*/
+				LexerTokens.COLON,
+				LexerTokens.COMMA,
+				LexerTokens.DOT,
+/*
+				LexerTokens.LIST_START,
+				LexerTokens.LIST_END,
+				LexerTokens.MATH_OP,
+				LexerTokens.OBJ_START,
+				LexerTokens.OBJ_END,
+				LexerTokens.OPERATOR,
+				LexerTokens.PAREN_L,
+				LexerTokens.PAREN_R,
+*/
+				LexerTokens.PLUS,
+				LexerTokens.SEMICOLON,
+/*
+				LexerTokens.YADA,
+				LexerTokens.MISC_OP,
+				LexerTokens.LOGIC_OP,
+				LexerTokens.Q
+*/
 		};
 
 		for (IElementType o : operators)

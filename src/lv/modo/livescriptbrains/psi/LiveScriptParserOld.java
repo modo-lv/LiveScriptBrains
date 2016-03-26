@@ -1,3 +1,4 @@
+/*
 package lv.modo.livescriptbrains.psi;
 
 import com.intellij.lang.ASTNode;
@@ -5,15 +6,18 @@ import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiParser;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
+import lv.modo.livescriptbrains.lexer.LexerTokens;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
 public class LiveScriptParserOld implements PsiParser {
 
-	/**
+	*/
+/**
 	 * A tree of tokens and sub-tokens parsed from the lexer input.
-	 */
+	 *//*
+
 	public class TokenTree extends ArrayList<TreeToken> {
 		public Stack<LiveScriptParserState> StateStack = new Stack<LiveScriptParserState>();
 
@@ -21,15 +25,19 @@ public class LiveScriptParserOld implements PsiParser {
 		public Map<Integer, List<TreeToken>> ByEndIndex = new HashMap<Integer, List<TreeToken>>();
 		public List<TreeToken> InputList;
 
-		/**
+		*/
+/**
 		 * Which token we're currently parsing.
-		 */
+		 *//*
+
 		public int ParseTokenIndex;
 
-		/**
+		*/
+/**
 		 * Constructor
 		 * @param inputList List of tokens from the lexer.
-		 */
+		 *//*
+
 		public TokenTree(List<TreeToken> inputList) {
 			InputList = new ArrayList<TreeToken>();
 			InputList.addAll(inputList);
@@ -37,11 +45,13 @@ public class LiveScriptParserOld implements PsiParser {
 				this.add(t);
 		}
 
-		/**
+		*/
+/**
 		 * Add a new token to the tree.
 		 * @param token Token to add.
 		 * @return Same as List.add().
-		 */
+		 *//*
+
 		@Override
 		public boolean add(TreeToken token) {
 			ByStartIndex.putIfAbsent(token.StartPosition, new ArrayList<TreeToken>());
@@ -71,21 +81,23 @@ public class LiveScriptParserOld implements PsiParser {
 		}
 
 
-		/**
+		*/
+/**
 		 * Parse input token list and build a token tree.
 		 * @return Self for method chaining.
-		 */
+		 *//*
+
 		public TokenTree ParseAndBuild() {
 			if (this.InputList.size() > 0) {
 				// Create a default state
-				LiveScriptParserState state = new LiveScriptParserState(LiveScriptTypes.None, this.InputList);
+				LiveScriptParserState state = new LiveScriptParserState(LexerTokens.None, this.InputList);
 
 				List<TreeToken> newTokens = state.ParseInput().GiveAddedTokens();
 
 				// Implicit lists with only one element are not actually lists, so we need
 				// to remove them and only leave the element as a simple value
 				for (int a = newTokens.size()-1; a >= 0; a--) {
-					if (newTokens.get(a).Type == LiveScriptTypes.ImplicitList
+					if (newTokens.get(a).Type == LexerTokens.ImplicitList
 						&& newTokens.get(a).ElementCount < 2)
 					{
 						newTokens.remove(a);
@@ -98,11 +110,13 @@ public class LiveScriptParserOld implements PsiParser {
 			return this;
 		}
 
-		/**
+		*/
+/**
 		 * Go through the tree and set the markers on a PSI builder.
 		 * @param builder Builder to set the markers on.
 		 * @return Self for method chaining.
-		 */
+		 *//*
+
 		public TokenTree SetMarkersOn(PsiBuilder builder) {
 			while (!builder.eof()) {
 				List<TreeToken> tokens;
@@ -178,4 +192,4 @@ public class LiveScriptParserOld implements PsiParser {
 
 		return builder.getTreeBuilt();
 	}
-}
+}*/
