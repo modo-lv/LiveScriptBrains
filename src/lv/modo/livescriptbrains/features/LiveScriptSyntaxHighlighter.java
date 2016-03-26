@@ -102,6 +102,7 @@ public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase
 			LexerTokens.IF,
 			LexerTokens.THEN,
 			LexerTokens.ELSE,
+			LexerTokens.FOR,
 			LexerTokens.FROM,
 			LexerTokens.TO,
 			LexerTokens.TIL,
