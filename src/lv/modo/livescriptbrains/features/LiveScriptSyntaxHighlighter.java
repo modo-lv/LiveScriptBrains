@@ -36,8 +36,10 @@ public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase
 		createTextAttributesKey("LS_KEYWORD", DefaultLanguageHighlighterColors.KEYWORD);
 	public static final TextAttributesKey THIS =
 		createTextAttributesKey("LS_THIS", LiveScriptHighlighterColors.THIS);
-	public static final TextAttributesKey BAD_CHAR = createTextAttributesKey("LS_BAD_CHAR",
-		LiveScriptHighlighterColors.BAD_CHAR);
+	public static final TextAttributesKey BAD_CHAR =
+		createTextAttributesKey("LS_BAD_CHAR", LiveScriptHighlighterColors.BAD_CHAR);
+	public static final TextAttributesKey REGEX =
+		createTextAttributesKey("LS_REGEX", LiveScriptHighlighterColors.REGEX);
 
 	// Custom
 
@@ -72,6 +74,17 @@ public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase
 			if (tokenType.equals(i))
 				return getKeySetFor(STRING);
 
+		IElementType[] regex = {
+			LexerTokens.REGEX,
+			LexerTokens.REGEX_START,
+			LexerTokens.REGEX_END,
+			LexerTokens.REGEX_LITERAL,
+		};
+
+		for (IElementType i : regex)
+			if (tokenType.equals(i))
+				return getKeySetFor(REGEX);
+
 		Map<IElementType, TextAttributesKey> types = new HashMap<IElementType, TextAttributesKey>();
 		types.put(LexerTokens.COMMENT_LINE, COMMENT_LINE);
 		types.put(LexerTokens.NUMBER, NUMBER);
@@ -89,6 +102,12 @@ public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase
 			LexerTokens.IF,
 			LexerTokens.THEN,
 			LexerTokens.ELSE,
+			LexerTokens.FROM,
+			LexerTokens.TO,
+			LexerTokens.TIL,
+			LexerTokens.BY,
+			LexerTokens.OF,
+			LexerTokens.IN_KEYWORD,
 		};
 
 		for (IElementType o : keywords)
@@ -126,10 +145,13 @@ public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase
 			LexerTokens.BRACE_END,
 			LexerTokens.PLUS,
 			LexerTokens.MINUS,
+			LexerTokens.MULT,
 			LexerTokens.PLUS_EQ,
 			LexerTokens.MINUS_EQ,
+			LexerTokens.MULT_EQ,
 			LexerTokens.PLUS_PLUS,
 			LexerTokens.MINUS_MINUS,
+			LexerTokens.MULT_MULT,
 			LexerTokens.EQ,
 			LexerTokens.EQ_EQ,
 			LexerTokens.EQ_EQ_EQ,

@@ -56,4 +56,6 @@ public class LexerPatterns {
 	public static final String THEN = "^then\\b";
 	public static final String ELSE = "^else\\b";
 	public static final String UNLESS = "^unless\\b";
+	public static final String REGEX_COMMENT = "^# .+";
+	public static final String REGEX = "^/(?:\\\\/|\\[.*?/.*?\\]|.)*?/[gmi]{0,3}";
 }

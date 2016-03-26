@@ -154,10 +154,11 @@ public class LiveScriptLexer implements FlexLexer
 		// If a token is detected, this._tokenType is set which breaks the loop and stops
 		// further checking.
 		methods.add(this::_tryExitInterpolation);
-		methods.add(this::_tryComments);
-		methods.add(this::_trySimpleValues);
-		methods.add(this::_tryPlainStrings);
 		methods.add(this::_tryFullString);
+
+		methods.add(this::_tryComments);
+		methods.add(this::_tryPlainStrings);
+		methods.add(this::_trySimpleValues);
 		methods.add(this::_tryKeywords);
 
 		methods.add(this::_tryId);
@@ -212,6 +213,13 @@ public class LiveScriptLexer implements FlexLexer
 
 		typeMap.put("^new\\b", LexerTokens.NEW_KEYWORD);
 		typeMap.put("^class\\b", LexerTokens.CLASS);
+		typeMap.put("^for\\b", LexerTokens.FOR);
+		typeMap.put("^from\\b", LexerTokens.FROM);
+		typeMap.put("^to\\b", LexerTokens.TO);
+		typeMap.put("^til\\b", LexerTokens.TIL);
+		typeMap.put("^by\\b", LexerTokens.BY);
+		typeMap.put("^in\\b", LexerTokens.IN_KEYWORD);
+
 
 		for (Map.Entry<String, IElementType> entry : typeMap.entrySet())
 		{
@@ -248,17 +256,20 @@ public class LiveScriptLexer implements FlexLexer
 		{{
 			put("===", LexerTokens.EQ_EQ_EQ);
 			put("!==", LexerTokens.NOT_EQ_EQ);
-			put("++", LexerTokens.PLUS_PLUS);
-			put("--", LexerTokens.MINUS_MINUS);
-			put("+=", LexerTokens.PLUS_EQ);
-			put("-=", LexerTokens.MINUS_EQ);
 			put("!=", LexerTokens.NE);
 			put("==", LexerTokens.EQ_EQ);
+			put("++", LexerTokens.PLUS_PLUS);
+			put("+=", LexerTokens.PLUS_EQ);
+			put("--", LexerTokens.MINUS_MINUS);
+			put("-=", LexerTokens.MINUS_EQ);
+			put("**", LexerTokens.MULT_MULT);
+			put("*=", LexerTokens.MULT_EQ);
 			put("->", LexerTokens.FUNCTION);
 			put("~>", LexerTokens.FUNCTION_BIND);
 			put("=", LexerTokens.EQ);
 			put("+", LexerTokens.PLUS);
 			put("-", LexerTokens.MINUS);
+			put("*", LexerTokens.MULT);
 			put("?", LexerTokens.EXIST);
 			put("(", LexerTokens.PARENTHESIS_START);
 			put(")", LexerTokens.PARENTHESIS_END);
@@ -334,6 +345,9 @@ public class LiveScriptLexer implements FlexLexer
 			typeMap.put(LexerPatterns.THEN, LexerTokens.THEN);
 			typeMap.put(LexerPatterns.ELSE, LexerTokens.ELSE);
 			typeMap.put(LexerPatterns.UNLESS, LexerTokens.UNLESS);
+
+			// RegEx
+			typeMap.put(LexerPatterns.REGEX, LexerTokens.REGEX_LITERAL);
 		}
 
 
@@ -405,11 +419,19 @@ public class LiveScriptLexer implements FlexLexer
 				return;
 			}
 
-			this._tokenType = LexerTokens.STRING;
+			// Check if we're at a regex comment point
+			if (this._tryMatch(LexerPatterns.REGEX_COMMENT)) {
+				this._tokenType = LexerTokens.COMMENT_LINE;
+				return;
+			}
+
+			this._tokenType = this._stateIs(LexerState.REGEX)
+				? LexerTokens.REGEX
+				: LexerTokens.STRING;
 
 
-			// Match until end or interpolation.
-			if (this._tryMatch("^(?:\\\\\"|\\\\/|\\\\#|[^\"])*?(#\\{|# |#)", Pattern.DOTALL))
+			// Match until end or interpolation (or regex comment).
+			if (this._tryMatch("^(?:\\\\\"|\\\\/|\\\\#|/[^/]|[^\"/])*?(#\\{|# |#)", Pattern.DOTALL))
 			{
 				this._tokenLength = this._matcher.end() - this._matcher.group(1).length();
 				return;
@@ -448,67 +470,6 @@ public class LiveScriptLexer implements FlexLexer
 						: LexerState.HEREDOC);
 			}
 		}
-
-
-/*		boolean justStarted = false;
-
-		// If we are already going through a string, we can't start another.
-		if (!this._stateIsOneOf(LexerState.STRING, LexerState.STRING_MULTILINE)) {
-			if (this._text.charAt(0) == '"') {
-				justStarted = true;
-				// We must find out if it's a single double-quote or a triple double-quote
-				this._enterState(this._tryMatch("^\"{3}") ? LexerState.STRING_MULTILINE : LexerState
-				.STRING);
-			}
-		}
-
-		// At this point we must be inside a string.
-		if (!this._stateIsOneOf(LexerState.STRING, LexerState.STRING_MULTILINE))
-			return;
-
-		// Since we are already in the string state, we know the token type will be string,
-		// no matter what else happens.
-		this._tokenType = LexerTokens.STRING;
-
-		// Set up variables and initial values.
-		boolean triple = this.yystate() == LexerState.STRING_MULTILINE;
-		String boundary = triple ? "\"{3}" : "\"";
-		int offset = justStarted ? (triple ? 3 : 1) : 0;
-		this._tokenLength = offset;
-
-		// We need to match the string up to the end or the first possible interpolation point.
-		do {
-			if (!this._tryMatch(".*?(#|" + boundary + ")", Pattern.DOTALL, offset)) {
-				// If we didn't match this, it means it's a broken (unfinished) string so we must
-				// match to the end of the line or file, and return that as a broken string.
-				this._tryMatch("^.+", Pattern.DOTALL);
-				this._tokenType = LexerTokens.STRING_BROKEN;
-				this._exitState();
-				return;
-			}
-
-			// Increase the match length to as far as we've gotten.
-			this._tokenLength += this._matcher.end() - this._matcher.start();
-
-			if (this._matcher.group(1).equals("#")) {
-				// Move offset to the end of the match for any further matching.
-				offset = this._matcher.end();
-
-				// Here we must figure out if we have an interpolation on our hands or not.
-				if (this._text.charAt(offset) == '{') {
-					this._tokenLength++;
-					this._enterState(LexerState.INTERPOLATED);
-				} else if (this._tryMatch(LexerPatterns.ID, 0, offset)) {
-					this._enterState(LexerState.INTERPOLATED_VAR_START);
-				}
-
-				// If none of the previous match, we do nothing.
-				// The loop will repeat and try to match further.
-			} else {
-				// End of string reached.
-				this._exitState();
-			}
-		} while (this._stateIsOneOf(LexerState.STRING, LexerState.STRING_MULTILINE));*/
 	}
 
 	private void _tryId()

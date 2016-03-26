@@ -33,29 +33,10 @@ public class LexerTokens
 	public static final IElementType STRING = new LiveScriptElementType("STRING");
 	public static final IElementType STRING_END = new LiveScriptElementType("STRING_END");
 
-	public static final IElementType HEREDOC_START = new LiveScriptElementType("HEREDOC_START");
-	public static final IElementType HEREDOC = new LiveScriptElementType("HEREDOC");
-	public static final IElementType HEREDOC_END = new LiveScriptElementType("HEREDOC_END");
-
+	public static final IElementType REGEX_LITERAL = new LiveScriptElementType("REGEX_LITERAL");
 	public static final IElementType REGEX_START = new LiveScriptElementType("REGEX_START");
-	public static final IElementType REGEX = new LiveScriptElementType("REGEXP_LITERAL");
-	public static final IElementType REGEX_BRACKET_START = new LiveScriptElementType
-		("REGEX_BRACKET_START");
-	public static final IElementType REGEX_BRACKET_END = new LiveScriptElementType
-		("REGEX_BRACKET_END");
-	public static final IElementType REGEX_PARENTHESIS_START = new LiveScriptElementType
-		("REGEX_PARENTHESIS_START");
-	public static final IElementType REGEX_PARENTHESIS_END = new LiveScriptElementType
-		("REGEX_PARENTHESIS_END");
-	public static final IElementType REGEX_BRACE_START = new LiveScriptElementType
-		("REGEX_BRACE_START");
-	public static final IElementType REGEX_BRACE_END = new LiveScriptElementType("REGEX_BRACE_END");
+	public static final IElementType REGEX = new LiveScriptElementType("REGEX");
 	public static final IElementType REGEX_END = new LiveScriptElementType("REGEX_END");
-	public static final IElementType REGEX_FLAG = new LiveScriptElementType("REGEX_FLAG");
-
-	public static final IElementType HEREGEX_START = new LiveScriptElementType("HEREGEX_START");
-	public static final IElementType HEREGEX_TOKEN = new LiveScriptElementType("REGEXP_LITERAL");
-	public static final IElementType HEREGEX_END = new LiveScriptElementType("HEREGEX_END");
 
 	public static final IElementType INTERPOLATION_START = new LiveScriptElementType
 		("INTERPOLATION_START");
@@ -155,8 +136,11 @@ public class LexerTokens
 	public static final IElementType FOR = new LiveScriptElementType("FOR");
 	public static final IElementType IN_KEYWORD = new LiveScriptElementType("IN_KEYWORD");
 	public static final IElementType OWN = new LiveScriptElementType("OWN");
-	public static final IElementType OF = new LiveScriptElementType("OF");
+	public static final IElementType FROM = new LiveScriptElementType("FROM");
+	public static final IElementType TO = new LiveScriptElementType("TO");
+	public static final IElementType TIL = new LiveScriptElementType("TIL");
 	public static final IElementType BY = new LiveScriptElementType("BY");
+	public static final IElementType OF = new LiveScriptElementType("OF");
 	public static final IElementType WHILE = new LiveScriptElementType("WHILE");
 	public static final IElementType LOOP = new LiveScriptElementType("LOOP");
 	public static final IElementType UNTIL = new LiveScriptElementType("UNTIL");
@@ -178,7 +162,9 @@ public class LexerTokens
 	public static final IElementType TYPEOF_KEYWORD = new LiveScriptElementType("TYPEOF_KEYWORD");
 	public static final IElementType EXCL = new LiveScriptElementType("EXCL");
 	public static final IElementType TILDE = new LiveScriptElementType("TILDE");
-	public static final IElementType PLUS_PLUS = new LiveScriptElementType("PLUSPLUS");
-	public static final IElementType MINUS_MINUS = new LiveScriptElementType("MINUSMINUS");
+	public static final IElementType PLUS_PLUS = new LiveScriptElementType("PLUS_PLUS");
+	public static final IElementType MINUS_MINUS = new LiveScriptElementType("MINUS_MINUS");
+	public static final IElementType MULT_MULT = new LiveScriptElementType("MULT_MULT");
+
 
 }
