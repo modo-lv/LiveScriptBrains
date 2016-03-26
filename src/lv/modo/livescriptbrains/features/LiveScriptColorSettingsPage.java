@@ -23,6 +23,7 @@ public class LiveScriptColorSettingsPage implements ColorSettingsPage {
 			new AttributesDescriptor("Identifier", LiveScriptSyntaxHighlighter.IDENTIFIER),
 			new AttributesDescriptor("Keyword", LiveScriptSyntaxHighlighter.KEYWORD),
 			new AttributesDescriptor("'this' keyword", LiveScriptSyntaxHighlighter.THIS),
+			new AttributesDescriptor("Bad character", LiveScriptSyntaxHighlighter.BAD_CHAR),
 	};
 
 	@Nullable

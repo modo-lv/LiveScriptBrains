@@ -36,6 +36,8 @@ public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase
 		createTextAttributesKey("LS_KEYWORD", DefaultLanguageHighlighterColors.KEYWORD);
 	public static final TextAttributesKey THIS =
 		createTextAttributesKey("LS_THIS", LiveScriptHighlighterColors.THIS);
+	public static final TextAttributesKey BAD_CHAR = createTextAttributesKey("LS_BAD_CHAR",
+		LiveScriptHighlighterColors.BAD_CHAR);
 
 	// Custom
 
@@ -56,6 +58,9 @@ public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase
 	@Override
 	public TextAttributesKey[] getTokenHighlights(IElementType tokenType)
 	{
+		if (tokenType.equals(LexerTokens.BAD_CHAR))
+			return getKeySetFor(BAD_CHAR);
+
 		IElementType[] strings = {
 			LexerTokens.STRING,
 			LexerTokens.STRING_START,
@@ -80,7 +85,10 @@ public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase
 		// KEYWORDS
 		IElementType[] keywords = {
 			LexerTokens.CLASS,
-			//LexerTokens.KEYWORD
+			LexerTokens.NEW_KEYWORD,
+			LexerTokens.IF,
+			LexerTokens.THEN,
+			LexerTokens.ELSE,
 		};
 
 		for (IElementType o : keywords)
@@ -95,7 +103,7 @@ public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase
 		// PREDEFINED VALUES & SYMBOLS
 		IElementType[] constants = {
 			LexerTokens.BOOLEAN,
-			//LexerTokens.EMPTY,
+			LexerTokens.EMPTY,
 		};
 
 		for (IElementType o : constants)
@@ -107,32 +115,30 @@ public class LiveScriptSyntaxHighlighter extends SyntaxHighlighterBase
 			LexerTokens.INTERPOLATED_VAR_START,
 			LexerTokens.INTERPOLATION_START,
 			LexerTokens.INTERPOLATION_END,
-
-/*
-				LexerTokens.ASSIGN,
-				LexerTokens.BANG,
-*/
 			LexerTokens.COLON,
 			LexerTokens.COMMA,
 			LexerTokens.DOT,
-/*
-				LexerTokens.LIST_START,
-				LexerTokens.LIST_END,
-				LexerTokens.MATH_OP,
-				LexerTokens.OBJ_START,
-				LexerTokens.OBJ_END,
-				LexerTokens.OPERATOR,
-				LexerTokens.PAREN_L,
-				LexerTokens.PAREN_R,
-*/
+			LexerTokens.PARENTHESIS_START,
+			LexerTokens.PARENTHESIS_END,
+			LexerTokens.BRACKET_START,
+			LexerTokens.BRACKET_END,
+			LexerTokens.BRACE_START,
+			LexerTokens.BRACE_END,
 			LexerTokens.PLUS,
+			LexerTokens.PLUS_EQ,
+			LexerTokens.PLUS_PLUS,
+			LexerTokens.EQ,
+			LexerTokens.EQ_EQ,
+			LexerTokens.EQ_EQ_EQ,
+			LexerTokens.NE,
+			LexerTokens.NOT_EQ_EQ,
 			LexerTokens.SEMICOLON,
-/*
-				LexerTokens.YADA,
-				LexerTokens.MISC_OP,
-				LexerTokens.LOGIC_OP,
-				LexerTokens.Q
-*/
+			LexerTokens.EXIST,
+			LexerTokens.FUNCTION,
+			LexerTokens.FUNCTION_BIND,
+			LexerTokens.SEMICOLON,
+			LexerTokens.PERC,
+
 		};
 
 		for (IElementType o : operators)

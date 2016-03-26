@@ -50,4 +50,10 @@ public class LexerPatterns {
 	public static final String DOT = "^\\.";
 
 	public static final String PLUS = "^\\+";
+
+	public static final String NULL = "^(?:null|void)\\b";
+	public static final String IF = "^if\\b";
+	public static final String THEN = "^then\\b";
+	public static final String ELSE = "^else\\b";
+	public static final String UNLESS = "^unless\\b";
 }

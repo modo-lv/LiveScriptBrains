@@ -158,6 +158,7 @@ public class LiveScriptLexer implements FlexLexer
 		methods.add(this::_trySimpleValues);
 		methods.add(this::_tryPlainStrings);
 		methods.add(this::_tryFullString);
+		methods.add(this::_tryKeywords);
 		methods.add(this::_tryId);
 		methods.add(this::_tryWhitespace);
 		methods.add(this::_tryDot);
@@ -201,16 +202,81 @@ public class LiveScriptLexer implements FlexLexer
 		return this._tokenType;
 	}
 
+	private void _tryKeywords()
+	{
+		if (this._stateIs(LexerState.DOT))
+			return;
+
+		LinkedHashMap<String, IElementType> typeMap = new LinkedHashMap<>();
+
+		typeMap.put("^new\\b", LexerTokens.NEW_KEYWORD);
+		typeMap.put("^class\\b", LexerTokens.CLASS);
+
+		for (Map.Entry<String, IElementType> entry : typeMap.entrySet())
+		{
+			if (this._tryMatch(entry.getKey()))
+			{
+				this._tokenType = entry.getValue();
+				return;
+			}
+		}
+	}
+
+	/**
+	 * Matches simple single-quoted strings.
+	 */
+	private void _tryPlainStrings()
+	{
+		if (this._stateIsOneOf(LexerStateSet.STRINGS))
+			return;
+
+		if (this._tryMatch(LexerPatterns.BACKSTRING)
+			|| this._tryMatch("^'{3}.*?'{3}", Pattern.DOTALL)
+			|| this._tryMatch("^'(?:\\\\'|.)*?'", Pattern.DOTALL))
+		{
+			this._tokenType = LexerTokens.STRING_LITERAL;
+		}
+	}
+
 	/**
 	 * Tries to match simple operators.
 	 */
 	private void _tryOperators()
 	{
-		switch (this._text.charAt(0)) {
-			case '+' : this._tokenType = LexerTokens.PLUS; break;
+		LinkedHashMap<String, IElementType> typeMap = new LinkedHashMap<String, IElementType>() {{
+			put("===", LexerTokens.EQ_EQ_EQ);
+			put("!==", LexerTokens.NOT_EQ_EQ);
+			put("++", LexerTokens.PLUS_PLUS);
+			put("+=", LexerTokens.PLUS_EQ);
+			put("!=", LexerTokens.NE);
+			put("==", LexerTokens.EQ_EQ);
+			put("->", LexerTokens.FUNCTION);
+			put("~>", LexerTokens.FUNCTION_BIND);
+			put("=", LexerTokens.EQ);
+			put("+", LexerTokens.PLUS);
+			put("?", LexerTokens.EXIST);
+			put("(", LexerTokens.PARENTHESIS_START);
+			put(")", LexerTokens.PARENTHESIS_END);
+			put(":", LexerTokens.COLON);
+			put(",", LexerTokens.COMMA);
+			put("[", LexerTokens.BRACKET_START);
+			put("]", LexerTokens.BRACKET_END);
+			put("{", LexerTokens.BRACE_START);
+			put("}", LexerTokens.BRACE_END);
+			put("!", LexerTokens.EXCL);
+			put(";", LexerTokens.SEMICOLON);
+			put("%", LexerTokens.PERC);
+		}};
+
+		for (Map.Entry<String, IElementType> entry : typeMap.entrySet()) {
+			String key = entry.getKey();
+			if (this._text.length() >= key.length() && this._text.substring(0, key.length()).equals(key))
+			{
+				this._tokenType = entry.getValue();
+				this._tokenLength = entry.getKey().length();
+				return;
+			}
 		}
-		if (this._tokenType != null)
-			this._tokenLength = 1;
 	}
 
 	/**
@@ -257,6 +323,11 @@ public class LiveScriptLexer implements FlexLexer
 		{
 			// "this"
 			typeMap.put(LexerPatterns.THIS, LexerTokens.THIS);
+			typeMap.put(LexerPatterns.NULL, LexerTokens.EMPTY);
+			typeMap.put(LexerPatterns.IF, LexerTokens.IF);
+			typeMap.put(LexerPatterns.THEN, LexerTokens.THEN);
+			typeMap.put(LexerPatterns.ELSE, LexerTokens.ELSE);
+			typeMap.put(LexerPatterns.UNLESS, LexerTokens.UNLESS);
 		}
 
 
@@ -461,22 +532,6 @@ public class LiveScriptLexer implements FlexLexer
 	private boolean _stateIs(int state)
 	{
 		return this.yystate() == state;
-	}
-
-	/**
-	 * Matches simple single-quoted strings.
-	 */
-	private void _tryPlainStrings()
-	{
-		if (this._stateIsOneOf(LexerStateSet.STRINGS))
-			return;
-
-		if (this._tryMatch(LexerPatterns.BACKSTRING)
-			|| this._tryMatch("^'{3}.*?'{3}", Pattern.DOTALL)
-			|| this._tryMatch("^'(?:\\\\'|.)*?'", Pattern.DOTALL))
-		{
-			this._tokenType = LexerTokens.STRING_LITERAL;
-		}
 	}
 
 	private Character _getIndentChar()
