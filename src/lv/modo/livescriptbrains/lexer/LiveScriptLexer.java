@@ -247,13 +247,16 @@ public class LiveScriptLexer implements FlexLexer
 			put("===", LexerTokens.EQ_EQ_EQ);
 			put("!==", LexerTokens.NOT_EQ_EQ);
 			put("++", LexerTokens.PLUS_PLUS);
+			put("--", LexerTokens.MINUS_MINUS);
 			put("+=", LexerTokens.PLUS_EQ);
+			put("-=", LexerTokens.MINUS_EQ);
 			put("!=", LexerTokens.NE);
 			put("==", LexerTokens.EQ_EQ);
 			put("->", LexerTokens.FUNCTION);
 			put("~>", LexerTokens.FUNCTION_BIND);
 			put("=", LexerTokens.EQ);
 			put("+", LexerTokens.PLUS);
+			put("-", LexerTokens.MINUS);
 			put("?", LexerTokens.EXIST);
 			put("(", LexerTokens.PARENTHESIS_START);
 			put(")", LexerTokens.PARENTHESIS_END);
