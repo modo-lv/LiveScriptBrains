@@ -118,6 +118,7 @@ public class LexerTokens
 	public static final IElementType PERC_EQ = new LiveScriptElementType("PERCEQ");
 	public static final IElementType EXIST_EQ = new LiveScriptElementType("EXIST_EQ");
 
+	public static final IElementType PROPERTY_COPY = new LiveScriptElementType("PROPERTY_COPY");
 
 	public static final IElementType RANGE = new LiveScriptElementType("RANGE");
 	public static final IElementType SPLAT = new LiveScriptElementType("SPLAT");

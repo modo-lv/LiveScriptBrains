@@ -254,8 +254,14 @@ public class LiveScriptLexer implements FlexLexer
 	{
 		LinkedHashMap<String, IElementType> typeMap = new LinkedHashMap<String, IElementType>()
 		{{
+			put("<<<<", LexerTokens.PROPERTY_COPY);
+			put("<<<", LexerTokens.PROPERTY_COPY);
 			put("===", LexerTokens.EQ_EQ_EQ);
 			put("!==", LexerTokens.NOT_EQ_EQ);
+			put("!->", LexerTokens.FUNCTION);
+			put("<-!", LexerTokens.FUNCTION);
+			put("!~>", LexerTokens.FUNCTION_BIND);
+			put("<~!", LexerTokens.FUNCTION_BIND);
 			put("!=", LexerTokens.NE);
 			put("==", LexerTokens.EQ_EQ);
 			put("++", LexerTokens.PLUS_PLUS);
@@ -265,8 +271,12 @@ public class LiveScriptLexer implements FlexLexer
 			put("**", LexerTokens.MULT_MULT);
 			put("*=", LexerTokens.MULT_EQ);
 			put("->", LexerTokens.FUNCTION);
+			put("<-", LexerTokens.FUNCTION);
 			put("~>", LexerTokens.FUNCTION_BIND);
+			put("<~", LexerTokens.FUNCTION_BIND);
 			put("=", LexerTokens.EQ);
+			put("<", LexerTokens.EQ);
+			put(">", LexerTokens.EQ);
 			put("+", LexerTokens.PLUS);
 			put("-", LexerTokens.MINUS);
 			put("*", LexerTokens.MULT);
